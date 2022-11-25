@@ -1,0 +1,19 @@
+name: Sync Upstream
+
+on:
+  # schedule:
+  #   - cron: '*/30 * * * *' # every 30 minutes
+  # workflow_dispatch: # on button click
+  push:
+
+jobs:
+  sync:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: tgymnich/fork-sync@v1.6.3
+        with:
+          owner: micropython
+          base: master
+          head: master
