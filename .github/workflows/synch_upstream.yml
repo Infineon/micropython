@@ -1,10 +1,10 @@
 name: Sync Upstream
 
 on:
-  # schedule:
-  #   - cron: '*/30 * * * *' # every 30 minutes
-  # workflow_dispatch: # on button click
-  push:
+  schedule:
+    - cron: '*/1 * * * *' # every 1 minutes
+  workflow_dispatch: # on button click
+
 
 jobs:
   sync:
