@@ -17,4 +17,3 @@ jobs:
           owner: micropython
           base: master
           head: ports/psoc6_ci-auto-synch
-          merge_method: rebase
