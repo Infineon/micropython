@@ -16,4 +16,5 @@ jobs:
         with:
           owner: micropython
           base: master
-          head: master
+          head: main
+          merge_method: rebase
