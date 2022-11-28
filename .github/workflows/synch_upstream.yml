@@ -16,4 +16,4 @@ jobs:
         with:
           owner: micropython
           base: master
-          head: ports/psoc6_ci-auto-synch
+          head: master
