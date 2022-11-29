@@ -13,9 +13,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, self-hosted]
+    runs-on: [self-hosted]
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
