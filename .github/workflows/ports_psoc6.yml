@@ -24,8 +24,11 @@ jobs:
     - name: Build
       run: source tools/ci.sh && ci_psoc6_build
     - name: Deploy
-      if: ${{matrix.os}} == 'self-hosted'
+      if: ${{matrix.os}} == 'self-hosted' && success()
       run: source tools/ci.sh && ci_psoc6_deploy
     - name: Run tests
-      if: ${{matrix.os}} == 'self-hosted'
+      if: ${{matrix.os}} == 'self-hosted' && success()
       run : source tools/ci.sh && ci_psoc6_run_tests
+    - name: Cleanup 
+      if: ${{matrix.os}} == 'self-hosted' && (success() || failure())
+      run: echo $PWD
