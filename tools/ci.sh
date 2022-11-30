@@ -265,7 +265,8 @@ function ci_psoc6_deploy {
 }
 
 function ci_psoc6_run_tests {
-    (cd tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py)
+    docker exec mtb-ci pip3 install pyserial
+    docker exec /bin/bash -c "cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py"
 }
 
 ########################################################################################
