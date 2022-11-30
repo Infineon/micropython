@@ -12,24 +12,27 @@ on:
       - 'ports/psoc6/**'
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, self-hosted]
-    runs-on: ${{matrix.os}}
-    continue-on-error: true
+  server-build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install packages
+        run: source tools/ci.sh && ci_psoc6_setup
+      - name: Build
+        run: source tools/ci.sh && ci_psoc6_build
+
+  build-deploy-test:
+    runs-on: self-hosted
+    needs: server-build-check
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
-      run: source tools/ci.sh && ci_psoc6_setup
+      run: source tools/ci.sh && ci_psoc6_setup --dev-access
     - name: Build
-      run: source tools/ci.sh && ci_psoc6_build
+      run: source tools/ci.sh && ci_psoc6_build 
     - name: Deploy
-      if: ${{matrix.os}} == 'self-hosted' && success()
       run: source tools/ci.sh && ci_psoc6_deploy
     - name: Run tests
-      if: ${{matrix.os}} == 'self-hosted' && success()
       run : source tools/ci.sh && ci_psoc6_run_tests
     - name: Cleanup 
-      if: ${{matrix.os}} == 'self-hosted' && (success() || failure())
       run: echo $PWD
