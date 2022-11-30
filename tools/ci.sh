@@ -241,7 +241,7 @@ MPY_MTB_CI_DOCKER_VERSION=0.2.0
 
 function ci_psoc6_setup {
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
-    docker run --name mtb-ci -d -it \
+    docker run --name mtb-ci -d -it --device=/dev/ttyACM0 \
       -v "$(pwd)":/micropython \
       -w /micropython/ports/psoc6 \
       ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
@@ -251,6 +251,14 @@ function ci_psoc6_setup {
 function ci_psoc6_build {
     docker exec mtb-ci make mpy_mtb_init
     docker exec mtb-ci make
+}
+
+function ci_psoc6_deploy {
+    docker exec mtb-ci make mpy_program
+}
+
+function ci_psoc_run_tests {
+    (cd tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py)
 }
 
 ########################################################################################
