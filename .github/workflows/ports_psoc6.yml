@@ -35,4 +35,5 @@ jobs:
     - name: Run tests
       run : source tools/ci.sh && ci_psoc6_run_tests
     - name: Cleanup 
+      if: success() || failure() # Cleanup despite the result
       run: echo $PWD
