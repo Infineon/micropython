@@ -237,7 +237,7 @@ function ci_powerpc_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=0.2.0
+MPY_MTB_CI_DOCKER_VERSION=0.3.0
 
 function ci_psoc6_setup {
     # Access to serial device 
@@ -265,7 +265,6 @@ function ci_psoc6_deploy {
 }
 
 function ci_psoc6_run_tests {
-    docker exec mtb-ci pip3 install pyserial
     docker exec mtb-ci /bin/bash -c "cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py"
 }
 
