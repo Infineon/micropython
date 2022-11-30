@@ -240,8 +240,15 @@ function ci_powerpc_build {
 MPY_MTB_CI_DOCKER_VERSION=0.2.0
 
 function ci_psoc6_setup {
+    # Access to serial device 
+    if [ "$1" = "--dev-access" ]; then
+        device_flag=--device=/dev/ttyACM0
+    else
+        device_flag=
+    fi
+
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
-    docker run --name mtb-ci --rm -d -it --device=/dev/ttyACM0 \
+    docker run --name mtb-ci --rm -d -it ${device_flag} \
       -v "$(pwd)":/micropython \
       -w /micropython/ports/psoc6 \
       ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
@@ -257,7 +264,7 @@ function ci_psoc6_deploy {
     docker exec mtb-ci make mpy_program
 }
 
-function ci_psoc_run_tests {
+function ci_psoc6_run_tests {
     (cd tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py)
 }
 
