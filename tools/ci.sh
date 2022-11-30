@@ -248,7 +248,7 @@ function ci_psoc6_setup {
     fi
 
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
-    docker run --name mtb-ci --rm -d -it ${device_flag} \
+    docker run --name mtb-ci --rm --privileged -d -it ${device_flag} \
       -v "$(pwd)":/micropython \
       -w /micropython/ports/psoc6 \
       ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
