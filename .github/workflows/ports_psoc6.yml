@@ -13,10 +13,17 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, self-hosted]
+    runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
       run: source tools/ci.sh && ci_psoc6_setup
     - name: Build
       run: source tools/ci.sh && ci_psoc6_build
+    - name: Deploy
+      run: echo deploy
+    - name: Tests
+      run : echo test
