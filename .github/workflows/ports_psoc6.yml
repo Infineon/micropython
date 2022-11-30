@@ -24,6 +24,8 @@ jobs:
     - name: Build
       run: source tools/ci.sh && ci_psoc6_build
     - name: Deploy
-      run: echo deploy
-    - name: Tests
-      run : echo test
+      if: ${{matrix.os}} == 'self-hosted'
+      run: source tools/ci.sh && ci_psoc6_deploy
+    - name: Run tests
+      if: ${{matrix.os}} == 'self-hosted'
+      run : source tools/ci.sh && ci_psoc6_run_tests
