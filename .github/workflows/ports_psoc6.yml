@@ -35,9 +35,9 @@ jobs:
     - name: Run tests
       run : source tools/ci.sh && ci_psoc6_run_tests
     - name: Cleanup 
+      if: success() || failure()
       run: |
         echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
         mkdir ${GITHUB_WORKSPACE}
         docker stop mtb-ci
-        docker rm mtb-ci
         docker image prune -all --force
