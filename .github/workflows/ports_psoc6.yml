@@ -26,6 +26,8 @@ jobs:
     needs: server-build-check
     steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run : echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
     - name: Install packages
       run: source tools/ci.sh && ci_psoc6_setup --dev-access
     - name: Build
