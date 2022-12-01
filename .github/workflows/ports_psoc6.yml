@@ -28,7 +28,7 @@ jobs:
     - name: Cleanup 
       run: |
         echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
-        # mkdir ${GITHUB_WORKSPACE}
+        mkdir ${GITHUB_WORKSPACE}
         # docker stop mtb-ci
         # docker rm mtb-ci
         # docker image prune -all
