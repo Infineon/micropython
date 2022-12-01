@@ -25,6 +25,13 @@ jobs:
     runs-on: self-hosted
     needs: server-build-check
     steps:
+    - name: Cleanup 
+      run: |
+        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
+        # mkdir ${GITHUB_WORKSPACE}
+        # docker stop mtb-ci
+        # docker rm mtb-ci
+        # docker image prune -all
     - uses: actions/checkout@v2
     - name: Install packages
       run: source tools/ci.sh && ci_psoc6_setup --dev-access
@@ -34,6 +41,3 @@ jobs:
       run: source tools/ci.sh && ci_psoc6_deploy
     - name: Run tests
       run : source tools/ci.sh && ci_psoc6_run_tests
-    - name: Cleanup 
-      if: success() || failure() # Cleanup despite the result
-      run: echo $PWD
