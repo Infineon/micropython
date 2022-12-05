@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with: 
           name: Micropython PSoC6 Ports
-          path: build/firmware.hex
+          path: micropython/ports/psoc6/build/firmware.hex
 
   build-deploy-test:
     runs-on: self-hosted
