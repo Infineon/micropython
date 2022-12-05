@@ -59,9 +59,9 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       if: steps.check-tag.outputs.match == 'true' && success()
-        with:
-          name: Micropython PSoC6 ${{ steps.check-tag.outputs.tags }}
-          files: ports/psoc6/build/micropython-psoc6-${{ steps.check-tag.outputs.tags }}.hex
+      with:
+        name: Micropython PSoC6 ${{ steps.check-tag.outputs.tags }}
+        files: ports/psoc6/build/micropython-psoc6-${{ steps.check-tag.outputs.tags }}.hex
     - name: Cleanup 
       if: success() || failure()
       run: |
