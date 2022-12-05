@@ -20,13 +20,14 @@ jobs:
         run: source tools/ci.sh && ci_psoc6_setup
       - name: Build
         run: source tools/ci.sh && ci_psoc6_build
-      - name: where is our binary file?
-        run: ls ${PWD}
+      - name: Gets commit SHA
+        id: commit_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Save firmware bin
         if: success()
         uses: actions/upload-artifact@v3
         with: 
-          name: Micropython PSoC6 Ports
+          name: micropython-psoc6-${{ steps.commit_sha.outputs.sha_short }}
           path: ports/psoc6/build/firmware.hex
 
   build-deploy-test:
