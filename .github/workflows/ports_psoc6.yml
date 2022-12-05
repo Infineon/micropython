@@ -54,7 +54,7 @@ jobs:
         fi
         echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
     - name: Rename binary 
-      if: success()
+      if: steps.check-tag.outputs.match == 'true' && success()
       run: cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{ steps.check-tag.outputs.tags }}.hex
     - name: Release
       uses: softprops/action-gh-release@v1
