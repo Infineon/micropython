@@ -32,7 +32,7 @@ jobs:
 
   hil-build-deploy-test-release:
     runs-on: self-hosted
-    needs: server-build-check
+    needs: server-build
     steps:
     - uses: actions/checkout@v2
     - name: Setup
