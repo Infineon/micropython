@@ -10,6 +10,7 @@ on:
       - 'extmod/**'
       - 'lib/**'
       - 'ports/psoc6/**'
+  publish:
 
 jobs:
   server-build-check:
@@ -20,6 +21,12 @@ jobs:
         run: source tools/ci.sh && ci_psoc6_setup
       - name: Build
         run: source tools/ci.sh && ci_psoc6_build
+      - name: Save firmware bin
+        if: success()
+        uses: actions/upload-artifact@v3
+        with: 
+          name: Micropython PSoC6 Ports
+          path: build/firmware.hex
 
   build-deploy-test:
     runs-on: self-hosted
