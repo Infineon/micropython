@@ -10,7 +10,6 @@ on:
       - 'extmod/**'
       - 'lib/**'
       - 'ports/psoc6/**'
-  publish:
 
 jobs:
   server-build-check:
