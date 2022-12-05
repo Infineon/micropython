@@ -21,7 +21,7 @@ jobs:
       - name: Build
         run: source tools/ci.sh && ci_psoc6_build
       - name: where is our binary file?
-        run: ls micropython/ports/psoc6/build/
+        run: ls ${PWD}
       - name: Save firmware bin
         if: success()
         uses: actions/upload-artifact@v3
