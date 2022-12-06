@@ -14,13 +14,14 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: master
+        token: ${{ secrets.GH_ACT_SYNCH_UPSTREAM }}
 
     - name: Sync upstream changes
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
         target_sync_branch: master
-        target_repo_token: ${{ secrets.GITHUB_ACTIONS_TOKENS }}
+        target_repo_token: ${{ secrets.GH_ACT_SYNCH_UPSTREAM }}
         upstream_sync_branch: master
         upstream_sync_repo: micropython/micropython
       
@@ -43,13 +44,14 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ports/psoc6
+        token: ${{ secrets.GH_ACT_SYNCH_UPSTREAM }}
 
     - name: Sync upstream changes
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
         target_sync_branch: ports/psoc6
-        target_repo_token: ${{ secrets.GITHUB_ACTIONS_TOKENS }}
+        target_repo_token: ${{ secrets.GH_ACT_SYNCH_UPSTREAM }}
         upstream_sync_branch: master
         upstream_sync_repo: micropython/micropython
       
