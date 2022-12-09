@@ -48,7 +48,7 @@ Follow the instructions on the provided link to download and install the tool.
 
 After that, select the downloaded MicroPython firmware *.hex* file to be deployed on the PSoC6™. Then, in
 the upper menu, select the connected *Probe/Kit*, click on *Connect*, and finally click on *Program*.
-The log section will show the progress and inform when the firmware deployment osn the controller is completed.
+The log section will show the progress and inform when the firmware deployment on the controller is completed.
 
 .. image:: ../img/cy-programmer.jpg
     :alt: Cypress Programmer GUI
