@@ -28,7 +28,7 @@ All PSoC6™ firmware versions for each of the supported boards can be found the
 ..
     :alt: GitHub MicroPython Releases
 ..
-    :width: 360px
+    :width: 520px
 
 Powering the board
 ------------------
@@ -52,7 +52,7 @@ The log section will show the progress and inform when the firmware deployment o
 
 .. image:: ../img/cy-programmer.jpg
     :alt: Cypress Programmer GUI
-    :width: 360px
+    :width: 520px
 
 For a detailed description on how to use the Cypress Programmer tool, please consult the `Cypress
 Programmer User Guide
@@ -84,7 +84,7 @@ typing some python code :)
 
 .. image:: ../img/mpy-psoc6-repl.jpg
     :alt: MicroPython REPL prompt
-    :width: 360px
+    :width: 520px
 
 Running a script
 ----------------
