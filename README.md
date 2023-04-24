@@ -115,8 +115,12 @@ In addition, the following ports are provided in this repository:
  - [pic16bit](ports/pic16bit) -- Microchip PIC 16-bit.
  - [powerpc](ports/powerpc) -- IBM PowerPC (including Microwatt)
  - [psoc6](ports/psoc6) -- Infineon PSoC6.
+<<<<<<< HEAD
  - [qemu-arm](ports/qemu-arm) -- QEMU-based Arm emulated target (for testing)
  - [qemu-riscv](ports/qemu-riscv) -- QEMU-based RISC-V emulated target (for testing)
+=======
+ - [qemu-arm](ports/qemu-arm) -- QEMU-based emulated target, for testing)
+>>>>>>> 5eb5c974b (README.md: Added PSoC6 port to list.)
  - [renesas-ra](ports/renesas-ra) -- Renesas RA family.
  - [rp2](ports/rp2) -- Raspberry Pi RP2040 (including Pico and Pico W).
  - [samd](ports/samd) -- Microchip (formerly Atmel) SAMD21 and SAMD51.
