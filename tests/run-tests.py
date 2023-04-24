@@ -1033,6 +1033,7 @@ the last matching regex is used:
         "minimal",
         "nrf",
         "qemu",
+        "psoc6",
         "renesas-ra",
         "rp2",
         "zephyr",
