@@ -998,6 +998,28 @@ Here is a function you can run (or put in your boot.py file) to automatically co
         else:
             print(wlan.ifconfig())
 
+Bluetooth Module
+-----------------
+The ``bluetooth`` module.
+
+See module :mod:`bluetooth`
+
+For some methods and constants, the PSoC6 bluetooth module implements certain specializations and slightly different behaviour. This is explained in this section.
+
+Methods
+^^^^^^^
+.. method:: BLE.config('param', /)
+            BLE.config(*, param=value, ...)
+
+Among the suggested parameters of the general BLE.config() API, for this port, only these are available:
+
+- ``'addr_mode'``: Supported values:
+
+    * 0x00 - PUBLIC - Use the controller's public address.
+    * 0x01 - RANDOM - Use a generated static address.
+
+- ``'mtu'``,  ``'bond'``, ``'mitm'``, ``'io'`` and ``'le_secure'`` will be evaluated for enablement in future.
+
 NeoPixel driver
 ---------------
 
