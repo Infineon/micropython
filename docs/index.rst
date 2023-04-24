@@ -14,6 +14,7 @@ MicroPython documentation and references
     rp2/quickref.rst
     mimxrt/quickref.rst
     psoc-edge/quickref.rst
+    psoc6/quickref.rst
     wipy/quickref.rst
     unix/quickref.rst
     zephyr/quickref.rst
