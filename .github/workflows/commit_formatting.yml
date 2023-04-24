@@ -14,5 +14,14 @@ jobs:
       with:
         fetch-depth: '100'
     - uses: actions/setup-python@v4
+<<<<<<< HEAD:.github/workflows/commit_formatting.yml
     - name: Check commit message formatting
       run: source tools/ci.sh && ci_commit_formatting_run
+=======
+    - name: Install Python packages
+      run: |
+        pip install Sphinx
+        pip install sphinx-tabs
+    - name: Build docs
+      run: make -C docs/ html
+>>>>>>> .github/workflowys/docs.yml: Install sphinx-tabs.:.github/workflows/docs.yml
