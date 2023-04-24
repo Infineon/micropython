@@ -923,6 +923,7 @@ the last matching regex is used:
         "esp32",
         "minimal",
         "nrf",
+        "psoc6",
         "renesas-ra",
         "rp2",
     )
