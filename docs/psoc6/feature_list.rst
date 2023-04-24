@@ -38,6 +38,19 @@ Enabled modules
         * I2C
         * RTC
         * SoftI2C
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        * SPI
+        * SoftSPI
+        * PWM
+        * Timer
+        * ADC
+        * ADCBlock
+
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
     * micropython
     * ucryptolib
     * uctypes
@@ -111,6 +124,26 @@ Table :ref:`configuration details <table_mpy_configuration>` below lists specifi
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
 | machine.SoftI2C | Option ``MICROPY_PY_MACHINE_SOFTI2C`` enabled.                                                                       |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+| machine.PWM     | option ``MICROPY_PY_MACHINE_PWM`` &  ``MICROPY_PY_MACHINE_PWM_INCLUDEFILE`` enabled                                  |
+|                 |                                                                                                                      |
+|                 | option ``MICROPY_PY_MACHINE_PWM_DUTY`` is not enabled.                                                               |
++-----------------+----------------------------------------------------------------------------------------------------------------------+                                                                                                                                             
+| machine.SoftSPI | Option ``MICROPY_PY_MACHINE_SOFTSPI`` enabled.                                                                       |
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+| machine.ADC     | ADC.init() not implemented.                                                                                          |
++-----------------+----------------------------------------------------------------------------------------------------------------------+                                                                                                                                             
+| machine.ADCBlock| All functions implemented.                                                                                           |
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+| machine.Timer   | mode = Timer.PERIODIC is not supported                                                                               |
++-----------------+----------------------------------------------------------------------------------------------------------------------+                                                                                                                                             
+| machine.SPI     | Option ``MICROPY_PY_MACHINE_SPI``, ``MICROPY_PY_MACHINE_SPI_MSB`` , ``MICROPY_PY_MACHINE_SPI_MSB`` enabled.          |    
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 | psoc6           | Option to enable the external instead of the internal flash: ``MICROPY_ENABLE_EXT_QSPI_FLASH``.                      |
 |                 |                                                                                                                      |
 |                 | Option to enable the port specific debug logger: ``MICROPY_LOGGER_DEBUG``.                                           |

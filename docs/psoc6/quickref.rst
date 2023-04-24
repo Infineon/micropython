@@ -30,8 +30,23 @@ working with this port it may be useful to get an overview of the microcontrolle
     quick reference are certainyly supported.
     Check :ref:`here <psoc6_feature_list>` for a complete list of currently enabled or implemented modules as well as not yet implemented functionality.
     
+<<<<<<< HEAD
     Please, consider opening an `issue <https://github.com/jaenrig-ifx/micropython/issues>`_ or
     `discussion <https://github.com/jaenrig-ifx/micropython/discussionsh>`_ on GitHub for any clarification
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+    Please, consider opening an `issue <https://github.com/infineon/micropython/issues>`_ or
+    `discussion <https://github.com/infineon/micropython/discussionsh>`_ on GitHub for any clarification
+=======
+    Please, consider opening an `issue <https://github.com/jaenrig-ifx/micropython/issues>`_ or
+    `discussion <https://github.com/jaenrig-ifx/micropython/discussionsh>`_ on GitHub for any clarification
+>>>>>>> 57a502306 (docs: Added docs and docs conf for PSoC6 port.)
+=======
+    Please, consider opening an `issue <https://github.com/jaenrig-ifx/micropython/issues>`_ or
+    `discussion <https://github.com/jaenrig-ifx/micropython/discussionsh>`_ on GitHub for any clarification
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
     required on available features or requests for missing ones. 
 
 General board control
@@ -72,12 +87,27 @@ Use the :mod:`time <time>` module::
     start = time.ticks_us() # get microsecond counter
     delta = time.ticks_diff(time.ticks_us(), start) # compute time difference
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 
 Timers
 ------
 
 *Feature unavailable. Placeholder. To be completed.*
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 57a502306 (docs: Added docs and docs conf for PSoC6 port.)
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 Pins and GPIO
 -------------
 
@@ -152,6 +182,18 @@ The following constants are used to configure the pin objects in addition to the
           
     Selects the pin value.
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+There's a higher-level abstraction :ref:`machine.Signal <machine.Signal>`
+which can be used to invert a pin. Useful for illuminating active-low LEDs
+using ``on()`` or ``value(1)``.
+=======
+>>>>>>> 57a502306 (docs: Added docs and docs conf for PSoC6 port.)
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 
 Software I2C bus
 ----------------
@@ -244,6 +286,72 @@ The :mod:`network` module
 
 See :ref:`network.WLAN <network.WLAN>`
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+For some methods and constants, the PSoC6 network port implements certain specialization and slightly different behavior. This is explained in this section.
+
+Methods
+^^^^^^^
+
+.. method:: WLAN.scan(ssid=None, bssid=None)
+
+    The scan option accepts the following filters as keyword arguments, removing from scan results any network not matching these parameters values:
+
+    * ``ssid``
+    * ``bssid``
+
+.. method:: WLAN.status('param')
+
+    .. warning:: 
+        The function does not provide status of the connection. Use the ``active()`` for that purpose. Any errors or failure are communicated when using the corresponding enable/disable or connect/disconnect functions.
+
+    The following query parameters are allowed:
+        * ``rssi``. Only for STA.
+        * ``stations``. List of connected stations (only for AP).
+
+.. method:: WLAN.config('param')
+            WLAN.config(param=value, ...)
+
+    Among the suggested parameters of the general network WLAN API, for this port, only these are available:
+
+    * AP & STA query parameters
+
+        - ``channel``
+        - ``ssid``
+        - ``security```
+        - ``key/password``. Only for default AP key.
+        - ``mac``
+    * AP set parameters
+
+        - ``channel``
+        - ``ssid``
+        - ``security```
+        - ``key/password``. Only for default AP key.
+        
+    * STA has no configurable parameter.
+
+Constants
+^^^^^^^^^
+
+Security modes constants:
+
+.. data:: WLAN.OPEN
+        WLAN.WEP
+        WLAN.WPA
+        WLAN.WPA2
+        WLAN.WPA3
+        WLAN.WPA2_WPA_PSK
+        WLAN.SEC_UNKNOWN
+
+.. note::
+    Power modes configuration not implemented.
+     
+=======
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured for
 this port.Create WLAN interface object using ::
 
@@ -281,6 +389,13 @@ These are the other functions available in the network module
   wlan.ifconfig()             # get the interface's IP/netmask/gateway/DNS addresses
      
    
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 57a502306 (docs: Added docs and docs conf for PSoC6 port.)
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
 Here is a function you can run (or put in your boot.py file) to automatically connect to your WiFi network:
 
 ::
@@ -310,3 +425,191 @@ Here is a function you can run (or put in your boot.py file) to automatically co
         else:
             print(wlan.ifconfig())
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+PWM (pulse width modulation)
+----------------------------
+
+PWM can be enabled on all output capable pins.The frequency can range from 1Hz to 100MHz. As the frequency
+increases the PWM resolution decreases. Refer `PSoC 6 MCU: CY8C62x8, CY8C62xA Datasheet <https://www.infineon.com/dgdl/Infineon-PSOC_6_MCU_CY8C62X8_CY8C62XA-DataSheet-v18_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee7d03a70b1>`_
+for additional details regarding board specific PWM.
+
+Use the :ref:`machine.PWM <machine.PWM>` class: 
+
+The constructor can be called by passing the required arguments. All initialization and the configurations are handled by the constructor. Create PWM object using 
+
+::  
+
+    pwm = PWM('P9_0', freq=50, duty_u16=8192, invert=0) # PWM is initialised for the given pin with respective frequency & duty cycle.
+    pwm1 = PWM('P9_1', freq=50, duty_ns=1000, invert=1)  # PWM is initialised for the given pin with respective frequency & pulse width & inverts the output.
+
+    All four arguments has to be passed manadatorily to create PWM object. duty_u16 or duty_ns should be specified at a time.  
+
+::
+
+    from machine import PWM
+
+    pwm = PWM('P9_0', freq=50, duty_u16=8192, invert=0) 
+    print(pwm)                                # view PWM settings
+
+    pwm.freq()                                # get current frequency
+    pwm.freq(100)                             # set PWM frequency to 100 Hz
+
+    pwm.duty_u16()                            # get current duty cycle, range 0-65535
+    pwm.duty_u16(8192)                        # set duty cycle from 0 to 65535 as a ratio of duty_u16/65535, now 25%
+    
+    pwm.duty_ns()                             # get current pulse width in ns
+    pwm.duty_ns(1000)                         # set the current pulse width in ns from 0 to 1000000000/freq
+
+    pwm.init(freq=90,duty_us=100,invert=1)    # Modify the settings of PWM object
+    pwm.deinit()                              # Deinitialisation of PWM pin
+
+Software SPI bus
+----------------
+
+Software SPI (using bit-banging) works on all pins, and is accessed via the
+:ref:`machine.SoftSPI <machine.SoftSPI>` class::
+
+    from machine import Pin, SoftSPI
+
+    # construct a SoftSPI bus on the given pins
+    # polarity is the idle state of SCK
+    # phase=0 means sample on the first edge of SCK, phase=1 means the second edge
+    spi = SoftSPI(baudrate=100_000, polarity=1, phase=0, sck='P0_2', mosi='P0_0', miso='P0_1')
+
+    spi.init(baudrate=200000) # set the baudrate
+
+    spi.read(10)            # read 10 bytes on MISO
+    spi.read(10, 0xff)      # read 10 bytes while outputting 0xff on MOSI
+
+    buf = bytearray(50)     # create a buffer
+    spi.readinto(buf)       # read into the given buffer (reads 50 bytes in this case)
+    spi.readinto(buf, 0xff) # read into the given buffer and output 0xff on MOSI
+
+    spi.write(b'12345')     # write 5 bytes on MOSI
+
+    buf = bytearray(4)      # create a buffer
+    spi.write_readinto(b'1234', buf) # write to MOSI and read from MISO into the buffer
+    spi.write_readinto(buf, buf) # write buf to MOSI and read MISO back into buf
+
+.. Warning::
+   Currently *all* of ``sck``, ``mosi`` and ``miso`` *must* be specified when
+   initialising Software SPI.
+
+Hardware SPI bus
+----------------
+Hardware SPI works on the following listed pair of SPI pins. 
+
+=====  ===========  ============  ============
+\      Default  
+=====  ===========  ============  ============
+MOSI    P9_0           P6_0         P10_0
+MISO    P9_1           P6_1         P10_1
+SCK     P9_2           P6_2         P10_2
+=====  ===========  ============  ============
+
+Refer `PSoC 6 MCU: CY8C62x8, CY8C62xA Datasheet <https://www.infineon.com/dgdl/Infineon-PSOC_6_MCU_CY8C62X8_CY8C62XA-DataSheet-v18_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee7d03a70b1>`_
+for additional details regarding all the SPI capable pins. 
+
+The driver is accessed via :ref:`machine.SPI <machine.SPI>`
+
+The constructor
+^^^^^^^^^^^^^^^
+An instance of the :mod:`machine.SPI` class can be created by invoking the constructor with all the 
+necessary parameters to fully configure and initialize the ``SPI``. By invoking the constructor with no additional parameters 
+SPI object is created with default settings or settings of previous initialization if any.
+
+::
+    
+    from machine import SPI
+    spi = SPI(0) # Default assignment: id=0, sck=P9_2  ,MOSI=P9_0, MISO=P9_1, baudrate=1000000, Polarity=0, Phase=0, bits=8, firstbit=SPI.MSB
+    spi.init()
+
+Management of a CS signal should happen in user code (via machine.Pin class).
+
+::
+    
+    from machine import Pin
+    cs = Pin('P9_3', mode=Pin.OUT, value=1)      # Create chip-select on pin P9_3
+    cs(0)                                        # select the peripheral
+
+Here, ``id=0`` should be passed mandatorily which selects the ``master`` mode operation.
+If the constructor is called with any additional parameters then SPI object is created & initialised.
+
+::    
+    
+    spi = SPI(0, baudrate=2000000) #object is created & initialised with baudrate=2000000 & default parameters
+    spi = SPI(0, baudrate=1500000, polarity=1, phase=1, bits=8, firstbit=SPI.LSB, sck='P11_2', mosi='P11_0', miso='P11_1')
+
+Methods
+^^^^^^^
+All the methods(functions) given in :ref:`machine.SPI <machine.SPI>` class have been implemented in this port.
+
+Timers
+------
+
+Hardware timer is supported.
+
+Use the :mod:`machine.Timer` class::
+
+    from machine import Timer
+    import time
+    tim = Timer(0) #Default assignment: period=9999, frequency=10000
+    tim.init(period=2000, mode=Timer.ONE_SHOT, callback=lambda t:print(2))
+    time.sleep_ms(100)
+
+Here id=0 should be passed mandatorily.
+
+.. note:: Here mode=Timer.PERIODIC is not currently supported 
+
+ADC (analog to digital conversion)
+----------------------------------
+
+On the PSoC6, a single ADC block with id - '0' is available. The ADC functionality is available on the
+following pins : "P10_0" - "P10_5".
+
+Use the :ref:`machine.ADC <machine.ADC>` class::
+
+    from machine import ADC, Pin
+
+    adc = ADC(Pin("P10_0"))        # create an ADC object on ADC pin
+    val = adc.read_u16()           # read a raw analog value in the range 0-65535
+    val = adc.read_uv()            # read an analog value in micro volts
+
+The PSoC6 port also supports :ref:`machine.ADCBlock <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
+
+PSoC6 supports only 1 12-bit SAR ADC with the following channel to pin mapping and the defaults are set accordingly:
+
++---------+-------+
+| Channel |  Pin  |
++=========+=======+
+|    0    | P10_0 |
++---------+-------+
+|    1    | P10_1 |
++---------+-------+
+|    2    | P10_2 |
++---------+-------+
+|    3    | P10_3 |
++---------+-------+
+|    4    | P10_4 |
++---------+-------+
+|    5    | P10_5 |
++---------+-------+
+
+.. note::
+    Arbitrary connection of ADC channels to GPIO is not supported. Specifying a pin that is not connected to this block, 
+    or specifying a mismatched channel and pin, will raise an exception.
+
+To use the APIs:
+::
+    
+    from machine import ADCBlock, Pin
+
+    adcBlock = ADCBlock(0, bits=12)             # create an ADCBlock 0 object
+    adc = adcBlock.connect(0, Pin("P10_0"))     # connect channel 0 to pin P10_0
+    val = adc.read_uv()                         # read an analog value in micro volts
+
+=======
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
+>>>>>>> docs: Added docs and docs conf for PSoC6 port.
