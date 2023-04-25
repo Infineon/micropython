@@ -35,7 +35,7 @@ DAC, PWM, SPI, I2C, CAN, Bluetooth, and USB.
 Getting started
 ---------------
 
-See the [online documentation](https://docs.micropython.org/) for API
+See the [online documentation (Infineon ReadTheDocs fork)](https://ifx-micropython.readthedocs.io/) for API
 references and information about using MicroPython and information about how
 it is implemented.
 
