@@ -75,7 +75,7 @@ STATIC MP_DEFINE_ATTRTUPLE(
     (mp_obj_t)&os_uname_info_release_obj,
     (mp_obj_t)&os_uname_info_version_obj,
     (mp_obj_t)&os_uname_info_machine_obj
-);
+    );
 
 STATIC mp_obj_t os_uname(void) {
     return (mp_obj_t)&os_uname_info_obj;
@@ -142,7 +142,7 @@ STATIC const mp_rom_map_elem_t os_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_uname), MP_ROM_PTR(&os_uname_obj) },
 
-#if MICROPY_VFS
+    #if MICROPY_VFS
     { MP_ROM_QSTR(MP_QSTR_chdir), MP_ROM_PTR(&mp_vfs_chdir_obj) },
     { MP_ROM_QSTR(MP_QSTR_getcwd), MP_ROM_PTR(&mp_vfs_getcwd_obj) },
     { MP_ROM_QSTR(MP_QSTR_ilistdir), MP_ROM_PTR(&mp_vfs_ilistdir_obj) },
@@ -157,25 +157,25 @@ STATIC const mp_rom_map_elem_t os_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_sync), MP_ROM_PTR(&mod_os_sync_obj) },
 
-#elif MICROPY_MBFS
+    #elif MICROPY_MBFS
     { MP_ROM_QSTR(MP_QSTR_listdir), MP_ROM_PTR(&os_mbfs_listdir_obj) },
     { MP_ROM_QSTR(MP_QSTR_ilistdir), MP_ROM_PTR(&os_mbfs_ilistdir_obj) }, // uses ~136 bytes
     { MP_ROM_QSTR(MP_QSTR_stat), MP_ROM_PTR(&os_mbfs_stat_obj) },         // uses ~228 bytes
     { MP_ROM_QSTR(MP_QSTR_remove), MP_ROM_PTR(&os_mbfs_remove_obj) },
-#endif
+    #endif
 
     /// \constant sep - separation character used in paths
     { MP_ROM_QSTR(MP_QSTR_sep), MP_ROM_QSTR(MP_QSTR__slash_) },
 
-#if MICROPY_HW_ENABLE_RNG
+    #if MICROPY_HW_ENABLE_RNG
     { MP_ROM_QSTR(MP_QSTR_urandom), MP_ROM_PTR(&os_urandom_obj) },
-#endif
+    #endif
 
     // these are MicroPython extensions
-#if MICROPY_PY_MACHINE_UART
+    #if MICROPY_PY_MACHINE_UART
     { MP_ROM_QSTR(MP_QSTR_dupterm), MP_ROM_PTR(&mod_os_dupterm_obj) },
-#endif
-#if MICROPY_VFS
+    #endif
+    #if MICROPY_VFS
     { MP_ROM_QSTR(MP_QSTR_mount), MP_ROM_PTR(&mp_vfs_mount_obj) },
     { MP_ROM_QSTR(MP_QSTR_umount), MP_ROM_PTR(&mp_vfs_umount_obj) },
     #if MICROPY_VFS_FAT
@@ -187,14 +187,14 @@ STATIC const mp_rom_map_elem_t os_module_globals_table[] = {
     #if MICROPY_VFS_LFS2
     { MP_ROM_QSTR(MP_QSTR_VfsLfs2), MP_ROM_PTR(&mp_type_vfs_lfs2) },
     #endif
-#endif
+    #endif
 };
 
 STATIC MP_DEFINE_CONST_DICT(os_module_globals, os_module_globals_table);
 
 const mp_obj_module_t mp_module_os = {
     .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t*)&os_module_globals,
+    .globals = (mp_obj_dict_t *)&os_module_globals,
 };
 
 MP_REGISTER_EXTENSIBLE_MODULE(MP_QSTR_os, mp_module_os);
