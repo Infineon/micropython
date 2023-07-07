@@ -19,14 +19,14 @@
 };*/
 
 STATIC const ch_pin_map_t ch_pin_obj[] = {
-    {.ch=0, .pin=PIN_P10_0},
-    {.ch=1, .pin=PIN_P10_1},
-    {.ch=2, .pin=PIN_P10_2},
-    {.ch=3, .pin=PIN_P10_3},
-    {.ch=4, .pin=PIN_P10_4},
-    {.ch=5, .pin=PIN_P10_5},
-    {.ch=6, .pin=PIN_P10_6},
-    {.ch=7, .pin=PIN_P10_7}
+    {.ch = 0, .pin = PIN_P10_0},
+    {.ch = 1, .pin = PIN_P10_1},
+    {.ch = 2, .pin = PIN_P10_2},
+    {.ch = 3, .pin = PIN_P10_3},
+    {.ch = 4, .pin = PIN_P10_4},
+    {.ch = 5, .pin = PIN_P10_5},
+    {.ch = 6, .pin = PIN_P10_6},
+    {.ch = 7, .pin = PIN_P10_7}
 };
 
 STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
@@ -36,7 +36,7 @@ STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp
 
 STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *all_args) {
     mp_arg_check_num(n_pos_args, n_kw_args, 1, MP_OBJ_FUN_ARGS_MAX, true);
-    
+
     // Get ADC ID
     uint8_t adc_id = mp_obj_get_int(all_args[0]);
     if (adc_id != 0) {
@@ -53,8 +53,7 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_pos_args - 1, all_args + 1, &kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
     uint8_t bits = args[ARG_bits].u_int;
-    if(bits != DEFAULT_ADC_BITS)
-    {
+    if (bits != DEFAULT_ADC_BITS) {
         mp_raise_TypeError(MP_ERROR_TEXT("Invalid bits. Current ADC configuration supports only 12 bits resolution!"));
     }
 
@@ -74,23 +73,22 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
     uint8_t channel = -1;
     if (n_pos_args == 2) {
         // If channel only specified : If mp_obj_is_int is true, then it is channel
-        if (mp_obj_is_int(pos_args[1])) {  
+        if (mp_obj_is_int(pos_args[1])) {
             channel = mp_obj_get_int(pos_args[1]);
             if (channel <= 7) {
-                //adc_pin 
-                //self->ch = mp_obj_get_int(pos_args[1]);
+                // adc_pin
+                // self->ch = mp_obj_get_int(pos_args[1]);
                 self->adc_pin = ch_pin_obj[channel].pin;
             }
         }
         // If Pin only specified
         else {
             machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[1]);
-           
-            for(int i=0; i<MP_ARRAY_SIZE(ch_pin_obj); i++)
+
+            for (int i = 0; i < MP_ARRAY_SIZE(ch_pin_obj); i++)
             {
-                if(ch_pin_obj[i].pin == adc_pin_obj->pin_addr)
-                {
-                    //self->ch = ch_pin_obj[i].ch;
+                if (ch_pin_obj[i].pin == adc_pin_obj->pin_addr) {
+                    // self->ch = ch_pin_obj[i].ch;
                     self->adc_pin = adc_pin_obj->pin_addr;
                 }
             }
@@ -99,7 +97,7 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
         self->ch = mp_obj_get_int(pos_args[1]);
         machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[2]);
         self->adc_pin = adc_pin_obj->pin_addr;
-        if (ch_pin_obj[self->ch].pin != self->adc_pin ){
+        if (ch_pin_obj[self->ch].pin != self->adc_pin) {
             mp_raise_TypeError(MP_ERROR_TEXT("Wrong pin specified for the mentioned channel"));
         }
     } else {
