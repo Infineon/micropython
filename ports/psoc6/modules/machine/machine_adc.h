@@ -10,6 +10,6 @@ typedef struct _machine_adc_obj_t {
     uint32_t sample_ns;
 } machine_adc_obj_t;
 
-extern machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin1,uint8_t bits );
+extern machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin1, uint8_t bits);
 
 #endif // MICROPY_INCLUDED_MACHINE_ADC_H
