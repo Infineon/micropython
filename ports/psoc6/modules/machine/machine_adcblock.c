@@ -7,17 +7,6 @@
 #include "pins.h"
 #include "machine_adc.h"
 
-/*STATIC const machine_adcblock_obj_t machine_adcblock_obj[] = {
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=0, .adc_pin=PIN_P10_0,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=1, .adc_pin=PIN_P10_1,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=2, .adc_pin=PIN_P10_2,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=3, .adc_pin=PIN_P10_3,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=4, .adc_pin=PIN_P10_4,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=5, .adc_pin=PIN_P10_5,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=6, .adc_pin=PIN_P10_6,{0}},
-    {{&machine_adcblock_type}, .adc_id=0, .bits=DEFAULT_ADC_BITS, .ch=7, .adc_pin=PIN_P10_7,{0}},
-};*/
-
 STATIC const ch_pin_map_t ch_pin_obj[] = {
     {.ch = 0, .pin = PIN_P10_0},
     {.ch = 1, .pin = PIN_P10_1},
@@ -25,8 +14,6 @@ STATIC const ch_pin_map_t ch_pin_obj[] = {
     {.ch = 3, .pin = PIN_P10_3},
     {.ch = 4, .pin = PIN_P10_4},
     {.ch = 5, .pin = PIN_P10_5},
-    {.ch = 6, .pin = PIN_P10_6},
-    {.ch = 7, .pin = PIN_P10_7}
 };
 
 STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
