@@ -36,7 +36,7 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     if (!IS_GPIO_VALID_ADC_PIN(pin)) {
         mp_raise_ValueError(MP_ERROR_TEXT("Invalid ADC Pin"));
     }
-    // Intialize the ADC block (required only once per execution)
+    // Initialize the ADC block (required only once per execution)
     if (!adc_init_flag) {
         adc_init(&adc_obj, pin, NULL);
         adc_init_flag = true;
@@ -50,7 +50,7 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
         .enabled = true
     };
 
-    // Intialize channel
+    // Initialize channel
     adc_ch_init(&adc_channel_obj, &adc_obj, pin, CYHAL_NC_PIN_VALUE, &channel_config);
 
     // Create ADC Object
@@ -59,7 +59,7 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     // Create ADCBlock
     machine_adcblock_obj_t *adc_block = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
 
-    // Intialize ADCBlock
+    // Initialize ADCBlock
     adc_block->adc_id = 0;
     adc_block->bits = DEFAULT_ADC_BITS;
     adc_block->adc_chan_obj = adc_channel_obj;
@@ -88,7 +88,7 @@ STATIC mp_obj_t machine_adc_make_new(const mp_obj_type_t *type, size_t n_args, s
 
     machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(all_args[0]);
 
-    // Get all user inputs
+    // Get user input sampling time
     uint32_t sampling_time = args[ARG_sample_ns].u_int;
 
     machine_adc_obj_t *o = adc_init_helper(sampling_time, adc_pin_obj->pin_addr, DEFAULT_ADC_BITS);
@@ -99,7 +99,6 @@ STATIC mp_obj_t machine_adc_make_new(const mp_obj_type_t *type, size_t n_args, s
 // block()
 STATIC mp_obj_t machine_adc_block(mp_obj_t self_in) {
     const machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    printf("\n Block: \n");
     return MP_OBJ_FROM_PTR(self->block);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_block_obj, machine_adc_block);

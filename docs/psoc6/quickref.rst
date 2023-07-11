@@ -459,7 +459,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
 
     adc = ADC(Pin("P10_0"))        # create an ADC object on ADC pin
     val = adc.read_u16()           # read a raw analog value in the range 0-65535
-    val = adc.read_uv()            # read an analog value in micro volts ranging 0.0V - 3.3V
+    val = adc.read_uv()            # read an analog value in micro volts
 
 The PSoC6 port also supports :ref:`machine.ADC <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
 PSoC6 supports only 1 12-bit SAR ADC with the following channel to pin mapping and the defaults are set accordingly:
@@ -490,5 +490,4 @@ To use the APIs:
 
     adcBlock = ADCBlock(0, bits=12)             # create an ADCBlock 0 object
     adc = adcBlock.connect(0, Pin("P10_0"))     # connect channel 0 to pin P10_0
-    val = adc.read_u16()                        # read a raw analog value in the range 0-65535
-    val = adc.read_uv()                         # read an analog value in micro volts ranging 0.0V - 3.3V
+    val = adc.read_uv()                         # read an analog value in micro volts

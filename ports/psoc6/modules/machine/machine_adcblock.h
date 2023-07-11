@@ -17,6 +17,7 @@ typedef struct _machine_adcblock_obj_t {
 typedef struct _ch_pin_map_t {
     uint8_t ch;
     uint32_t pin;
+    bool flag;
 } ch_pin_map_t;
 
 extern void machine_adcblock_init_helper(machine_adcblock_obj_t *self, uint8_t id, uint8_t bits, cyhal_adc_channel_t adc_chan_obj);
