@@ -1,5 +1,4 @@
-<ADC Pin=80, Channel=0, sampling_time_ns=1000>
-<ADC Pin=80, Channel=0, sampling_time_ns=1200>
-False
-True
 Invalid ADC Pin
+<ADC Pin=80, Channel=0, sampling_time_ns=1000>
+True
+True
