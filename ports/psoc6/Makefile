@@ -129,7 +129,6 @@ DRIVERS_SRC_C += $(addprefix drivers/,\
 	machine/psoc6_i2c.c \
 	machine/psoc6_pwm.c \
 	machine/psoc6_system.c  \
-	machine/psoc6_adc.c \
 	)
 
 MOD_SRC_C += $(addprefix modules/,\

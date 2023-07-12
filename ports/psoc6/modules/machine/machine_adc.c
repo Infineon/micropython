@@ -5,9 +5,12 @@
 
 // port-specific includes
 #include "modmachine.h"
-#include "drivers/machine/psoc6_adc.h"
 #include "pins.h"
 #include "machine_adc.h"
+
+#include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
 
 #define DEFAULT_ADC_ACQ_NS  1000
 
@@ -38,7 +41,7 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     }
     // Initialize the ADC block (required only once per execution)
     if (!adc_init_flag) {
-        adc_init(&adc_obj, pin, NULL);
+        cyhal_adc_init(&adc_obj, pin, NULL);
         adc_init_flag = true;
     }
 
@@ -51,7 +54,7 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     };
 
     // Initialize channel
-    adc_ch_init(&adc_channel_obj, &adc_obj, pin, CYHAL_NC_PIN_VALUE, &channel_config);
+    cyhal_adc_channel_init_diff(&adc_channel_obj, &adc_obj, pin, CYHAL_ADC_VNEG, &channel_config);
 
     // Create ADC Object
     machine_adc_obj_t *o = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
@@ -106,14 +109,14 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_block_obj, machine_adc_block);
 // read_u16()
 STATIC mp_obj_t machine_adc_read_u16(mp_obj_t self_in) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    return MP_OBJ_NEW_SMALL_INT(adc_read_u16(&self->block->adc_chan_obj));
+    return MP_OBJ_NEW_SMALL_INT(cyhal_adc_read_u16(&self->block->adc_chan_obj));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_u16_obj, machine_adc_read_u16);
 
 // read_uv
 STATIC mp_obj_t machine_adc_read_uv(mp_obj_t self_in) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    return MP_OBJ_NEW_SMALL_INT(adc_read_uv(&self->block->adc_chan_obj));
+    return MP_OBJ_NEW_SMALL_INT(cyhal_adc_read_uv(&self->block->adc_chan_obj));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_uv_obj, machine_adc_read_uv);
 
