@@ -1,7 +1,7 @@
 #ifndef MICROPY_INCLUDED_MACHINE_ADCBLOCK_H
 #define MICROPY_INCLUDED_MACHINE_ADCBLOCK_H
 
-#include "drivers/machine/psoc6_adc.h"
+// #include "drivers/machine/psoc6_adc.h"
 #define DEFAULT_ADC_BITS    12
 
 typedef struct _machine_adcblock_obj_t {

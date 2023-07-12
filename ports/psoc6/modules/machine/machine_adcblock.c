@@ -63,8 +63,6 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
         if (mp_obj_is_int(pos_args[1])) {
             channel = mp_obj_get_int(pos_args[1]);
             if (channel <= 7) {
-                // adc_pin
-                // self->ch = mp_obj_get_int(pos_args[1]);
                 self->adc_pin = ch_pin_obj[channel].pin;
             }
         }
@@ -75,7 +73,6 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
             for (int i = 0; i < MP_ARRAY_SIZE(ch_pin_obj); i++)
             {
                 if (ch_pin_obj[i].pin == adc_pin_obj->pin_addr) {
-                    // self->ch = ch_pin_obj[i].ch;
                     self->adc_pin = adc_pin_obj->pin_addr;
                 }
             }
