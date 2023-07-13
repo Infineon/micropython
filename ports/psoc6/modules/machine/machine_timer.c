@@ -23,7 +23,6 @@ typedef struct _machine_timer_obj_t {
 const mp_obj_type_t machine_timer_type;
 
 static void isr_timer(void *callback_arg, cyhal_timer_event_t event) {
-    mp_printf(&mp_plat_print, "Here isr");
     machine_timer_obj_t *self = callback_arg;
     mp_sched_schedule(self->callback, MP_OBJ_FROM_PTR(self));
 }
