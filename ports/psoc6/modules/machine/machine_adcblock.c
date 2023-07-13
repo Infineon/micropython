@@ -7,14 +7,51 @@
 #include "pins.h"
 #include "machine_adc.h"
 
-STATIC const ch_pin_map_t ch_pin_obj[] = {
-    {.ch = 0, .pin = PIN_P10_0},
-    {.ch = 1, .pin = PIN_P10_1},
-    {.ch = 2, .pin = PIN_P10_2},
-    {.ch = 3, .pin = PIN_P10_3},
-    {.ch = 4, .pin = PIN_P10_4},
-    {.ch = 5, .pin = PIN_P10_5},
+#define ADCBLOCK0 (0) //replace by object pointer of MPY_ADC_BLOCK
+
+STATIC const machine_adc_obj_t block0_channels_for_our_bsp[] = {
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_0},
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_1},
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_2},
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_3},
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_4},
+    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_5}
 };
+
+// STATIC const ch_pin_map_t ch_pin_obj[] = {
+//     {.ch = 0, .pin = PIN_P10_0},
+//     {.ch = 1, .pin = PIN_P10_1},
+//     {.ch = 2, .pin = PIN_P10_2},
+//     {.ch = 3, .pin = PIN_P10_3},
+//     {.ch = 4, .pin = PIN_P10_4},
+//     {.ch = 5, .pin = PIN_P10_5},
+// };
+
+STATIC const uint32_t block0_channel_pin_map[] = {
+    PIN_P10_0,
+    PIN_P10_1
+    PIN_P10_2,
+    PIN_P10_3,
+    PIN_P10_4,
+    PIN_P10_5
+}; //will belong to only a particular bsp
+
+typedef struct 
+{
+    uint16_t block_id;
+    uint16_t channel;
+    uint16_t pin;
+}acd_block_channel_pin_map_t;
+
+
+STATIC const acd_block_channel_pin_map_t adc_block_pin_map[] = {
+    {ADCBLOCK0, 0, PIN_P10_0},
+    {ADCBLOCK0, 1, PIN_P10_1},
+    {ADCBLOCK0, 2, PIN_P10_2},
+    {ADCBLOCK0, 3, PIN_P10_3},
+    {ADCBLOCK0, 4, PIN_P10_4},
+    {ADCBLOCK0, 5, PIN_P10_5}
+}; //will belong to only a particular bsp
 
 STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adcblock_obj_t *self = MP_OBJ_TO_PTR(self_in);

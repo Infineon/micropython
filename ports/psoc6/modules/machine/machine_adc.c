@@ -25,6 +25,10 @@ bool adc_init_flag = false;
 
 const mp_obj_type_t machine_adc_type;
 
+// #define ADC_OBJ_MAX     6 //the block - adc specific of the bsp defines this
+
+// cyhal_adc_channel_t adc_channel_obj[ADC_OBJ_MAX];
+
 // machine_adc_print()
 STATIC void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
@@ -35,10 +39,10 @@ STATIC void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
 // ADC initialization helper function
 machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t bits) {
     // Get GPIO and check it has ADC capabilities.
-    cyhal_adc_channel_t adc_channel_obj;
     if (!IS_GPIO_VALID_ADC_PIN(pin)) {
         mp_raise_ValueError(MP_ERROR_TEXT("Invalid ADC Pin"));
     }
+    cyhal_adc_channel_t adc_channel_obj;
     // Initialize the ADC block (required only once per execution)
     if (!adc_init_flag) {
         cyhal_adc_init(&adc_obj, pin, NULL);
@@ -59,8 +63,10 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     // Create ADC Object
     machine_adc_obj_t *o = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
 
+    // look for a given pin its adcblock associated
+
     // Create ADCBlock
-    machine_adcblock_obj_t *adc_block = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
+    // machine_adcblock_obj_t *adc_block = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
 
     // Initialize ADCBlock
     adc_block->adc_id = 0;
