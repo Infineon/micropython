@@ -7,16 +7,49 @@
 #include "pins.h"
 #include "machine_adc.h"
 
-#define ADCBLOCK0 (0) //replace by object pointer of MPY_ADC_BLOCK
 
-STATIC const machine_adc_obj_t block0_channels_for_our_bsp[] = {
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_0},
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_1},
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_2},
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_3},
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_4},
-    {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_5}
-};
+
+// STATIC const machine_adc_obj_t block0_channels_for_our_bsp[] = {
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_0 },
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_1},
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_2},
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_3},
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_4},
+//     {{&machine_adc_type}, ADCBLOCK0, SAMPLE_RATE_NS, PIN_P10_5}
+// };
+
+#define ADCBLOCK0       (0) //replace by object pointer of MPY_ADC_BLOCK
+#define ADC_BLOCK_MAX   (1)
+// STATIC const machine_adblock_obj_t block_bsp[] = {
+//     {{&machine_adcblock_type}, ADCBLOCK0, DEFAULT_ADC_BITS, {NULL}},
+// }; //bsp definition
+
+STATIC machine_adblock_obj_t * block[MAX_BLOCKS] = {NULL};
+
+typedef struct 
+{
+    uint16_t block_id;
+    uint16_t channel;
+    uint16_t pin;
+}acd_block_channel_pin_map_t;
+
+STATIC const acd_block_channel_pin_map_t adc_block_pin_map[] = {
+    {ADCBLOCK0, 0, PIN_P10_0},
+    {ADCBLOCK0, 1, PIN_P10_1},
+    {ADCBLOCK0, 2, PIN_P10_2},
+    {ADCBLOCK0, 3, PIN_P10_3},
+    {ADCBLOCK0, 4, PIN_P10_4},
+    {ADCBLOCK0, 5, PIN_P10_5}
+}; //will belong to only a particular bsp
+
+// STATIC const uint32_t block0_channel_pin_map[] = {
+//     PIN_P10_0,
+//     PIN_P10_1
+//     PIN_P10_2,
+//     PIN_P10_3,
+//     PIN_P10_4,
+//     PIN_P10_5
+// }; 
 
 // STATIC const ch_pin_map_t ch_pin_obj[] = {
 //     {.ch = 0, .pin = PIN_P10_0},
@@ -27,31 +60,9 @@ STATIC const machine_adc_obj_t block0_channels_for_our_bsp[] = {
 //     {.ch = 5, .pin = PIN_P10_5},
 // };
 
-STATIC const uint32_t block0_channel_pin_map[] = {
-    PIN_P10_0,
-    PIN_P10_1
-    PIN_P10_2,
-    PIN_P10_3,
-    PIN_P10_4,
-    PIN_P10_5
-}; //will belong to only a particular bsp
-
-typedef struct 
-{
-    uint16_t block_id;
-    uint16_t channel;
-    uint16_t pin;
-}acd_block_channel_pin_map_t;
+//will belong to only a particular bsp
 
 
-STATIC const acd_block_channel_pin_map_t adc_block_pin_map[] = {
-    {ADCBLOCK0, 0, PIN_P10_0},
-    {ADCBLOCK0, 1, PIN_P10_1},
-    {ADCBLOCK0, 2, PIN_P10_2},
-    {ADCBLOCK0, 3, PIN_P10_3},
-    {ADCBLOCK0, 4, PIN_P10_4},
-    {ADCBLOCK0, 5, PIN_P10_5}
-}; //will belong to only a particular bsp
 
 STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adcblock_obj_t *self = MP_OBJ_TO_PTR(self_in);
@@ -63,6 +74,7 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
 
     // Get ADC ID
     uint8_t adc_id = mp_obj_get_int(all_args[0]);
+    // check if this id is a valid/avaiable block
     if (adc_id != 0) {
         mp_raise_TypeError(MP_ERROR_TEXT("Specified ADC id not supported. Currently only block 0 is configured!"));
     }
@@ -82,12 +94,14 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
     }
 
     // Specifics of adcblock object
-    cyhal_adc_channel_t adc_chan_obj;
+    // cyhal_adc_channel_t adc_chan_obj;
+
+    //check if the object already exists (the instance object)
 
     machine_adcblock_obj_t *self = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
-    self->adc_id = adc_id;
+    self->id = adc_id;
     self->bits = bits;
-    self->adc_chan_obj = adc_chan_obj;
+    // self->adc_chan_obj = adc_chan_obj;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -125,6 +139,9 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
         mp_raise_TypeError(MP_ERROR_TEXT("Too many positional args"));
     }
 
+    //check if the adc_obj already exists?
+
+    //asign it to the right index in the channel array.
     return adc_init_helper(1000, self->adc_pin, self->bits); // Default sampling time in ns = 1000
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_adcblock_connect_obj, 2, machine_adcblock_connect);

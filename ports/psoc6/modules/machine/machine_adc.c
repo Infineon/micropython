@@ -48,6 +48,16 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
         cyhal_adc_init(&adc_obj, pin, NULL);
         adc_init_flag = true;
     }
+    
+    // look for a given pin its adcblock associated
+    // uint32_t adc_block_id = get_adc_block(pin);
+
+    // Create ADCBlock
+    // we call to the ADCBlock constructor for the given idblock
+    // machine_adcblock_obj_t *adc_block = construct_or_get_existing(adc_block_id);
+
+    //Allocate channel in block
+    adc_block->adc_chan_obj = adc_channel_obj; //function of adcblock to allocate a channel.
 
     // Configure the ADC channel
     const cyhal_adc_channel_config_t channel_config =
@@ -63,18 +73,14 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     // Create ADC Object
     machine_adc_obj_t *o = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
 
-    // look for a given pin its adcblock associated
 
-    // Create ADCBlock
-    // machine_adcblock_obj_t *adc_block = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
 
     // Initialize ADCBlock
-    adc_block->adc_id = 0;
-    adc_block->bits = DEFAULT_ADC_BITS;
-    adc_block->adc_chan_obj = adc_channel_obj;
+    // adc_block->adc_id = 0;
+    // adc_block->bits = DEFAULT_ADC_BITS;
 
     o->adc_pin = pin;
-    o->block = adc_block;
+    o->block = adc_block; //or adc_block_id
     o->sample_ns = sampling_time;
 
     return o;
