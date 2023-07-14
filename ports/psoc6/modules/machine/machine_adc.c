@@ -19,15 +19,10 @@
 cyhal_adc_t adc_obj;
 bool adc_init_flag = false;
 
-
 /******************************************************************************/
 // MicroPython bindings for machine.ADC
 
 const mp_obj_type_t machine_adc_type;
-
-// #define ADC_OBJ_MAX     6 //the block - adc specific of the bsp defines this
-
-// cyhal_adc_channel_t adc_channel_obj[ADC_OBJ_MAX];
 
 // machine_adc_print()
 STATIC void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
@@ -49,21 +44,24 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
         adc_init_flag = true;
     }
     
-    // look for a given pin its adcblock associated
+    // TODO: get the adcblock for a given pin.
     // uint32_t adc_block_id = get_adc_block(pin);
 
-    // Create ADCBlock
-    // we call to the ADCBlock constructor for the given idblock
+    // TODO: get or construct (if not yet constructed) the associated block 
+    // instance given its adc block id
     // machine_adcblock_obj_t *adc_block = construct_or_get_existing(adc_block_id);
 
-    //Allocate channel in block
-    adc_block->adc_chan_obj = adc_channel_obj; //function of adcblock to allocate a channel.
+    //TODO: Before creating the ADC object, check if for the associated block
+    // there is already a adc object (channel) created
+    // it will return null if not existing.
+   // machine_adc_obj_t *o = get_adc_channel(adc_block, pin); 
 
+    // TODO: (Review) If not existing, now we can create the adc object
     // Configure the ADC channel
     const cyhal_adc_channel_config_t channel_config =
     {
-        .enable_averaging = false,
-        .min_acquisition_ns = sampling_time,
+        .enable_averaging = false,  
+        .min_acquisition_ns = sampling_time, //TODO: if existing, can we change its configuration (sampling rate?)
         .enabled = true
     };
 
@@ -73,15 +71,12 @@ machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin, uint8_t
     // Create ADC Object
     machine_adc_obj_t *o = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
 
-
-
-    // Initialize ADCBlock
-    // adc_block->adc_id = 0;
-    // adc_block->bits = DEFAULT_ADC_BITS;
-
     o->adc_pin = pin;
-    o->block = adc_block; //or adc_block_id
+    o->block = adc_block; 
     o->sample_ns = sampling_time;
+
+    // TODO: (Review) Register the object in the corresponding block
+    //adc_block_allocate_adc_channel(adc_block, o);
 
     return o;
 }

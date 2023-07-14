@@ -3,16 +3,9 @@
 
 #include "machine_adcblock.h"
 
-// typedef struct _machine_adc_obj_t {
-//     mp_obj_base_t base;
-//     machine_adcblock_obj_t *block;
-//     uint32_t adc_pin;
-//     uint32_t sample_ns;
-// } machine_adc_obj_t;
-
 typedef struct _machine_adc_obj_t {
     mp_obj_base_t base;
-    // machine_adcblock_obj_t *block;
+    machine_adcblock_obj_t *block; 
     uint32_t pin;
     uint32_t sample_ns;
     cyhal_adc_channel_t adc_chan_obj;
