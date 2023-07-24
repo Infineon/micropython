@@ -217,7 +217,6 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_u16_obj, machine_adc_read_u16)
 // read_uv
 STATIC mp_obj_t machine_adc_read_uv(mp_obj_t self_in) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    printf("\n WORK DUMBO \n");
     return MP_OBJ_NEW_SMALL_INT(cyhal_adc_read_uv(self->adc_chan_obj));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_uv_obj, machine_adc_read_uv);
