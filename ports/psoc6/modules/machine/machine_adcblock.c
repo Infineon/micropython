@@ -29,7 +29,7 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
 
     // Get ADC ID
     uint8_t adc_id = mp_obj_get_int(all_args[0]);
-    // TODO: check if this id is a valid/avaiable genertically
+    // TODO: check if this id is a valid/available genertically
     if (adc_id != 0) {
         mp_raise_TypeError(MP_ERROR_TEXT("Specified ADC id not supported. Currently only block 0 is configured!"));
     }
