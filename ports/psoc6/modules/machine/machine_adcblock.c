@@ -7,31 +7,21 @@
 #include "pins.h"
 #include "machine_adc.h"
 
+machine_adcblock_obj_t *adc_block[MAX_BLOCKS] = {NULL};
+cyhal_adc_channel_t *adc_channels[MAX_CHANNELS] = {NULL};
 
-#define ADCBLOCK0               (0) 
-#define ADCBLOCK_CHANNEL_MAX    (1)
-
-STATIC machine_adblock_obj_t * acd_block[MAX_BLOCKS] = {NULL};
-
-typedef struct 
-{
-    uint16_t block_id;
-    uint16_t channel;
-    uint16_t pin;
-}acd_block_channel_pin_map_t;
-
-STATIC const acd_block_channel_pin_map_t adc_block_pin_map[] = {
+const adc_block_channel_pin_map_t adc_block_pin_map[] = {
     {ADCBLOCK0, 0, PIN_P10_0},
     {ADCBLOCK0, 1, PIN_P10_1},
     {ADCBLOCK0, 2, PIN_P10_2},
     {ADCBLOCK0, 3, PIN_P10_3},
     {ADCBLOCK0, 4, PIN_P10_4},
     {ADCBLOCK0, 5, PIN_P10_5}
-}; //will belong to only a particular bsp
+}; // will belong to only a particular bsp
 
 STATIC void machine_adcblock_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adcblock_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "ADCBlock(%u, bits=%u)", self->adc_id, self->bits);
+    mp_printf(print, "ADCBlock(%u, bits=%u)", self->id, self->bits);
 }
 
 STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *all_args) {
@@ -58,10 +48,10 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
         mp_raise_TypeError(MP_ERROR_TEXT("Invalid bits. Current ADC configuration supports only 12 bits resolution!"));
     }
 
-    //TODO: check if the object already exists (the instance object)
+    // TODO: check if the object already exists (the instance object)
     // if the corresponding index in the array isn´t NULL
 
-    //TODO: If not construct the object
+    // TODO: If not construct the object
     machine_adcblock_obj_t *self = mp_obj_malloc(machine_adcblock_obj_t, &machine_adcblock_type);
     self->id = adc_id;
     self->bits = bits;
@@ -71,7 +61,7 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
     return MP_OBJ_FROM_PTR(self);
 }
 
-STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+/*STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     machine_adcblock_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
     uint8_t channel = -1;
     if (n_pos_args == 2) {
@@ -80,7 +70,7 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
         if (mp_obj_is_int(pos_args[1])) {
             channel = mp_obj_get_int(pos_args[1]);
             if (channel <= 7) {
-                self->adc_pin = ch_pin_obj[channel].pin;
+                self->adc_pin = adc_block_pin_map[channel].pin;
             }
         }
         // TODO: generalize for (block, channel, pin) structure
@@ -115,10 +105,10 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
     //TODO: allocate it in the right channel index of the array.
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_adcblock_connect_obj, 2, machine_adcblock_connect);
-
+*/
 
 STATIC const mp_rom_map_elem_t machine_adcblock_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&machine_adcblock_connect_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&machine_adcblock_connect_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(machine_adcblock_locals_dict, machine_adcblock_locals_dict_table);
 
