@@ -4,6 +4,7 @@
 #include "modmachine.h"
 
 #include "machine_adcblock.h"
+#include "machine_adc.h"
 #include "pins.h"
 
 extern machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin);
@@ -106,6 +107,13 @@ int16_t get_adc_channel_number(uint32_t pin) {
 
 machine_adc_obj_t *adc_block_get_channel_obj(machine_adcblock_obj_t *adc_block, uint8_t channel) {
     return adc_block->channel[channel];
+}
+
+machine_adc_obj_t *adc_block_allocate_new_pin(machine_adcblock_obj_t *adc_block, uint32_t pin) {
+    int16_t adc_channel_no = get_adc_channel_number(pin);
+    adc_block->channel[adc_channel_no] = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
+
+    return adc_block->channel[adc_channel_no];
 }
 
 machine_adc_obj_t *adc_block_get_pin_adc_obj(machine_adcblock_obj_t *adc_block, uint32_t pin) {
