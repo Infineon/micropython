@@ -20,6 +20,7 @@
 extern int16_t get_adc_block_id(uint32_t pin);
 extern machine_adc_obj_t *adc_block_get_pin_adc_obj(machine_adcblock_obj_t *adc_block, uint32_t pin);
 extern machine_adcblock_obj_t *adc_block_init_helper(uint8_t adc_id, uint8_t bits);
+extern machine_adc_obj_t *adc_block_allocate_new_pin(machine_adcblock_obj_t *adc_block, uint32_t pin);
 
 /******************************************************************************/
 // MicroPython bindings for machine.ADC
@@ -28,7 +29,7 @@ const mp_obj_type_t machine_adc_type;
 
 static inline machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time) {
 
-    machine_adc_obj_t *o = mp_obj_malloc(machine_adc_obj_t, &machine_adc_type);
+    machine_adc_obj_t *o = adc_block_allocate_new_pin(adc_block, pin);
     const cyhal_adc_channel_config_t channel_config =
     {
         .enable_averaging = false,
