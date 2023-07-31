@@ -8,6 +8,8 @@
 #include "pins.h"
 
 extern machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin);
+extern machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time);
+
 
 machine_adcblock_obj_t *adc_block[MAX_BLOCKS] = {NULL};
 
@@ -96,10 +98,21 @@ int16_t get_adc_block_id(uint32_t pin) {
 
 // Helper function to get channel number provided the pin is given
 int16_t get_adc_channel_number(uint32_t pin) {
-    for (int i = 0; i < sizeof(adc_block_pin_map); i++)
+    for (int i = 0; i < (sizeof(adc_block_pin_map) / sizeof(adc_block_pin_map[0])); i++)
     {
         if (pin == adc_block_pin_map[i].pin) {
             return adc_block_pin_map[i].channel;
+        }
+    }
+    return -1;
+}
+
+// Helper function to get pin number provided the channel is given
+int16_t get_adc_pin_number(uint16_t channel) {
+    for (int i = 0; i < (sizeof(adc_block_pin_map) / sizeof(adc_block_pin_map[0])); i++)
+    {
+        if (channel == adc_block_pin_map[i].channel) {
+            return adc_block_pin_map[i].pin;
         }
     }
     return -1;
@@ -171,54 +184,43 @@ STATIC mp_obj_t machine_adcblock_make_new(const mp_obj_type_t *type, size_t n_po
     return MP_OBJ_FROM_PTR(adc_block_init_helper(adc_id, bits));
 }
 
-/*STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     machine_adcblock_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
     uint8_t channel = -1;
+    uint32_t pin = 0;
+
     if (n_pos_args == 2) {
         // TODO: generalize for (block, channel, pin) structure
         // If channel only specified : If mp_obj_is_int is true, then it is channel
         if (mp_obj_is_int(pos_args[1])) {
             channel = mp_obj_get_int(pos_args[1]);
-            if (channel <= 7) {
-                self->adc_pin = adc_block_pin_map[channel].pin;
-            }
-        }
-        // TODO: generalize for (block, channel, pin) structure
-        // If Pin only specified
-        else {
+            pin = get_adc_pin_number(channel);
+        } else {
             machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[1]);
-
-            for (int i = 0; i < MP_ARRAY_SIZE(ch_pin_obj); i++)
-            {
-                if (ch_pin_obj[i].pin == adc_pin_obj->pin_addr) {
-                    self->adc_pin = adc_pin_obj->pin_addr;
-                }
-            }
+            pin = adc_pin_obj->pin_addr;
+            channel = get_adc_channel_number(pin);
         }
     } else if (n_pos_args == 3) {
-        self->ch = mp_obj_get_int(pos_args[1]);
-        machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[2]);
-        // TODO: generalize for (block, channel, pin) structure
-        self->adc_pin = adc_pin_obj->pin_addr;
-        if (ch_pin_obj[self->ch].pin != self->adc_pin) {
-            mp_raise_TypeError(MP_ERROR_TEXT("Wrong pin specified for the mentioned channel"));
-        }
+        machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[1]);
+        pin = adc_pin_obj->pin_addr;
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Too many positional args"));
     }
+    // TODO: check if the adc_obj already exists else create new
+    machine_adc_obj_t *o = adc_block_get_pin_adc_obj(self, pin);
+    if (o == NULL) {
+        o = adc_init_new(self, pin, 1500);
+    }
 
-    //TODO: check if the adc_obj already exists
+    return o;
 
-    //TODO: create the adc object
-    return adc_init_helper(1000, self->adc_pin, self->bits); // Default sampling time in ns = 1000
-
-    //TODO: allocate it in the right channel index of the array.
+    // TODO: allocate it in the right channel index of the array.
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_adcblock_connect_obj, 2, machine_adcblock_connect);
-*/
+
 
 STATIC const mp_rom_map_elem_t machine_adcblock_locals_dict_table[] = {
-    // { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&machine_adcblock_connect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&machine_adcblock_connect_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(machine_adcblock_locals_dict, machine_adcblock_locals_dict_table);
 

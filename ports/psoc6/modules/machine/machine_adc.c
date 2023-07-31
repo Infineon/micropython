@@ -27,7 +27,7 @@ extern machine_adc_obj_t *adc_block_allocate_new_pin(machine_adcblock_obj_t *adc
 
 const mp_obj_type_t machine_adc_type;
 
-static inline machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time) {
+machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time) {
 
     machine_adc_obj_t *o = adc_block_allocate_new_pin(adc_block, pin);
     const cyhal_adc_channel_config_t channel_config =
@@ -50,7 +50,7 @@ static inline machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block,
 // machine_adc_print()
 STATIC void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "<ADC Pin=%u, ADCBlock_id=%d, sampling_time_ns=%ld>", self->pin, self->block, self->sample_ns);
+    mp_printf(print, "<ADC Pin=%u, ADCBlock_id=%d, sampling_time_ns=%ld>", self->pin, self->block->id, self->sample_ns);
 }
 
 // ADC initialization helper function
