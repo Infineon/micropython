@@ -1,7 +1,9 @@
 """
 ADCBlock test for the PSoC6 port.
 """
-from machine import ADCBlock, Pin
+from machine import Pin, ADCBlock
+
+print("ADCBlock tests")
 
 pin = Pin("P10_0")
 
@@ -16,7 +18,7 @@ try:
 except:
     print("TypeError: Invalid bits. Current ADC configuration supports only 12 bits resolution!")
 
-adcBlock = ADCBlock(0, bits=12)
+adcBlock = ADCBlock(0)
 
 try:
     adcPin = adcBlock.connect(1, pin)
