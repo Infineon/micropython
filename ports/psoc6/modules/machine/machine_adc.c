@@ -13,36 +13,71 @@
 #include "cyhal.h"
 #include "cy_pdl.h"
 
-#define DEFAULT_ADC_ACQ_NS  1000
-
 #define IS_GPIO_VALID_ADC_PIN(gpio) ((gpio == CYHAL_NC_PIN_VALUE) || ((gpio >= 80) && (gpio <= 87)))
 
-extern int16_t get_adc_block_id(uint32_t pin);
-extern machine_adc_obj_t *adc_block_get_pin_adc_obj(machine_adcblock_obj_t *adc_block, uint32_t pin);
+extern int16_t adc_block_get_block_id_for_pin(uint32_t pin);
+extern machine_adc_obj_t *adc_block_retrieve_adc_obj_for_pin(machine_adcblock_obj_t *adc_block, uint32_t pin);
 extern machine_adcblock_obj_t *adc_block_init_helper(uint8_t adc_id, uint8_t bits);
-extern machine_adc_obj_t *adc_block_allocate_new_pin(machine_adcblock_obj_t *adc_block, uint32_t pin);
+extern machine_adc_obj_t *adc_block_allocate_new_channel_for_pin(machine_adcblock_obj_t *adc_block, uint32_t pin);
 
 /******************************************************************************/
 // MicroPython bindings for machine.ADC
 
 const mp_obj_type_t machine_adc_type;
 
-machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time) {
+// Private helper function to check if ADC Block ID is valid
+static inline bool _is_gpio_valid_adc_pin(uint32_t pin) {
+    if ((pin == CYHAL_NC_PIN_VALUE) || ((pin >= 80) && (pin <= 87))) {
+        return true;
+    }
 
-    machine_adc_obj_t *o = adc_block_allocate_new_pin(adc_block, pin);
+    return false;
+}
+
+// Public helper function to handle new ADC channel creation and initialization
+machine_adc_obj_t *adc_create_and_init_new_channel_obj(machine_adcblock_obj_t *adc_block, uint32_t pin, uint32_t sampling_time) {
+
+    machine_adc_obj_t *adc_channel = adc_block_allocate_new_channel_for_pin(adc_block, pin);
     const cyhal_adc_channel_config_t channel_config =
     {
         .enable_averaging = false,
-        .min_acquisition_ns = sampling_time, // TODO: if existing, can we change its configuration (sampling rate?)
+        .min_acquisition_ns = sampling_time,
         .enabled = true
     };
 
-    cyhal_adc_channel_init_diff(&(o->adc_chan_obj), &(adc_block->adc_block_obj), pin, CYHAL_ADC_VNEG, &channel_config);
-    // TODO: handle error return
+    cy_rslt_t status = cyhal_adc_channel_init_diff(&(adc_channel->adc_chan_obj), &(adc_block->adc_block_obj), pin, CYHAL_ADC_VNEG, &channel_config);
+    if (status != CY_RSLT_SUCCESS) {
+        mp_raise_TypeError(MP_ERROR_TEXT("ADC Channel Initialization failed!"));
+    }
 
-    o->pin = pin;
-    o->block = adc_block;
-    o->sample_ns = sampling_time;
+    adc_channel->pin = pin;
+    adc_channel->block = adc_block;
+    adc_channel->sample_ns = sampling_time;
+
+    return adc_channel;
+}
+
+// Main helper function to create and initialize ADC
+machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin) {
+    if (!_is_gpio_valid_adc_pin(pin)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Invalid ADC Pin"));
+    }
+
+    int16_t adc_block_id = adc_block_get_block_id_for_pin(pin);
+
+    if (adc_block_id == -1) {
+        mp_raise_ValueError(MP_ERROR_TEXT("No associated ADC Block for specified pin!"));
+    }
+
+    // Initialize ADC Block
+    machine_adcblock_obj_t *adc_block = adc_block_init_helper(adc_block_id, DEFAULT_ADC_BITS);
+
+    // Retrieve associated channel (ADC obj) for pin
+    machine_adc_obj_t *o = adc_block_retrieve_adc_obj_for_pin(adc_block, pin);
+
+    if (o == NULL) {
+        o = adc_create_and_init_new_channel_obj(adc_block, pin, sampling_time);
+    }
 
     return o;
 }
@@ -51,32 +86,6 @@ machine_adc_obj_t *adc_init_new(machine_adcblock_obj_t *adc_block, uint32_t pin,
 STATIC void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_printf(print, "<ADC Pin=%u, ADCBlock_id=%d, sampling_time_ns=%ld>", self->pin, self->block->id, self->sample_ns);
-}
-
-// ADC initialization helper function
-machine_adc_obj_t *adc_init_helper(uint32_t sampling_time, uint32_t pin) {
-    // Get GPIO and check it has ADC capabilities.
-    if (!IS_GPIO_VALID_ADC_PIN(pin)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("Invalid ADC Pin"));
-    }
-
-    int16_t adc_block_id = get_adc_block_id(pin);
-    printf("\n ADC Block ID: %d\n", adc_block_id);
-
-    if (adc_block_id == -1) {
-        mp_raise_ValueError(MP_ERROR_TEXT("No associated ADC Block for specified pin!"));
-    }
-
-    machine_adcblock_obj_t *adc_block = adc_block_init_helper(adc_block_id, DEFAULT_ADC_BITS);
-    printf("\nADC Bits: %d\n", adc_block->bits);
-
-    machine_adc_obj_t *o = adc_block_get_pin_adc_obj(adc_block, pin);
-
-    if (o == NULL) {
-        o = adc_init_new(adc_block, pin, sampling_time);
-    }
-
-    return o;
 }
 
 // ADC(id)

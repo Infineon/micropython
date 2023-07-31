@@ -4,6 +4,7 @@
 // These should go into the specific BSP
 #define DEFAULT_ADC_BITS        12
 #define ADC_BLOCK_CHANNEL_MAX   6
+#define DEFAULT_ADC_ACQ_NS      1000
 
 #define ADCBLOCK0               (0)
 #define ADCBLOCK_CHANNEL_MAX    (1)
