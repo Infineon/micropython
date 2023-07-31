@@ -156,6 +156,7 @@ machine_adcblock_obj_t *adc_block_init_helper(uint8_t adc_id, uint8_t bits) {
 
     // No existing adc_block for given id. Create new one.
     if (adc_block == NULL) {
+        printf("\nHERE\n");
         adc_block = _create_and_init_new_adc_block(adc_id, bits);
     }
 
@@ -214,8 +215,14 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
             channel = _get_adc_channel_number_for_pin(pin);
         }
     } else if (n_pos_args == 3) {
-        machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[1]);
+        channel = mp_obj_get_int(pos_args[1]);
+        uint32_t exp_pin = _get_adc_pin_number_for_channel(channel);
+
+        machine_pin_obj_t *adc_pin_obj = MP_OBJ_TO_PTR(pos_args[2]);
         pin = adc_pin_obj->pin_addr;
+        if (exp_pin != pin) {
+            mp_raise_TypeError(MP_ERROR_TEXT("Wrong pin specified for the mentioned channel"));
+        }
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Too many positional args"));
     }
@@ -229,6 +236,14 @@ STATIC mp_obj_t machine_adcblock_connect(size_t n_pos_args, const mp_obj_t *pos_
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_adcblock_connect_obj, 2, machine_adcblock_connect);
 
+void adcblock_deinit(void) {
+
+    for (uint8_t i = 0; i < MAX_BLOCKS; i++) {
+        cyhal_adc_free(&adc_block[i]->adc_block_obj);
+        adc_block[i] = NULL;
+    }
+
+}
 
 STATIC const mp_rom_map_elem_t machine_adcblock_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&machine_adcblock_connect_obj) },
