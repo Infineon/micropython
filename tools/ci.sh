@@ -351,7 +351,7 @@ function ci_nrf_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=0.3.0
+MPY_MTB_CI_DOCKER_VERSION=0.4.0
 
 function ci_psoc6_setup {
     # Access to serial device 
