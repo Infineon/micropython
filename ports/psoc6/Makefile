@@ -198,7 +198,6 @@ $(MPY_MAIN_BUILD_DIR)/firmware.elf: $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 $(MPY_MAIN_BUILD_DIR)/firmware.hex: $(MPY_MAIN_BUILD_DIR)/firmware.elf
 	$(Q) $(OBJCOPY) -O ihex $^ $@
 
-
 # include adapter makefile
 include mtb-libs/makefile_mtb.mk
 
@@ -207,7 +206,7 @@ include $(TOP)/py/mkrules.mk
 
 MPY_CROSS_FLAGS += -march=armv7m
 
-build: mtb_get_build_flags $(MPY_PATH_TO_MAIN_MAKEFILE) $(MPY_MAIN_BUILD_DIR)/firmware.hex
+build: mtb_get_build_flags $(MPY_PATH_TO_MAIN_MAKEFILE) $(MPY_MAIN_BUILD_DIR)/firmware.hex make_pins
 
 all: build
 
@@ -234,6 +233,44 @@ test_multi:
 	$(info Running PSoC6 multi tests)
 
 	$(Q) cd ../../tests ; ./run-multitests.py -i pyb:$(DEV0) -i pyb:$(DEV1) $(MULTI_TESTS)
+
+# Supporting variables for make-pins.py script execution
+MAKE_PINS = boards/make-pins.py
+
+ifeq ($(BOARD), CY8CPROTO-062-4343W)
+PIN_PACKAGE_FILE = cyhal_psoc6_02_124_bga.h
+endif
+ifeq ($(BOARD), CY8CPROTO-063-BLE)
+PIN_PACKAGE_FILE = cyhal_psoc6_03_68_qfn.h #ToDo: Check the right file and replace
+endif
+
+#ToDo: Post adding af functionality, refactor to minimize dependent variables in py script if possible
+GEN_PINS_SRC := $(BUILD)/pins_$(BOARD).c
+GEN_PINS_HDR := $(HEADER_BUILD)/pins.h
+GEN_PINS_QSTR := $(BUILD)/pins_qstr.h
+BOARD_PINS := ./pins.csv 
+BOARD_AF_PINS := ./pins_af.csv
+PREFIX_FILE := psoc6_prefix.c
+HEADER_BUILD := $(BUILD)/genhdr
+
+# Rule to generate pins.csv
+#ToDo: Move to python script when af completed
+$(BOARD_PINS):
+	@echo "Creating $(BOARD_PINS)"
+	@touch $(BOARD_PINS)
+
+$(BOARD_AF_PINS):
+	@echo "Creating $(BOARD_AF_PINS)"
+	@touch $(BOARD_AF_PINS)	
+
+$(HEADER_BUILD):
+	@mkdir -p $(HEADER_BUILD)
+	@chmod +w -R $(HEADER_BUILD)
+
+make_pins: 
+	@echo "Generating pin structures"
+	$(PYTHON) $(MAKE_PINS) --gen-pin-for $(PIN_PACKAGE_FILE) --save-pins-csv-at $(BOARD_PINS) --save-pins-af-csv-at $(BOARD_AF_PINS) --prefix $(PREFIX_FILE) --hdr $(GEN_PINS_HDR) --qstr $(GEN_PINS_QSTR) > $(GEN_PINS_SRC)
+	rm -rf $(BOARD_PINS) $(BOARD_AF_PINS)
 
 help:
 	@:
