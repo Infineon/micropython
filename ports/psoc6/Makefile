@@ -110,7 +110,7 @@ $(info Compiling in $(CONFIG) mode !)
 # Rule to generate pins.csv
 make_pins_csv:
 	@echo "Generating $@"
-	$(PYTHON) $(MAKE_PINS_CSV) --gen-pin-for $(PIN_PACKAGE_FILE) --save-pins-csv-at $(BOARD_PINS) --save-pins-af-csv-at $(BOARD_AF_PINS)
+	$(PYTHON) $(MAKE_PINS_CSV) --gen-pin-for $(PIN_PACKAGE_FILE) --gpio-file $(GPIO_MTB_HEADER_FILE) --save-pins-csv-at $(BOARD_PINS) --save-pins-af-csv-at $(BOARD_AF_PINS)
 	$(MAKE) make_pins
 
 make_pins: $(GEN_PINS_SRC) $(GEN_PINS_HDR) $(GEN_PINS_QSTR)
@@ -232,7 +232,8 @@ include mtb-libs/makefile_mtb.mk
 
 MPY_CROSS_FLAGS += -march=armv7m
 
-build: mtb_get_build_flags make_pins_csv $(MPY_PATH_TO_MAIN_MAKEFILE) $(MPY_MAIN_BUILD_DIR)/firmware.hex clean_csv
+build: mtb_get_build_flags make_pins_csv $(MPY_PATH_TO_MAIN_MAKEFILE) $(MPY_MAIN_BUILD_DIR)/firmware.hex 
+#clean_csv
 
 all: build
 

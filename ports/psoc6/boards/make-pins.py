@@ -60,7 +60,7 @@ class Pin(object):
         return [self._name]
 
     def print_const_table_entry(self):
-        print('{{{{ &machine_pin_type}},{:s}, "{:s}"}},'.format(self._pin_exp, self._name))
+        print('{{{{ &machine_pin_type}},{:s}, "{:s}"}},'.format(self._pin_addr, self._name))
 
 
 class Pins(object):
