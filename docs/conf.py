@@ -51,10 +51,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-<<<<<<< HEAD
     'sphinxcontrib.jquery',
-=======
->>>>>>> docs: Added docs and docs conf for PSoC6 port.
     'sphinx_tabs.tabs',
 ]
 
