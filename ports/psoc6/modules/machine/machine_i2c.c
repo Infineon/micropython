@@ -20,12 +20,17 @@
 
 #define MAX_I2C              10 // TODO: Change as per bsp?
 #define DEFAULT_I2C_FREQ     (400000)
-#define PSOC_I2C_MASTER_MODE (CYHAL_I2C_MODE_MASTER)
+#define DEFAULT_I2C_SLAVE_ADDR  (0x24)
+#define MASTER_MODE (CYHAL_I2C_MODE_MASTER)
+#define SLAVE_MODE (CYHAL_I2C_MODE_SLAVE)
+// #define PSOC_I2C_MASTER_MODE (CYHAL_I2C_MODE_MASTER)
 
 typedef struct _machine_i2c_obj_t {
     mp_obj_base_t base;
     cyhal_i2c_t i2c_obj;
-    uint8_t i2c_id;
+    // uint8_t i2c_id;
+    uint8_t mode;
+    uint16_t addr;
     machine_pin_phy_obj_t *scl;
     machine_pin_phy_obj_t *sda;
     uint32_t freq;
@@ -58,14 +63,14 @@ STATIC cy_rslt_t i2c_init(machine_i2c_obj_t *machine_i2c_obj) {
     // Define the I2C master configuration structure
     cyhal_i2c_cfg_t i2c_master_config =
     {
-        CYHAL_I2C_MODE_MASTER,
-        0, // address is not used for master mode
+        machine_i2c_obj->mode,
+        machine_i2c_obj->addr, // master mode - 0; slave mode - set by user or default (0x24)
         machine_i2c_obj->freq
     };
 
     // Initialize I2C master, set the SDA and SCL pins and assign a new clock
     cy_rslt_t result = cyhal_i2c_init(&machine_i2c_obj->i2c_obj, machine_i2c_obj->sda->addr, machine_i2c_obj->scl->addr, NULL);
-
+    printf("Init result: %ld", result);
     return result == CY_RSLT_SUCCESS ? cyhal_i2c_configure(&machine_i2c_obj->i2c_obj, &i2c_master_config)
                                      : result;
 }
@@ -102,16 +107,17 @@ STATIC inline void i2c_scl_free(machine_i2c_obj_t *i2c_obj) {
 
 STATIC void machine_i2c_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "I2C(%u, freq=%u, scl=%u, sda=%u)", self->i2c_id, self->freq, self->scl->addr, self->sda->addr);
+    mp_printf(print, "I2C(%u, freq=%u, scl=%u, sda=%u)", self->mode, self->freq, self->scl->addr, self->sda->addr);
 }
 
 mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     mplogger_print("%q constructor invoked\n", MP_QSTR_I2C);
-    enum { ARG_id, ARG_freq, ARG_scl, ARG_sda };
+    enum { ARG_mode, ARG_freq, ARG_addr, ARG_scl, ARG_sda };
 
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_id, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_mode, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = DEFAULT_I2C_FREQ} },
+        { MP_QSTR_addr, MP_ARG_INT, {.u_int = 0x00} },
         { MP_QSTR_scl, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
         { MP_QSTR_sda, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
     };
@@ -121,14 +127,21 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     // Get I2C bus.
-    int i2c_id = mp_obj_get_int(args[ARG_id].u_obj);
+    int i2c_mode = mp_obj_get_int(args[ARG_mode].u_obj);
+    printf("Mode: %d\n", i2c_mode);
 
-    if (i2c_id != PSOC_I2C_MASTER_MODE) {
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C id '%d' not supported !"), i2c_id);
-    }
+    /*if (i2c_mode != PSOC_I2C_MASTER_MODE) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C id '%d' not supported !"), i2c_mode);
+    }*/
 
     machine_i2c_obj_t *self = i2c_obj_alloc();
-    self->i2c_id = i2c_id;
+    self->mode = i2c_mode;
+
+    if (self->mode == MASTER_MODE) {
+        self->addr = 0;
+    } else {
+        self->addr = args[ARG_addr].u_int;
+    }
 
     // get scl & sda pins & configure them
     if (args[ARG_scl].u_obj != mp_const_none) {
@@ -145,12 +158,14 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
     self->freq = args[ARG_freq].u_int;
 
-    // initialise I2C Peripheral and configure as master
+
+    // initialise I2C Peripheral and configure as master or slave as per the mode
     cy_rslt_t result = i2c_init(self);
 
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C initialisation failed with return code %lx !"), result);
     }
+
     return MP_OBJ_FROM_PTR(self);
 }
 
@@ -162,6 +177,26 @@ STATIC void machine_i2c_deinit(mp_obj_base_t *self_in) {
     i2c_obj_free(self);
 }
 
+STATIC int machine_i2c_write(mp_obj_base_t *self_in, const uint8_t *buf, size_t len) {
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+    machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    result = cyhal_i2c_slave_config_write_buffer(&self->i2c_obj, buf, len);
+    if (result != CY_RSLT_SUCCESS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_slave_config_write_buffer failed with return code %lx !"), result);
+    }
+    return len;
+}
+
+STATIC int machine_i2c_read(mp_obj_base_t *self_in, uint8_t *read_buf, size_t len, bool nack) {
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+    machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    result = cyhal_i2c_slave_config_read_buffer(&self->i2c_obj, read_buf, len);
+    if (result != CY_RSLT_SUCCESS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_slave_config_read_buffer failed with return code %lx !"), result);
+    }
+    return 0;
+}
+
 STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
     cy_rslt_t result = CY_RSLT_SUCCESS;
@@ -169,44 +204,99 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
     uint32_t timeout = 0;
 
     if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
-        result = cyhal_i2c_master_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+        if (self->mode == MASTER_MODE) {
+            result = cyhal_i2c_master_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
 
-        if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
-        }
-
-        return len;
-    } else {
-        // handle scan type bus checks and send stop
-        if (buf == NULL) {
-            result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, 0, 50, send_stop);
-
-            if ((result != CY_RSLT_SUCCESS)) {
-                // these 2 errors occur if nothing is attached to sda/scl, but they are pulled-up (0xaa2004) or not pulled-up (0xaa2003).
-                // In the latter case, due to not reaction at all the timeout has to expire. Latency is therefore high.
-                if (result != 0xaa2004 && result != 0xaa2003) {
-                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
-                }
-
-                return 1;
+            if (result != CY_RSLT_SUCCESS) {
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
             }
-
             return len;
         } else {
-            result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+            result = cyhal_i2c_slave_config_read_buffer(&self->i2c_obj, buf, len);
+
             if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_slave_config_read_buffer failed with return code %lx !"), result);
             }
+            return len;
         }
 
+
+    } else {
+        if (self->mode == MASTER_MODE) {
+            // handle scan type bus checks and send stop
+            if (buf == NULL) {
+                result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, 0, 50, send_stop);
+
+                if ((result != CY_RSLT_SUCCESS)) {
+                    // these 2 errors occur if nothing is attached to sda/scl, but they are pulled-up (0xaa2004) or not pulled-up (0xaa2003).
+                    // In the latter case, due to not reaction at all the timeout has to expire. Latency is therefore high.
+                    if (result != 0xaa2004 && result != 0xaa2003) {
+                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+                    }
+
+                    return 1;
+                }
+
+                return len;
+            } else {
+                result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+                if (result != CY_RSLT_SUCCESS) {
+                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+                }
+            }
+            return len;
+
+        } else {
+            result = cyhal_i2c_slave_config_write_buffer(&self->i2c_obj, buf, len);
+            if (result != CY_RSLT_SUCCESS) {
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_slave_config_write_buffer failed with return code %lx !"), result);
+            }
+        }
         return len;
+
     }
+
+    // if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
+    //    result = cyhal_i2c_master_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+//
+    //    if (result != CY_RSLT_SUCCESS) {
+    //        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
+    //    }
+//
+    //    return len;
+    // } else {
+    //    // handle scan type bus checks and send stop
+    //    if (buf == NULL) {
+    //        result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, 0, 50, send_stop);
+//
+    //        if ((result != CY_RSLT_SUCCESS)) {
+    //            // these 2 errors occur if nothing is attached to sda/scl, but they are pulled-up (0xaa2004) or not pulled-up (0xaa2003).
+    //            // In the latter case, due to not reaction at all the timeout has to expire. Latency is therefore high.
+    //            if (result != 0xaa2004 && result != 0xaa2003) {
+    //                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+    //            }
+//
+    //            return 1;
+    //        }
+//
+    //        return len;
+    //    } else {
+    //        result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+    //        if (result != CY_RSLT_SUCCESS) {
+    //            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+    //        }
+    //    }
+//
+    //    return len;
+    // }
 }
 
 STATIC const mp_machine_i2c_p_t machine_i2c_p = {
     .deinit = machine_i2c_deinit,
     .transfer_single = machine_i2c_transfer,
-    .transfer = mp_machine_i2c_transfer_adaptor
+    .transfer = mp_machine_i2c_transfer_adaptor,
+    .write = machine_i2c_write,
+    .read = machine_i2c_read
 };
 
 MP_DEFINE_CONST_OBJ_TYPE(
