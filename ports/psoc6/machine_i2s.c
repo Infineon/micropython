@@ -177,7 +177,7 @@ static void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
         cyhal_i2s_config_t rx_config =
         {
             .is_tx_slave = false,
-            .is_rx_slave = true,
+            .is_rx_slave = false,
             .mclk_hz = 0,
             .channel_length = 32,
             .word_length = self->bits,
