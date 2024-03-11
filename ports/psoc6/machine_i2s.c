@@ -122,8 +122,8 @@ static void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
     // is Bits valid?
     int8_t i2s_bits = args[ARG_bits].u_int;
     if ((i2s_bits != 16) &&
-        (i2s_bits != 32)
-        ) {
+        (i2s_bits != 32) &&
+        (i2s_bits) != 20) {
         mp_raise_ValueError(MP_ERROR_TEXT("invalid bits"));
     }
 

@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
 
     // Initialize retarget-io to use the debug UART port
     // FOR DEMO PURPOSES WE USE OTHER THAN THE BSP UART PINS
+    // result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
     result = cy_retarget_io_init(P10_1, P10_0, CY_RETARGET_IO_BAUDRATE);
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
