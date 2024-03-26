@@ -329,14 +329,14 @@ static mp_obj_t machine_i2c_init(size_t n_args, const mp_obj_t *args, mp_map_t *
 MP_DEFINE_CONST_FUN_OBJ_KW(machine_i2c_init_obj, 1, machine_i2c_init);
 
 static mp_obj_t machine_i2c_deinit(mp_obj_t self_in) {
-<<<<<<< HEAD
     mp_obj_base_t *self = (mp_obj_base_t *)MP_OBJ_TO_PTR(self_in);
     mp_machine_i2c_p_t *i2c_p = (mp_machine_i2c_p_t *)MP_OBJ_TYPE_GET_SLOT(self->type, protocol);
+    if (i2c_p->deinit != NULL) {
         i2c_p->deinit(self);
     }
-=======
-    mp_obj_base_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_machine_i2c_p_t *i2c_p = (mp_machine_i2c_p_t *)MP_OBJ_TYPE_GET_SLOT(self->type, protocol);
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_1(machine_i2c_deinit_obj, machine_i2c_deinit);
 
 static mp_obj_t machine_i2c_scan(mp_obj_t self_in) {
     mp_obj_base_t *self = MP_OBJ_TO_PTR(self_in);
@@ -744,10 +744,7 @@ int mp_machine_soft_i2c_write(mp_obj_base_t *self_in, const uint8_t *src, size_t
 
 static const mp_machine_i2c_p_t mp_machine_soft_i2c_p = {
     .init = mp_machine_soft_i2c_init,
-<<<<<<< HEAD
     .deinit = NULL,
-=======
->>>>>>> 3cae85805c (extmod/machine_i2c.c: Adding machine_i2c.c..)
     .start = (int (*)(mp_obj_base_t *))mp_hal_i2c_start,
     .stop = (int (*)(mp_obj_base_t *))mp_hal_i2c_stop,
     .read = mp_machine_soft_i2c_read,
