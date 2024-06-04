@@ -17,6 +17,7 @@ extern const mp_obj_type_t machine_adc_type;
 extern const mp_obj_type_t machine_wdt_type;
 extern const mp_obj_type_t machine_adcblock_type;
 extern const mp_obj_type_t machine_i2s_type;
+extern const mp_obj_type_t machine_sdcard_type;
 
 /* Note: the static functions' prototypes in the .c file cannot be declared here
 since they are static. The static type in those functions come from MPY hence

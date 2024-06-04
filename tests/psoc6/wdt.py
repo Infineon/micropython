@@ -22,18 +22,18 @@ except Exception:
 
 # valid test cases
 
-print("\n***** Test 4: WDT created successfully 6s *****\n")
+print("\n***** Test 4: WDT created successfully 500ms *****\n")
 wdt = machine.WDT(id=0, timeout=500)
 print(wdt)
 print("PASS")
 
-print("\n***** Test 5: WDT feed after 500ms *****\n")
+print("\n***** Test 5: WDT feed after 100ms *****\n")
 time.sleep_ms(100)
 wdt.feed()
 print(wdt)
 print("PASS")
 
-print("\n***** Test 6: WDT feed after 900ms *****\n")
+print("\n***** Test 6: WDT feed after 200ms *****\n")
 time.sleep_ms(200)
 wdt.feed()
 print(wdt)
