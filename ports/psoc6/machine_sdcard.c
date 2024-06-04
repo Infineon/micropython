@@ -75,7 +75,6 @@ enum {
 
 static void sd_card_allocate_pin(machine_sdcard_obj_t *self, mp_arg_val_t *args) {
 
-    printf("SD card pins reallocated from any other machine allocation\n");
 
     if (args[ARG_cmd].u_obj != mp_const_none) {
         self->cmd = pin_phy_realloc(args[ARG_cmd].u_obj, PIN_PHY_FUNC_SDHC);
@@ -125,15 +124,7 @@ static void sd_card_allocate_pin(machine_sdcard_obj_t *self, mp_arg_val_t *args)
 // machine.SDCard(slot=1, width=4, cd=None, wp=None, cmd=None, dat0=None, dat1=None, dat2=None, dat3=None, clk= ,freq=20000000)
 static mp_obj_t machine_sdcard_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
 
-    printf("SD Card constructor invoked\n");
     mp_arg_check_num(n_args, n_kw, 0, 9, true);
-
-    printf("args=%d and kwargs=%d\n", n_args, n_kw);
-
-    for (int i = 0; i < n_args; i++)
-    {
-        printf("arguments=%p\n", all_args[i]);
-    }
 
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_slot,     MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
@@ -169,12 +160,9 @@ static mp_obj_t machine_sdcard_make_new(const mp_obj_type_t *type, size_t n_args
     cy_rslt_t result = CY_RSLT_SUCCESS;
 
     if (args[ARG_slot].u_int == 0) {
-        printf("SD Card slot 0 is selected\n");
         result = cyhal_sdhc_init(&sdhc_obj, &sdhc_config, CYBSP_SDHC_CMD, CYBSP_SDHC_CLK, CYBSP_SDHC_IO0, CYBSP_SDHC_IO1,
             CYBSP_SDHC_IO2, CYBSP_SDHC_IO3, NC, NC, NC, NC, CYBSP_SDHC_DETECT, NC, NC, NC, NC, NC, NULL);
     } else {
-        printf("SD Card slot %u is selected\n", args[ARG_slot].u_int);
-
         sd_card_allocate_pin(self, args);
 
         cyhal_clock_t clock;
@@ -184,42 +172,42 @@ static mp_obj_t machine_sdcard_make_new(const mp_obj_type_t *type, size_t n_args
 
         result = cyhal_sdhc_init(&sdhc_obj, &sdhc_config, self->cmd->addr, self->clk->addr, self->dat0->addr, self->dat1->addr,
             self->dat2->addr, self->dat3->addr, NC, NC, NC, NC, self->cd->addr, NC, NC, NC, NC, NC, &clock);
-        printf("initialization of machine module sd card is done and result=%ld\n", result);
+
     }
 
     if (CY_RSLT_SUCCESS != result) {
-        printf("psoc6_sdcard_make_new() failed while initializing SD Card with \n");
-        printf("error type : %lu; error module : %lu, error code : %lu \n", CY_RSLT_GET_TYPE(result), CY_RSLT_GET_MODULE(result), CY_RSLT_GET_CODE(result));
+        // printf("psoc6_sdcard_make_new() failed while initializing SD Card with \n");
+        // printf("error type : %lu; error module : %lu, error code : %lu \n", CY_RSLT_GET_TYPE(result), CY_RSLT_GET_MODULE(result), CY_RSLT_GET_CODE(result));
         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("psoc6_sdcard_make_new() - SD Card init failed !\n"));
     }
 
     return MP_OBJ_FROM_PTR(self);
 }
 
-static mp_obj_t psoc6_flash_readblocks(size_t n_args, const mp_obj_t *args) {
-    printf("\nFlash readblocks called\n");
+// static mp_obj_t psoc6_flash_readblocks(size_t n_args, const mp_obj_t *args) {
+//     printf("\nFlash readblocks called\n");
 
-    psoc6_flash_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-    uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
-    mp_buffer_info_t bufinfo;
-    mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_WRITE);
+//     psoc6_flash_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+//     uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
+//     mp_buffer_info_t bufinfo;
+//     mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_WRITE);
 
-    if (n_args == 4) {
-        offset += mp_obj_get_int(args[3]);
-    }
+//     if (n_args == 4) {
+//         offset += mp_obj_get_int(args[3]);
+//     }
 
-    cy_rslt_t result = cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
-    if (CY_RSLT_SUCCESS != result) {
-        printf("psoc6_flash_readblocks() failed while reading the flash with error code: %u\n", CY_RSLT_GET_CODE(result));
-        mp_raise_ValueError(MP_ERROR_TEXT("psoc6_flash_readblocks() - Flash Read failed !"));
-    }
+//     cy_rslt_t result = cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
+//     if (CY_RSLT_SUCCESS != result) {
+//         printf("psoc6_flash_readblocks() failed while reading the flash with error code: %u\n", CY_RSLT_GET_CODE(result));
+//         mp_raise_ValueError(MP_ERROR_TEXT("psoc6_flash_readblocks() - Flash Read failed !"));
+//     }
 
-    // TODO: or simply do it like this ?
-    // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
+//     // TODO: or simply do it like this ?
+//     // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
 
-    return mp_const_none;
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_flash_readblocks_obj, 3, 4, psoc6_flash_readblocks);
+//     return mp_const_none;
+// }
+// static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_flash_readblocks_obj, 3, 4, psoc6_flash_readblocks);
 
 // static mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
 //     printf("\nFlash writeblocks called\n");
