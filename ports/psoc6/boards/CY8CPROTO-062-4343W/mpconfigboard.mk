@@ -9,3 +9,6 @@ BOARD_VERSION=release-v4.0.0
 
 # Variables to support make-pins
 PIN_PACKAGE_FILE = cyhal_psoc6_02_124_bga.h
+
+# Flasher configuration
+OPENOCD_TARGET_CFG=psoc6_2m.cfg
