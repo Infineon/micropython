@@ -61,6 +61,7 @@ extern void mod_i2c_deinit(void);
 extern void mod_pwm_deinit(void);
 extern void mod_spi_deinit(void);
 extern void mod_wdt_deinit(void);
+extern void sdcard_deinit(void);
 
 void mpy_task(void *arg);
 
@@ -187,6 +188,7 @@ soft_reset:
     mod_pwm_deinit();
     mod_spi_deinit();
     mod_pin_phy_deinit();
+    sdcard_deinit();
     #if MICROPY_PY_NETWORK
     mod_network_deinit();
     network_deinit();

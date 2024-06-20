@@ -15,5 +15,7 @@ sdcard = machine.SDCARD(
     dat3="P13_3",
 )
 
-print("\n***** initialized SD card = *****\n")
+print("\n***** initialized SD card *****\n")
 print(sdcard)
+
+sdcard.deinit()
