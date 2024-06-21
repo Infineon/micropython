@@ -558,7 +558,7 @@ SPI object is created with default settings or settings of previous initializati
 ::
     
     from machine import SPI
-    spi = SPI(baudrate=1000000, polarity=0,phase=0,bits=8,firstbit=SPI.MSB,sck='P6_2', mosi='P6_0', miso='P6_1')
+    spi = SPI(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI. MSB, sck='P6_2', mosi='P6_0', miso='P6_1')
 
 Methods
 ^^^^^^^
