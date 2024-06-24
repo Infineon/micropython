@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 // micropython includes
 #include "py/runtime.h"
 #include "extmod/vfs.h"
@@ -49,12 +48,11 @@
 #define SDHC_BLOCK_SIZE                     (512UL)
 
 // flag to indicate if sd card is initialized
-uint8_t sdcard_state_initialized = 0;
+static uint8_t sdcard_state_initialized = 0;
 static cyhal_sdhc_t sdhc_obj;
 
 typedef struct _machine_sdcard_obj_t {
     mp_obj_base_t base;
-    // cyhal_sdhc_t sdhc_obj;
     machine_pin_phy_obj_t *wp;
     machine_pin_phy_obj_t *cmd;
     machine_pin_phy_obj_t *dat0;
@@ -82,8 +80,6 @@ enum {
 
 
 static void sd_card_allocate_pin(machine_sdcard_obj_t *self, mp_arg_val_t *args) {
-
-
     if (args[ARG_cmd].u_obj != mp_const_none) {
         self->cmd = pin_phy_realloc(args[ARG_cmd].u_obj, PIN_PHY_FUNC_SDHC);
     } else {
@@ -213,27 +209,10 @@ static mp_obj_t machine_sdcard_readblocks(size_t n_args, const mp_obj_t *args) {
     size_t length = bufinfo.len / SDHC_BLOCK_SIZE;
     cy_rslt_t result = cyhal_sdhc_read(&sdhc_obj, block_address, bufinfo.buf, &length);
 
-
     if (CY_RSLT_SUCCESS != result) {
-        // printf("machine_sdcard_readblocks() failed while reading the SD Card with result %lu\n", result);
-        // printf("error type : %lu; error module : %lu, error code : %lu \n", CY_RSLT_GET_TYPE(result), CY_RSLT_GET_MODULE(result), CY_RSLT_GET_CODE(result));
         mp_raise_ValueError(MP_ERROR_TEXT("machine_sdcard_readblocks() - SD Card Read failed !"));
     }
 
-    // for (uint32_t i = 0; i < numSectors; i++) {
-    //     size_t length = 1;
-    //     cy_rslt_t result = cyhal_sdhc_read(&sdhc_obj, block_address + i*SDHC_BLOCK_SIZE, bufinfo.buf + i*SDHC_BLOCK_SIZE, &length);
-
-    //     if (CY_RSLT_SUCCESS != result) {
-    //         printf("fails at addr %lu, buff %p\n", block_address, bufinfo.buf);
-    //         printf("fails at i %lu, addr %lu, buff %p\n", i, block_address + i*SDHC_BLOCK_SIZE, bufinfo.buf + i*SDHC_BLOCK_SIZE);
-    //         printf("machine_sdcard_readblocks() failed while reading the SD Card with result %lu\n", result);
-    //         printf("error type : %lu; error module : %lu, error code : %lu \n", CY_RSLT_GET_TYPE(result), CY_RSLT_GET_MODULE(result), CY_RSLT_GET_CODE(result));
-    //         mp_raise_ValueError(MP_ERROR_TEXT("machine_sdcard_readblocks() - SD Card Read failed !"));
-    //     }
-    // }
-
-    // MICROPY_END_ATOMIC_SECTION(atomic_state);
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_sdcard_readblocks_obj, 3, 4, machine_sdcard_readblocks);
@@ -291,7 +270,6 @@ static mp_obj_t machine_sdcard_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj_t
             return MP_OBJ_NEW_SMALL_INT(SDHC_BLOCK_SIZE);
         case MP_BLOCKDEV_IOCTL_BLOCK_ERASE: {
             uint32_t offset = mp_obj_get_int(arg_in);
-
             cy_rslt_t result = cyhal_sdhc_erase(&sdhc_obj, offset, 1, 0);
 
             if (CY_RSLT_SUCCESS != result) {

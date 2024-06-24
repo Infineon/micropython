@@ -1,0 +1,3 @@
+pass  extmod/vfs_basic.py
+pass  extmod/vfs_lfs_superblock.py
+pass  extmod/vfs_userfs.py

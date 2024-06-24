@@ -158,7 +158,6 @@ MOD_SRC_C += \
 	machine_adcblock.c \
 	machine_i2s.c \
 	machine_bitstream.c \
-	machine_sdcard.c \
 	\
 	modpsoc6.c \
 	psoc6_fatfs.c \
@@ -167,6 +166,11 @@ MOD_SRC_C += \
 ifeq ($(MICROPY_PY_EXT_FLASH),1)
 	CFLAGS += -DMICROPY_ENABLE_EXT_QSPI_FLASH=1
 	MOD_SRC_C += psoc6_qspi_flash.c 
+endif
+
+ifeq ($(MICROPY_PY_SD_CARD),1)
+	CFLAGS += -DMICROPY_ENABLE_SD_CARD=1
+	MOD_SRC_C += machine_sdcard.c 
 endif
 
 ifeq ($(MICROPY_PY_NETWORK_IFX_WCM),1)

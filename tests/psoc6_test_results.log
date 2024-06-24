@@ -1,0 +1,5 @@
+pass  extmod/vfs_basic.py
+pass  extmod/vfs_lfs_superblock.py
+pass  extmod/vfs_userfs.py
+3 tests performed (119 individual testcases)
+3 tests passed
