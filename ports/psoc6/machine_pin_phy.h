@@ -5,12 +5,13 @@
 
 typedef enum {
     PIN_PHY_FUNC_NONE = 0x00,
-    PIN_PHY_FUNC_DIO = 0x01,
-    PIN_PHY_FUNC_ADC = 0x02,
-    PIN_PHY_FUNC_I2C = 0x04,
-    PIN_PHY_FUNC_PWM = 0x08,
-    PIN_PHY_FUNC_SPI = 0x10,
-    PIN_PHY_FUNC_I2S = 0x20
+    PIN_PHY_FUNC_DIO  = 0x01,
+    PIN_PHY_FUNC_ADC  = 0x02,
+    PIN_PHY_FUNC_I2C  = 0x04,
+    PIN_PHY_FUNC_PWM  = 0x08,
+    PIN_PHY_FUNC_SPI  = 0x10,
+    PIN_PHY_FUNC_I2S  = 0x20,
+    PIN_PHY_FUNC_SDHC = 0x30,
 } machine_pin_phy_func_t;
 
 typedef struct _machine_pin_phy_obj_t {

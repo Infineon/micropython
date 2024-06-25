@@ -95,6 +95,9 @@ void machine_deinit(void) {
     mod_spi_deinit();
     mod_rtc_deinit();
     mod_pin_phy_deinit();
+    #if MICROPY_ENABLE_SD_CARD
+    mod_sdcard_deinit();
+    #endif
 }
 
 // machine.info([dump_alloc_table])
@@ -328,5 +331,6 @@ MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
     { MP_ROM_QSTR(MP_QSTR_Timer),               MP_ROM_PTR(&machine_timer_type) }, \
     { MP_ROM_QSTR(MP_QSTR_ADC),                 MP_ROM_PTR(&machine_adc_type) }, \
     { MP_ROM_QSTR(MP_QSTR_ADCBlock),            MP_ROM_PTR(&machine_adcblock_type) }, \
+    { MP_ROM_QSTR(MP_QSTR_SDCARD),              MP_ROM_PTR(&machine_sdcard_type) }, \
 
 #endif // MICROPY_PY_MACHINE
