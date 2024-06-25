@@ -17,7 +17,9 @@ usage() {
   echo "  -i            run implemented tests only and exclude known failing tests"
   echo "  -n            run not yet implemented tests only"
   echo "  -w            run wifi tests => needs secrets.py key file>"
-  echo "  -v            run virtual filesystem related tests. If followed by -x, runs advance tests too."
+  echo "  -v            run virtual filesystem related tests on flash by default.
+                        If followed by -y, runs the test on sd card. 
+                        if followed by -x, runs advance tests too."
   echo "  -b            run bitsream script."
   echo "  -s            run i2s tests."
   echo "  -r            run spi tests."
@@ -45,7 +47,7 @@ for arg in "$@"; do
   esac
 done
 
-while getopts "abcd:e:fhimnpqtuwvxspr" o; do
+while getopts "abcd:e:fhimnpqtuwvxspry" o; do
   case "${o}" in
     a)
        all=1
@@ -94,6 +96,9 @@ while getopts "abcd:e:fhimnpqtuwvxspr" o; do
        ;;
     x)
        afs=1
+       ;;
+    y)
+       sdcard=1
        ;;
     t)
        hwext=1
@@ -152,6 +157,10 @@ fi
 
 if [ -z "${afs}" ]; then
   afs=0
+fi
+
+if [ -z "${sdcard}" ]; then
+  sdcard=0
 fi
 
 if [ -z "${bitstream}" ]; then
@@ -311,7 +320,13 @@ if [ ${fs} -eq 1 ]; then
   
   chmod 777 ./psoc6/test_scripts/fs.py
 
-  python3 ./psoc6/test_scripts/fs.py ${device0} 0
+  storage_device="flash"
+
+  if [ ${sdcard} -eq 1 ]; then
+    storage_device="sd"
+  fi
+
+  python3 ./psoc6/test_scripts/fs.py ${device0} 0 ${storage_device}
   if [ $? -ne 0 ]; then
     echo "FS test failed"
     exit 1
@@ -319,11 +334,11 @@ if [ ${fs} -eq 1 ]; then
 
   # On device file saving tests for medium and large size takes considerable amount of time. Hence only when needed, this should be triggered.
   if [ ${afs} -eq 1 ]; then
-    python3 ./psoc6/test_scripts/fs.py ${device0} 1
+    python3 ./psoc6/test_scripts/fs.py ${device0} 1 ${storage_device}
     if [ $? -ne 0 ]; then
       echo "FS test failed"
       exit 1
-  fi  
+    fi  
   fi
 
 fi
