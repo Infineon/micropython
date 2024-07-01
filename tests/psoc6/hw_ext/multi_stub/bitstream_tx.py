@@ -14,7 +14,7 @@ an input, which is used for synchronization with the receiver.
 machine = os.uname().machine
 if "CY8CPROTO-062-4343W" in machine:
     bitstream_pin_name = "P12_1"
-    wait_signal_pin_name = "P13_5"
+    wait_signal_pin_name = "P13_4"
 elif "CY8CPROTO-063-BLE" in machine:
     bitstream_pin_name = "P5_2"
     wait_signal_pin_name = "P6_2"

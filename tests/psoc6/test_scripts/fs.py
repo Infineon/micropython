@@ -12,13 +12,13 @@ local_medium_file_path = "./psoc6/test_inputs/test_fs_medium_file.txt"
 local_large_file_path = "./psoc6/test_inputs/test_fs_large_file.txt"
 
 if mem_type == "sd":
-    remote_directory_path = "/sd/"
+    remote_directory_path = "/sd"
     basic_test_op_fp = "./psoc6/test_scripts/fs_basic_sd.py.out"
     adv_test_op_fp = "./psoc6/test_scripts/fs_adv_sd.py.out"
     exp_basic_op_fp = "./psoc6/test_scripts/fs_basic_sd.py.exp"
     exp_adv_op_fp = "./psoc6/test_scripts/fs_adv_sd.py.exp"
 else:
-    remote_directory_path = "/flash/"
+    remote_directory_path = "/"
     # out and exp file paths
     basic_test_op_fp = "./psoc6/test_scripts/fs_basic_flash.py.out"
     adv_test_op_fp = "./psoc6/test_scripts/fs_adv_flash.py.out"
