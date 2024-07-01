@@ -196,23 +196,6 @@ accessed via :ref:`machine.SoftI2C <machine.SoftI2C>` ::
 
 Hardware I2C bus
 ----------------
-Hardware I2C works on the following listed pair of I2C pins
-
-=====  ===========  ============
-\      Default  
-=====  ===========  ============
-scl    P6_0           P9_0
-sda    P6_1           P9_1
-=====  ===========  ============
-
-.. 
-    TODO: This is only applicable to the CY8CPROTO-062-4343W. This does not belong here. 
-    TODO: Define approach on how the user gets to know the pinout diagram, alternate function of each board
-    - From board manual? 
-    - From datasheet?
-    - To create a pinout diagram? 
-
-
 The driver is accessed via :ref:`machine.I2C <machine.I2C>`
 
 The constructor
@@ -658,26 +641,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
 
 The PSoC6 port also supports :ref:`machine.ADCBlock <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
 
-PSoC6 supports only 1 12-bit SAR ADC with the following channel to pin mapping and the defaults are set accordingly:
-
-+---------+-------+
-| Channel |  Pin  |
-+=========+=======+
-|    0    | P10_0 |
-+---------+-------+
-|    1    | P10_1 |
-+---------+-------+
-|    2    | P10_2 |
-+---------+-------+
-|    3    | P10_3 |
-+---------+-------+
-|    4    | P10_4 |
-+---------+-------+
-|    5    | P10_5 |
-+---------+-------+
-
-.. 
-    TODO: This is only applicable to the CY8CPROTO-062-4343W. This does not belong here. 
+PSoC6 supports only 1 12-bit SAR ADC. The channel to pin mapping can be found in respective :ref:`Supported boards <psoc6_general>` section.
 
 .. note::
     Arbitrary connection of ADC channels to GPIO is not supported. Specifying a pin that is not connected to this block, 
