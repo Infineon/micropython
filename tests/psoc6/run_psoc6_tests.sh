@@ -22,6 +22,7 @@ usage() {
   echo "  -s            run i2s tests."
   echo "  -r            run spi tests."
   echo "  -u            run i2c tests."
+  echo "  -g            run uart tests."
   echo "  --dev0        device to be used"
   echo "  --dev1        second device to be used (for multi test)"
   echo "  --psoc6       run only psoc6 port related tests"
@@ -45,7 +46,7 @@ for arg in "$@"; do
   esac
 done
 
-while getopts "abcd:e:fhimnpqtuwvxspr" o; do
+while getopts "abcd:e:fghimnpqtuwvxspr" o; do
   case "${o}" in
     a)
        all=1
@@ -67,6 +68,9 @@ while getopts "abcd:e:fhimnpqtuwvxspr" o; do
        ;;
     h)
        usage
+       ;;
+    g)
+       uart=1
        ;;
     i)
        implemented=1
@@ -186,6 +190,9 @@ if [ -z "${spi}" ]; then
   spi=0
 fi
 
+if [ -z "${uart}" ]; then
+  uart=0
+fi
 
 resultsFile="psoc6_test_results.log"
 passResultsFile="psoc6_test_passed.log"
@@ -557,6 +564,20 @@ if [ ${i2s} -eq 1 ]; then
       \
       psoc6/hw_ext/multi_stub/i2s_rx.py \
     |tee -a ${resultsFile}
+
+fi
+
+if [ ${uart} -eq 1 ]; then
+
+  echo "  running uart tests ..."
+  echo
+
+  ./run-tests.py --target psoc6 --device ${device0} psoc6/hw_ext/uart.py \
+    | tee -a ${resultsFile}
+  
+  echo
+  echo "  done."
+  echo
 
 fi
 
