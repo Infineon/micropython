@@ -12,7 +12,7 @@ local_medium_file_path = "./psoc6/test_inputs/test_fs_medium_file.txt"
 local_large_file_path = "./psoc6/test_inputs/test_fs_large_file.txt"
 
 if mem_type == "sd":
-    remote_directory_path = "/sd"
+    remote_directory_path = "/sd/"
     basic_test_op_fp = "./psoc6/test_scripts/fs_basic_sd.py.out"
     adv_test_op_fp = "./psoc6/test_scripts/fs_adv_sd.py.out"
     exp_basic_op_fp = "./psoc6/test_scripts/fs_basic_sd.py.exp"
@@ -42,8 +42,11 @@ def exec(cmd, op_file_path="null"):
         if output.returncode == 0:
             subprocess.run(f"{cmd} {op_file_path}", shell=True, capture_output=False)
     else:
+        if os.path.exists(op_file_path):
+            os.remove(op_file_path)
         with open(op_file_path, "a") as file:
             subprocess.check_call(cmd, shell=True, stdout=file)
+            file.close()
 
 
 def validate_test(op, exp_op):
@@ -57,7 +60,6 @@ def validate_test(op, exp_op):
 
     if output != exp_output:
         print("Operation failed!")
-        os.remove(op)
         sys.exit(1)
     else:
         print("Operation successful!")
