@@ -17,9 +17,10 @@ usage() {
   echo "  -i            run implemented tests only and exclude known failing tests"
   echo "  -n            run not yet implemented tests only"
   echo "  -w            run wifi tests => needs secrets.py key file>"
-  echo "  -v            run virtual filesystem related tests on flash by default.
-                        If followed by -y, runs the test on sd card. 
+  echo "  -v            run virtual filesystem related tests on flash.
                         if followed by -x, runs advance tests too."
+  echo "  -y            run virtual filesystem related tests on sd card.
+                        If followed by -x, runs advance tests too."
   echo "  -b            run bitsream script."
   echo "  -s            run i2s tests."
   echo "  -r            run spi tests."
@@ -322,9 +323,9 @@ if [ ${fs} -eq 1 ]; then
 
   storage_device="flash"
 
-  if [ ${sdcard} -eq 1 ]; then
-    storage_device="sd"
-  fi
+  # if [ ${sdcard} -eq 1 ]; then
+  #   storage_device="sd"
+  # fi
 
   python3 ./psoc6/test_scripts/fs.py ${device0} 0 ${storage_device}
   if [ $? -ne 0 ]; then
@@ -341,6 +342,26 @@ if [ ${fs} -eq 1 ]; then
     fi  
   fi
 
+fi
+
+if [ ${sdcard} -eq 1 ]; then
+
+  storage_device="sd"
+
+  python3 ./psoc6/test_scripts/fs.py ${device0} 0 ${storage_device}
+  if [ $? -ne 0 ]; then
+    echo "FS test failed"
+    exit 1
+  fi
+
+  # On device file saving tests for medium and large size takes considerable amount of time. Hence only when needed, this should be triggered.
+  if [ ${afs} -eq 1 ]; then
+    python3 ./psoc6/test_scripts/fs.py ${device0} 1 ${storage_device}
+    if [ $? -ne 0 ]; then
+      echo "FS test failed"
+      exit 1
+    fi  
+  fi
 fi
 
 if [ ${implemented} -eq 1 ]; then
