@@ -738,6 +738,8 @@ Constructor
 
    The SD Card slot to pin mapping can be found in respective :ref:`Supported boards <psoc6_general>` section.
 
+   Note that SD Cards upto speed class c10 is tested.
+
 ::
 
     from machine import SDCard
