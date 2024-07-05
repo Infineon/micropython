@@ -1,5 +1,7 @@
 import machine
 import os
+import errno
+import vfs
 
 # Define constants
 MOUNT_POINT_LFS2 = "/SDCardLFS2"
@@ -38,7 +40,7 @@ def mount_or_format_sd_card(block_device, filesystem, mount_point):
             filesystem.mkfs(block_device)
             vfs = filesystem(block_device)
         os.mount(vfs, mount_point)
-    print(f"SD card mounted at {mount_point}\n")
+    print(f"\nSD card mounted at {mount_point}\n")
 
 
 def read_write_test(file_path, test_data):
@@ -149,6 +151,6 @@ def test_negative_slot_number():
 
 if __name__ == "__main__":
     test_lfs2_file_transfer()
-    # test_fat_file_transfer()
+    test_fat_file_transfer()
     test_reintializing_same_slot()
     test_negative_slot_number()
