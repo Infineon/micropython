@@ -247,7 +247,7 @@ static mp_obj_t machine_sdcard_readblocks(size_t n_args, const mp_obj_t *args) {
         mp_raise_ValueError(MP_ERROR_TEXT("machine_sdcard_readblocks() - SD Card Read failed !"));
     }
 
-    return mp_const_none;
+    return mp_obj_new_bool(CY_RSLT_SUCCESS == result);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_sdcard_readblocks_obj, 3, 4, machine_sdcard_readblocks);
 
@@ -275,26 +275,32 @@ static mp_obj_t machine_sdcard_writeblocks(size_t n_args, const mp_obj_t *args) 
         mp_raise_ValueError(MP_ERROR_TEXT("machine_sdcard_writeblocks() - SD Card Write failed!"));
     }
 
-    return mp_const_none;
+    return mp_obj_new_bool(CY_RSLT_SUCCESS == result);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_sdcard_writeblocks_obj, 3, 4, machine_sdcard_writeblocks);
 
 static mp_obj_t machine_sdcard_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj_t arg_in) {
-    machine_sdcard_obj_t *self = MP_OBJ_TO_PTR(self_in);
+
+    machine_sdcard_obj_t *self = self_in;
     mp_int_t cmd = mp_obj_get_int(cmd_in);
 
     switch (cmd) {
         case MP_BLOCKDEV_IOCTL_INIT:
             return MP_OBJ_NEW_SMALL_INT(0);
+
         case MP_BLOCKDEV_IOCTL_DEINIT:
             mod_sdcard_deinit();
             return MP_OBJ_NEW_SMALL_INT(0);
+
         case MP_BLOCKDEV_IOCTL_SYNC:
             return MP_OBJ_NEW_SMALL_INT(0);
+
         case MP_BLOCKDEV_IOCTL_BLOCK_COUNT:
             return MP_OBJ_NEW_SMALL_INT(self->block_count);
+
         case MP_BLOCKDEV_IOCTL_BLOCK_SIZE:
             return MP_OBJ_NEW_SMALL_INT(SDHC_BLOCK_SIZE);
+
         case MP_BLOCKDEV_IOCTL_BLOCK_ERASE: {
             uint32_t offset = mp_obj_get_int(arg_in);
             cy_rslt_t result = cyhal_sdhc_erase(&self->sdhc_obj, offset, 1, 0);
