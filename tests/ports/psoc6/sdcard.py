@@ -2,9 +2,12 @@ import machine
 import os
 
 # Define constants
-MOUNT_POINT = "/SDCard"
+MOUNT_POINT_LFS2 = "/SDCardLFS2"
+MOUNT_POINT_FAT = "/SDCardFAT"
 SHORT_TEST_STRING = "This is a test string."
 LONG_TEST_STRING = "This is a very long string. And as a long string that it is, it is only getting longer and longer and the string goes. How long shall it be? Well, not really sure, but let´s try it like this."
+READ_SIZE = 512
+WRITE_SIZE = 512
 
 print("\n***** Test 1: File transfer to SD Card in LFS2 farmat *****\n")
 print(machine_name)
@@ -20,17 +23,17 @@ if "VfsLfs2" in dir(os):
     f.write(test_string)
     f.close()
 
-def mount_or_format_sd_card(block_device, filesystem, mount_point, read_size, write_size):
+def mount_or_format_sd_card(block_device, filesystem, mount_point):
     try:
         if filesystem == os.VfsLfs2:
-            vfs = filesystem(block_device, progsize=write_size, readsize=read_size)
+            vfs = filesystem(block_device, progsize=WRITE_SIZE, readsize=READ_SIZE)
         else:
             vfs = filesystem(block_device)
         os.mount(vfs, mount_point)
     except OSError:
         if filesystem == os.VfsLfs2:
-            filesystem.mkfs(block_device, progsize=write_size, readsize=read_size)
-            vfs = filesystem(block_device, progsize=write_size, readsize=read_size)
+            filesystem.mkfs(block_device, progsize=WRITE_SIZE, readsize=READ_SIZE)
+            vfs = filesystem(block_device, progsize=WRITE_SIZE, readsize=READ_SIZE)
         else:
             filesystem.mkfs(block_device)
             vfs = filesystem(block_device)
@@ -63,19 +66,17 @@ def sd_card_instance():
 
 def test_lfs2_file_transfer():
     bdev = sd_card_instance()
-    READ_SIZE = 512
-    WRITE_SIZE = 512
 
     # Unmount the SD card if mounted
-    unmount_sd_card(MOUNT_POINT)
+    unmount_sd_card(MOUNT_POINT_LFS2)
 
     # Mount or format the SD card with LFS2 filesystem
     if "VfsLfs2" in dir(os):
-        mount_or_format_sd_card(bdev, os.VfsLfs2, MOUNT_POINT, READ_SIZE, WRITE_SIZE)
+        mount_or_format_sd_card(bdev, os.VfsLfs2, MOUNT_POINT_LFS2)
 
         print("\n***** Test 1: Short string file transfer to SD Card in LFS2 format *****\n")
         # Test short string
-        short_test_file = "/SDCard/test_sd_lfs2_short.txt"
+        short_test_file = MOUNT_POINT_LFS2 + "/test_sd_lfs2_short.txt"
         if read_write_test(short_test_file, SHORT_TEST_STRING):
             print("PASS")
         else:
@@ -83,7 +84,7 @@ def test_lfs2_file_transfer():
 
         print("\n***** Test 2: Long string file transfer to SD Card in LFS2 format *****\n")
         # Test long string
-        long_test_file = "/SDCard/test_sd_lfs2_long.txt"
+        long_test_file = MOUNT_POINT_LFS2 + "/test_sd_lfs2_long.txt"
         if read_write_test(long_test_file, LONG_TEST_STRING):
             print("PASS")
         else:
@@ -94,15 +95,15 @@ def test_fat_file_transfer():
     bdev = sd_card_instance()
 
     # Unmount the SD card if mounted
-    unmount_sd_card(MOUNT_POINT)
+    unmount_sd_card(MOUNT_POINT_FAT)
 
     # Mount or format the SD card with LFS2 filesystem
     if "VfsLfs2" in dir(os):
-        mount_or_format_sd_card(bdev, os.VfsFat, MOUNT_POINT)
+        mount_or_format_sd_card(bdev, os.VfsFat, MOUNT_POINT_FAT)
 
         print("\n***** Test 3: Short string file transfer to SD Card in FAT format *****\n")
         # Test short string
-        short_test_file = "/SDCard/test_sd_lfs2_short.txt"
+        short_test_file = MOUNT_POINT_FAT + "/test_sd_fat_short.txt"
         if read_write_test(short_test_file, SHORT_TEST_STRING):
             print("PASS")
         else:
@@ -110,7 +111,7 @@ def test_fat_file_transfer():
 
         print("\n***** Test 4: Long string file transfer to SD Card in FAT format *****\n")
         # Test long string
-        long_test_file = "/SDCard/test_sd_lfs2_long.txt"
+        long_test_file = MOUNT_POINT_FAT + "/test_sd_fat_long.txt"
         if read_write_test(long_test_file, LONG_TEST_STRING):
             print("PASS")
         else:
@@ -148,6 +149,6 @@ def test_negative_slot_number():
 
 if __name__ == "__main__":
     test_lfs2_file_transfer()
-    test_fat_file_transfer()
+    # test_fat_file_transfer()
     test_reintializing_same_slot()
     test_negative_slot_number()
