@@ -6,17 +6,22 @@ import time
 import os
 
 # Allocate pin based on board
-machine = os.uname().machine
-if "CY8CPROTO-062-4343W" in machine:
+board = os.uname().machine
+if "CY8CPROTO-062-4343W" in board:
     uart_rx_pin = "P9_0"
     uart_tx_pin = "P9_1"
     uart_rts_pin = "P9_2"
     uart_cts_pin = "P9_3"
-elif "CY8CPROTO-063-BLE" in machine:
+elif "CY8CPROTO-063-BLE" in board:
     uart_rx_pin = "P10_0"
     uart_tx_pin = "P10_1"
     uart_rts_pin = "P10_2"
     uart_cts_pin = "P10_3"
+elif "CY8CKIT-062S2-AI" in board:
+    uart_rx_pin = "P10_0"
+    uart_tx_pin = "P10_1"
+    uart_rts_pin = "P9_2"
+    uart_cts_pin = "P9_3"
 
 # 1. Construct instance
 ##############################################
