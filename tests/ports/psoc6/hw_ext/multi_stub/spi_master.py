@@ -21,6 +21,12 @@ if "CY8CPROTO-063-BLE" in board:
     mosi_master_pin = "P9_0"
     miso_master_pin = "P9_1"
     ssel_master_pin = "P9_3"
+elif "CY8CKIT-062S2-AI" in board:
+    # Allocate pin based on board
+    sck_master_pin = "P9_2"
+    mosi_master_pin = "P9_0"
+    miso_master_pin = "P9_1"
+    ssel_master_pin = "P9_3"
 
 # 0. Construct SPI object
 spi_obj = SPI(
