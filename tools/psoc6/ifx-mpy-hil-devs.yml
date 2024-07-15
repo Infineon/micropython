@@ -10,3 +10,11 @@
       hw_ext: 0.5.0.b
     - sn: 03180F1400052400
       hw_ext: 0.5.0.a
+- board_type: CY8CKIT-062S2-AI
+  board_list:
+    - sn: 1225085A012D2400
+      hw_ext: 0.1.0.a
+    - sn: 132119A1002E0400
+      hw_ext: 0.1.0.b
+    - sn: 1A0A095A012D2400
+      hw_ext: 0.1.0.c
