@@ -12,8 +12,8 @@ elif "CY8CPROTO-063-BLE" in board:
     pin1_name = "P12_6"
     pin2_name = "P12_7"
 elif "CY8CKIT-062S2-AI" in board:
-    pin1_name = "P9_0"
-    pin2_name = "P9_1"
+    pin1_name = "P9_6"
+    pin2_name = "P9_7"
 
 # Pin out and pin in must be connected
 # together in the board
