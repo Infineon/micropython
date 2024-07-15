@@ -28,7 +28,7 @@ elif "CY8CKIT-062S2-AI" in board:
     scl_master_pin = "P0_2"
     sda_master_pin = "P0_3"
     scl_master_soft_pin = "P9_5"
-    sda_master_soft_pin = "P9_6"
+    sda_master_soft_pin = "P9_4"
     scl_slave_pin = "P9_0"
     sda_slave_pin = "P9_1"
 
