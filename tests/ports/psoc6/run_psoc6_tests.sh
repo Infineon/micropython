@@ -154,16 +154,14 @@ mpremote_vfs_large_file_tests() {
 
   # On device file saving tests for medium and large size takes considerable 
   # amount of time. Hence only when needed, this should be triggered.
-  enable_adv_tests=0
+  enable_adv_tests="basic"
   if [ ${afs} -eq 1 ]; then
-    enable_adv_tests=1
+     enable_adv_tests="adv"
   fi
 
   python3 ${tests_psoc6_dir}/test_scripts/fs.py ${dev_test} ${enable_adv_tests} ${storage_device}
-  if [ $? -ne 0 ]; then
-    echo "FS test failed"
-    exit 1
-  fi
+  
+  update_test_result $?
 }
 
 vfs_flash_tests() {
