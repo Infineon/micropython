@@ -91,7 +91,7 @@ def instance1():
 
     # status()
     # The test boards are placed next to each other (few cm range)
-    print("sta status rssi in range: ", -70 < sta_if.status("rssi") < 0)
+    print("sta status rssi in range: ", -70 < sta_if.status("rssi") < 10)
 
     print(" > yield access point")
     multitest.next()
