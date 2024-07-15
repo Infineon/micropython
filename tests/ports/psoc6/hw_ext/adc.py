@@ -16,21 +16,25 @@ from machine import ADC, ADCBlock
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
+    gnd_tests_skip = False
     adc_pin_gnd = "P10_4"
     adc_pin_mid = "P10_3"
     adc_mid_chan = 3
     adc_pin_max = "P10_2"
     adc_wrong_pin_name = "P13_7"
 elif "CY8CPROTO-063-BLE" in board:
+    gnd_tests_skip = False
     adc_pin_gnd = "P10_2"
     adc_pin_mid = "P10_3"
     adc_mid_chan = 3
     adc_pin_max = "P10_4"
     adc_wrong_pin_name = "P13_7"
 elif "CY8CKIT-062S2-AI" in board:
-    # P10_x only available in expansion header J17 and only 2 pins
-    print("SKIP")
-    raise SystemExit
+    gnd_tests_skip = True
+    adc_pin_mid = "P10_0"
+    adc_mid_chan = 0
+    adc_pin_max = "P10_1"
+    adc_wrong_pin_name = "P13_7"
 
 # 0.35V
 tolerance_uv = 350000
@@ -41,21 +45,23 @@ block = None
 
 
 def validate_adc_uv_value(adc_pin, exp_volt, act_volt):
-    print(
-        "Expected voltage - ",
-        exp_volt,
-        "(uV) is approx same as obtained voltage(uV): ",
-        (exp_volt - tolerance_uv) < act_volt < (exp_volt + tolerance_uv),
-    )
+    if not (exp_volt - tolerance_uv) < act_volt < (exp_volt + tolerance_uv):
+        print(
+            "Expected voltage - ",
+            exp_volt,
+            "(uV) is approx same as obtained voltage(uV): ",
+            act_volt,
+        )
 
 
 def validate_adc_raw_value(adc_pin, exp_volt, act_volt):
-    print(
-        "Expected voltage - ",
-        exp_volt,
-        "(raw) is approx same as obtained voltage(raw): ",
-        (exp_volt - tolerance_raw) < act_volt < (exp_volt + tolerance_raw),
-    )
+    if not (exp_volt - tolerance_raw) < act_volt < (exp_volt + tolerance_raw):
+        print(
+            "Expected voltage - ",
+            exp_volt,
+            "(raw) is approx same as obtained voltage(raw): ",
+            act_volt,
+        )
 
 
 # Exception should be raised
@@ -74,18 +80,21 @@ block = ADCBlock(0, bits=12)
 adc1 = block.connect(adc_pin_mid)
 block.deinit()
 
-adc0 = ADC(adc_pin_gnd, sample_ns=1000)
+if not gnd_tests_skip:
+    adc0 = ADC(adc_pin_gnd, sample_ns=1000)
+
+    adc0_value_uv = adc0.read_uv()
+    validate_adc_uv_value(adc_pin_gnd, 0, adc0_value_uv)
+    adc0_value_raw = adc0.read_u16()
+    validate_adc_raw_value(adc_pin_gnd, 0, adc0_value_raw)
+
+    adc0.deinit()
 
 # ADCBlock.connect(channel,source)
 block = ADCBlock(0, bits=12)
 adc1 = block.connect(adc_mid_chan, adc_pin_mid)
 
 adc2 = ADC(adc_pin_max, sample_ns=1000)
-
-adc0_value_uv = adc0.read_uv()
-validate_adc_uv_value(adc_pin_gnd, 0, adc0_value_uv)
-adc0_value_raw = adc0.read_u16()
-validate_adc_raw_value(adc_pin_gnd, 0, adc0_value_raw)
 
 adc1_value_uv = adc1.read_uv()
 validate_adc_uv_value(adc_pin_mid, 1650000, adc1_value_uv)
@@ -97,6 +106,6 @@ validate_adc_uv_value(adc_pin_max, 3300000, adc2_value_uv)
 adc2_value_raw = adc2.read_u16()
 validate_adc_raw_value(adc_pin_max, 32767, adc2_value_raw)
 
-adc0.deinit()
+
 adc1.deinit()
 adc2.deinit()
