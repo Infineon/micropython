@@ -16,6 +16,10 @@ Find below the hardware diagrams for each of the supported boards:
 
 ![CY8CPROTO-063-BLE HIL setup](img/cy8cproto-063-ble-hil-test-diag.png)
 
+### CY8CPROTO-063-BLE
+
+![CY8CKIT-062S2_AI HIL setup](img/cy8ckit-062s2-ai-hil-test-diag.png)
+
 ## Developing Extended Hardware Setup Tests
 
 The driving principle for designing these tests is to keep a **simple** (as simple as possible),  **reproducible** and **scalable** hardware-in-the-loop setup, by aiming for **self-contained** board setups using minimal or no hardware other than the board itself. 
