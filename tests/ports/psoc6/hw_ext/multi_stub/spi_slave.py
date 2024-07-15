@@ -15,13 +15,18 @@ if "CY8CPROTO-062-4343W" in board:
     mosi_slave_pin = "P6_0"
     miso_slave_pin = "P6_1"
     ssel_slave_pin = "P6_3"
-
 if "CY8CPROTO-063-BLE" in board:
     # Allocate pin based on board
     sck_slave_pin = "P9_2"
     mosi_slave_pin = "P9_0"
     miso_slave_pin = "P9_1"
     ssel_slave_pin = "P9_3"
+elif "CY8CKIT-062S2-AI" in board:
+    # Allocate pin based on board
+    sck_master_pin = "P9_2"
+    mosi_master_pin = "P9_0"
+    miso_master_pin = "P9_1"
+    ssel_master_pin = "P9_3"
 
 
 def data_increase_by_one(buf):
