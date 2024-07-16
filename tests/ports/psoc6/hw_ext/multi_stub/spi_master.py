@@ -22,11 +22,14 @@ if "CY8CPROTO-063-BLE" in board:
     miso_master_pin = "P9_1"
     ssel_master_pin = "P9_3"
 elif "CY8CKIT-062S2-AI" in board:
-    # Allocate pin based on board
+    # Current not supported as
+    # SPI Slave on P9_x pins seems to be not supported
     sck_master_pin = "P9_2"
     mosi_master_pin = "P9_0"
     miso_master_pin = "P9_1"
     ssel_master_pin = "P9_3"
+    print("SKIP")
+    raise SystemExit
 
 # 0. Construct SPI object
 spi_obj = SPI(
