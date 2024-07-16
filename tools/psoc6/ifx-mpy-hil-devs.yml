@@ -14,7 +14,7 @@
   board_list:
     - sn: 1225085A012D2400
       hw_ext: 0.1.0.a
-    - sn: 132119A1002E0400
-      hw_ext: 0.1.0.b
     - sn: 1A0A095A012D2400
+      hw_ext: 0.1.0.b
+    - sn: 132119A1002E0400
       hw_ext: 0.1.0.c
