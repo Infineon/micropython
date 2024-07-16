@@ -31,6 +31,7 @@ usage() {
                             If followed by -x, runs advance tests too."
   echo "  no-hw-ext         run machine modules tests not requiring extended hardware"
   echo "  hw-ext            run machine modules tests requiring extended hardware"
+  echo "  adc               run adc tests"
   echo "  i2c               run i2c tests"
   echo "  uart              run uart tests"
   echo "  spi               run spi tests"
@@ -188,7 +189,14 @@ no_ext_hw_tests() {
 
 hw_ext_tests() {
   run_tests "hardware extended" ${dev_test} "${tests_psoc6_dir}/hw_ext" \
-  "-e ${tests_psoc6_dir}/hw_ext/i2c.py -e ${tests_psoc6_dir}/hw_ext/sdcard.py -e ${tests_psoc6_dir}/hw_ext/uart.py"
+  "-e ${tests_psoc6_dir}/hw_ext/i2c.py \
+   -e ${tests_psoc6_dir}/hw_ext/sdcard.py \
+   -e ${tests_psoc6_dir}/hw_ext/uart.py \
+   -e ${tests_psoc6_dir}/hw_ext/adc.py"
+}
+
+adc_tests() {
+  run_tests "adc" ${dev_test} "${tests_psoc6_dir}/hw_ext/adc.py"
 }
 
 i2c_tests() {
@@ -246,8 +254,16 @@ run_ci_tests() {
     echo "hil            : ${hil_name}"
 
     devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml))
-    devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext 0.5.0.a))
-    devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext 0.5.0.b))
+
+    # TODO: This mess needs to be solved in a future script rework using yml files to define the compatible boards requirements
+    board_version=0.5.0
+    if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+      board_version=0.1.0
+    fi
+
+    devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.a))
+    devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b))
+    devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c))
 
     dev_test=${devs[0]}
     vfs_flash_tests  
@@ -263,36 +279,64 @@ run_ci_tests() {
     dev_test=${devs_a[0]}
     hw_ext_tests
 
-    if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
-      i2c_dev=${devs_b[0]} 
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]} 
     else
-      if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-        i2c_dev=${devs_a[0]}
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_b[0]}
       fi
     fi
-    dev_test=${i2c_dev} 
+    adc_tests
+
+    if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
+      dev_test=${devs_b[0]} 
+    else
+      if [ "${board}" == "CY8CPROTO-063-BLE" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_a[0]}
+      fi
+    fi
     i2c_tests
   
-    if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
-      uart_dev=${devs_a[0]} 
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+      dev_test=${devs_a[0]} 
     else
       if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-        uart_dev=${devs_b[0]}
+        dev_test=${devs_b[0]}
       fi
     fi
-    dev_test=${uart_dev} 
     uart_tests
 
-    dev_test=${devs_a[0]}
-    dev_stub=${devs_b[0]}
-    spi_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]}
+      dev_stub=${devs_b[0]}
+      # else
+      #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+      #     dev_test=${devs_c[0]}
+      #     dev_stub=${devs_b[0]}
+      #   fi
+      spi_tests
+    fi
 
-    dev_test=${devs_b[0]}
-    dev_stub=${devs_a[0]}
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_b[0]}
+      dev_stub=${devs_a[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
     i2s_tests
 
-    dev_test=${devs_a[0]}
-    dev_stub=${devs_b[0]}
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]}
+      dev_stub=${devs_b[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
     bitstream_tests
 
     dev_test=${devs[0]}
@@ -321,6 +365,9 @@ case ${test_suite} in
         ;;
     "hw-ext")
         hw_ext_tests
+        ;;
+    "adc")
+        adc_tests
         ;;
     "i2c")
         i2c_tests
