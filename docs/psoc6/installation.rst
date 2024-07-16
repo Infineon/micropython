@@ -12,7 +12,7 @@ You can easily download the script from the terminal with the following command:
     
     $ curl -s -L https://raw.githubusercontent.com/infineon/micropython/ports-psoc6-main/tools/psoc6/mpy-psoc6.py > mpy-psoc6.py
 
-Make sure you have a recent version on `Python3.x <https://www.python.org/downloads/>`_  installed and the `pip <https://pip.pypa.io/en/stable/installation/>`_ package installer.
+Make sure you have a recent version of `Python3.x <https://www.python.org/downloads/>`_  installed and the `pip <https://pip.pypa.io/en/stable/installation/>`_ package installer.
 Then install the following packages:
 
 .. code-block:: bash                
@@ -38,7 +38,7 @@ MicropPython firmware version:
     
     $ python mpy-psoc6.py device-setup
 
-You can run this command any time you want to upgrade to the latest MicroPython firmware version.
+You can run this command whenever you want to upgrade to the latest MicroPython firmware version.
 This command will take care of the following steps:
 
 * Download and install fw-loader, which will be used to update the board flasher firmware.
@@ -49,10 +49,10 @@ This command will take care of the following steps:
 Install a previous version
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to setup the device with a previous firmware version, you can check the list of available release in the `GitHub release section <https://github.com/infineon/MicroPython/releases>`_. 
+If you want to setup the device with a previous firmware version, you can check the list of available releases in the `GitHub release section <https://github.com/infineon/MicroPython/releases>`_. 
 
-The ``device-setup`` command can as well assist you with this process. In this case, the board and the desired
-version need to be passed as arguments.
+The ``device-setup`` command can also assist you with this process. In this case, the board and the desired
+version needs to be passed as arguments.
 
 .. code-block:: bash
     
@@ -60,15 +60,15 @@ version need to be passed as arguments.
 
 .. warning::
     
-    Be sure to provide the board name as shown in the ``device-setup`` command when run in interactive mode.
+    Be sure to provide the board name as shown in the ``device-setup`` command when running in interactive mode.
     Equally, provide a valid tag existing in the release section with the format *v.x.y.z*. 
-    No fail safe mechanisms or error verifications are (yet) implemented on the ``mpy-psoc6.py`` utility, and the script will fail to retrieve the necessary firmware file.
+    No fail-safe mechanisms or error verifications are (yet) implemented on the ``mpy-psoc6.py`` utility, and the script will fail to retrieve the necessary firmware file.
 
 Updating the flasher firmware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The evaluation PSoC6™ boards include an integrated hardware programmer tool using `KitProg <https://www.infineon.com/cms/en/design-support/tools/programming-testing/psoc-programming-solutions/#collapse-703c72c0-50f2-11ec-9758-005056945905-3>`_ firmware. 
-Some older boards will come preflashed with KitProg version 2. In MicroPython PSoC6™ port it is required to use KitProg version 3, and the setup process will fail for version 2.
+Some older boards will come pre-flashed with KitProg version 2. In MicroPython PSoC6™ port it is required to use KitProg version 3, and the setup process will fail for version 2.
 
 By default, ``device-setup`` automatically updates the flasher firmware, ensuring compatibility with the rest of the flashing tools.
 If you want to skip the KitProg firmware update step, you can use the flag ``-s`` or ``--skip-fw-update`` during the ``device-setup`` process. 
@@ -80,7 +80,7 @@ If you want to skip the KitProg firmware update step, you can use the flag ``-s`
 Direct binary flashing
 ----------------------
 
-Another alternative to program the board is to directly provide the binary file. The ``firmware-deploy`` command is enabling this option. 
+Another alternative to program the board is to directly provide the binary file. The ``firmware-deploy`` command enables this option. 
 The board needs to be specified, and the path and name of the ``.hex`` file:
 
 .. code-block:: bash
@@ -92,7 +92,7 @@ Erasing the device (external) file system
 
 Some PSoC6™ boards include an external flash memory which is used by the MicroPython file system. This memory will not be erased when
 reprogramming or erasing MicroPython firmware via ``device-setup`` or ``firmware-deploy``.
-Use the ``device-erase`` command to erase of the external memory of your PSoC6™ device:
+Use the ``device-erase`` command to erase the external memory of your PSoC6™ device:
 
     .. code-block:: bash
         
@@ -121,21 +121,21 @@ Other installation methods
 Cypress Programmer
 ^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can use directly flash the firmware binary file with the `Cypress Programmer
+Alternatively, you can directly flash the firmware binary file with the `Cypress Programmer
 <https://softwaretools.infineon.com/tools/com.ifx.tb.tool.cypressprogrammer>`_ 
-It allows to program the PSoC6™ microcontrollers family in a few clicks from your Windows,
+It allows you to program the PSoC6™ microcontroller family in a few clicks from your Windows,
 Linux or Mac OS machine. 
 Follow the instructions on the provided link to download and install the tool.
 
 After that, select the downloaded MicroPython firmware *.hex* file to be deployed on the PSoC6™. Then, in
 the upper menu, select the connected *Probe/Kit*, click on *Connect*, and finally click on *Program*.
-The log section will show the progress and inform when the firmware deployment on the controller is completed.
+The log section will show the progress and inform us when the firmware deployment on the controller is completed.
 
 .. image:: img/cy-programmer.jpg
     :alt: Cypress Programmer GUI
     :width: 520px
 
-For a detailed description on how to use the Cypress Programmer tool, please consult the `Cypress
+For a detailed description of how to use the Cypress Programmer tool, please consult the `Cypress
 Programmer User Guide
 <https://www.infineon.com/dgdl/Infineon-Infineon_Programmer_4.0_GUI_User_Guide-Software-v01_00-EN.pdf?fileId=8ac78c8c7e7124d1017ed9abca6e365c>`_.
 
