@@ -4,7 +4,7 @@ Getting started with MicroPython on the PSoC6™
 ==============================================
 
 This tutorial will guide you to get started with running MicroPython on the PSoC6™ microcontrollers. 
-There are only a few step keeping you away from enjoying the python programming experience together
+There are only a few steps keeping you away from enjoying the Python programming experience together
 with the possibilities of PSoC6™ microcontrollers.
 
 Let's get started!
@@ -15,13 +15,13 @@ Requirements
 The only required hardware is:
 
 * A PSoC6™ board from the :ref:`Supported boards` list.
-* A microUSB cable.
+* A micro USB cable.
 
 Power the board
 ------------------
 
 Connect the USB cable to your computer and the micro USB to the board debugger. All the PSoC6™ boards
-come with a on-board debugger required for flashing/debugging operations during development. Please refer to the
+come with an on-board debugger required for flashing/debugging operations during development. Please refer to the
 corresponding board manual of your board.
 
 Install MicroPython on the board
@@ -35,7 +35,7 @@ First, download the ``mpy-psoc6.py`` utility script:
 
     $ curl -s -L https://raw.githubusercontent.com/infineon/micropython/ports-psoc6-main/tools/psoc6/mpy-psoc6.py > mpy-psoc6.py
 
-Make sure you have a recent version on `Python3.x <https://www.python.org/downloads/>`_  installed and the `pip <https://pip.pypa.io/en/stable/installation/>`_ package installer.
+Make sure you have a recent version of `Python3.x <https://www.python.org/downloads/>`_  installed and the `pip <https://pip.pypa.io/en/stable/installation/>`_ package installer.
 Then install the following packages:
 
 .. code-block:: bash                
@@ -70,7 +70,7 @@ Once installed, open the application and select the serial port of your PSoC6™
 Interact with the MicroPython prompt
 ------------------------------------
 
-As in python, you can use the prompt mode. Simply start typing some python commands:
+As in Python, you can use the prompt mode. Simply start typing some Python commands:
 
 .. image:: img/mpy-ide-prompt.jpg
     :alt: Arduino IDE prompt
@@ -112,7 +112,7 @@ You are all set now to start programming with MicroPython!
 
 .. warning::
 
-    Adding *forever* blocking loops to the ``main.py`` program might block the access to the storage device. It is recommended to use the ``main.py`` script once
+    Adding *forever* blocking loops to the ``main.py`` program might block access to the storage device. It is recommended to use the ``main.py`` script once
     stable, tested and intended to be deployed and run stand-alone.
     
 Learn more about MicroPython in the following sections:
