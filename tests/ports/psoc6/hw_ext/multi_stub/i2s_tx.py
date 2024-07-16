@@ -22,7 +22,6 @@ elif "CY8CPROTO-063-BLE" in board:
     print("SKIP")
     raise SystemExit
 elif "CY8CKIT-062S2-AI" in board:
-    # TODO: check this against another AI Kit when HIL installation.
     sck_tx_pin = "P9_1"
     ws_tx_pin = "P9_2"
     sd_tx_pin = "P9_3"
