@@ -18,7 +18,6 @@ enum {GPIO_IRQ_LEVEL_NONE=0, GPIO_IRQ_FALLING, GPIO_IRQ_RISING, GPIO_IRQ_BOTH};
 
 typedef struct _machine_pin_io_obj_t {
     mp_obj_base_t base;
-    // machine_pin_phy_obj_t *pin_phy;
     uint32_t pin_addr;
     uint8_t mode;
     uint8_t drive;
@@ -37,7 +36,6 @@ int pin_fetch_address(mp_obj_t pin) {
 }
 
 static inline machine_pin_io_obj_t *pin_io_allocate(mp_obj_t pin_name) {
-    // machine_pin_phy_obj_t *pin_phy = pin_phy_realloc(pin_name, PIN_PHY_FUNC_DIO);
     uint32_t pin_addr = pin_addr_by_name(pin_name);
     uint16_t i;
     for (i = 0; i < machine_pin_num_of_cpu_pins; i++) {
@@ -52,7 +50,6 @@ static inline machine_pin_io_obj_t *pin_io_allocate(mp_obj_t pin_name) {
 }
 
 static inline void pin_io_free(machine_pin_io_obj_t *pin) {
-    // pin_phy_free(pin->pin_phy);
     for (uint16_t i = 0; i < machine_pin_num_of_cpu_pins; i++) {
         if (pin_io[i] == pin) {
             pin_io[i] = NULL;
