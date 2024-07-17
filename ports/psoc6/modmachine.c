@@ -95,7 +95,6 @@ void machine_deinit(void) {
     mod_spi_deinit();
     mod_rtc_deinit();
     mod_timer_deinit();
-    mod_pin_phy_deinit();
     #if MICROPY_ENABLE_SD_CARD
     mod_sdcard_deinit();
     #endif
