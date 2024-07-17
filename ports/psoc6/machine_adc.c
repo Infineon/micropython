@@ -19,8 +19,7 @@ extern machine_adc_obj_t *adc_block_channel_alloc(machine_adcblock_obj_t *adc_bl
 extern void adc_block_channel_free(machine_adcblock_obj_t *acd_block, machine_adc_obj_t *channel);
 
 void adc_obj_init(machine_adc_obj_t *adc, machine_adcblock_obj_t *adc_block, mp_obj_t pin_name, uint32_t sampling_time) {
-    machine_pin_phy_obj_t *adc_pin_phy = pin_phy_realloc(pin_name, PIN_PHY_FUNC_ADC);
-
+    uint32_t pin_addr = pin_addr_by_name(pin_name);
     const cyhal_adc_channel_config_t channel_config =
     {
         .enable_averaging = false,
@@ -28,19 +27,19 @@ void adc_obj_init(machine_adc_obj_t *adc, machine_adcblock_obj_t *adc_block, mp_
         .enabled = true
     };
 
-    cy_rslt_t status = cyhal_adc_channel_init_diff(&(adc->adc_chan_obj), &(adc_block->adc_obj), adc_pin_phy->addr, CYHAL_ADC_VNEG, &channel_config);
+    cy_rslt_t status = cyhal_adc_channel_init_diff(&(adc->adc_chan_obj), &(adc_block->adc_obj), pin_addr, CYHAL_ADC_VNEG, &channel_config);
     if (status != CY_RSLT_SUCCESS) {
+        assert_pin_phy_used(status);
         mp_raise_TypeError(MP_ERROR_TEXT("ADC Channel Initialization failed!"));
     }
 
-    adc->pin_phy = adc_pin_phy;
+    adc->pin_addr = pin_addr;
     adc->block = adc_block;
     adc->sample_ns = sampling_time;
 }
 
 void adc_obj_deinit(machine_adc_obj_t *adc) {
     cyhal_adc_channel_free(&(adc->adc_chan_obj));
-    pin_phy_free(adc->pin_phy);
 }
 
 machine_adc_obj_t *machine_adc_make_init(uint32_t sampling_time, mp_obj_t pin_name) {
@@ -72,7 +71,7 @@ uint8_t adc_get_resolution(machine_adc_obj_t *adc) {
 // machine_adc_print()
 static void machine_adc_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "<ADC Pin=%u, ADCBlock_id=%d, sampling_time_ns=%ld>", self->pin_phy->addr, self->block->id, self->sample_ns);
+    mp_printf(print, "<ADC Pin=%u, ADCBlock_id=%d, sampling_time_ns=%ld>", self->pin_addr, self->block->id, self->sample_ns);
 }
 
 // ADC(id)
