@@ -7,7 +7,7 @@
 typedef struct _machine_adc_obj_t {
     mp_obj_base_t base;
     machine_adcblock_obj_t *block;
-    machine_pin_phy_obj_t *pin_phy;
+    uint32_t pin_addr;
     uint32_t sample_ns;
     cyhal_adc_channel_t adc_chan_obj;
 } machine_adc_obj_t;
