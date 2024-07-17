@@ -40,10 +40,10 @@ typedef struct _machine_uart_obj_t {
     uint32_t stop;
     uint32_t baudrate;
     cyhal_uart_parity_t parity;
-    machine_pin_phy_obj_t *tx;
-    machine_pin_phy_obj_t *rx;
-    machine_pin_phy_obj_t *cts;
-    machine_pin_phy_obj_t *rts;
+    uint32_t tx;
+    uint32_t rx;
+    uint32_t cts;
+    uint32_t rts;
     cyhal_uart_cfg_t cfg;
     uint16_t timeout; // only used by cyhal_uart_getc() ie, readchar()
     uint8_t flow;
@@ -115,8 +115,9 @@ static void uart_init(machine_uart_obj_t *machine_uart_obj) {
 
     if (machine_uart_obj->init_flag == 0) {
         // Initialize the UART Block
-        cy_rslt_t result = cyhal_uart_init(&machine_uart_obj->uart_obj, machine_uart_obj->tx->addr, machine_uart_obj->rx->addr, machine_uart_obj->cts->addr,
-            machine_uart_obj->rts->addr, NULL, &(machine_uart_obj->cfg));
+        cy_rslt_t result = cyhal_uart_init(&machine_uart_obj->uart_obj, machine_uart_obj->tx, machine_uart_obj->rx, machine_uart_obj->cts,
+            machine_uart_obj->rts, NULL, &(machine_uart_obj->cfg));
+        assert_pin_phy_used(result);
         uart_assert_raise_val("UART initialisation failed with return code %lx !", result);
     }
 
@@ -154,68 +155,11 @@ static inline void uart_obj_free(machine_uart_obj_t *uart_obj_ptr) {
     }
 }
 
-static inline void uart_tx_alloc(machine_uart_obj_t *uart_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *tx = pin_phy_realloc(pin_name, PIN_PHY_FUNC_UART);
-    if (tx == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("UART pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-    uart_obj->tx = tx;
-}
-
-static inline void uart_tx_free(machine_uart_obj_t *uart_obj) {
-    pin_phy_free(uart_obj->tx);
-}
-
-static inline void uart_rx_alloc(machine_uart_obj_t *uart_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *rx = pin_phy_realloc(pin_name, PIN_PHY_FUNC_UART);
-
-    if (rx == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("UART pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    uart_obj->rx = rx;
-}
-
-static inline void uart_rx_free(machine_uart_obj_t *uart_obj) {
-    pin_phy_free(uart_obj->rx);
-}
-
-static inline void uart_cts_alloc(machine_uart_obj_t *uart_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *cts = pin_phy_realloc(pin_name, PIN_PHY_FUNC_UART);
-
-    if (cts == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("UART pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    uart_obj->cts = cts;
-}
-
-static inline void uart_cts_free(machine_uart_obj_t *uart_obj) {
-    pin_phy_free(uart_obj->cts);
-}
-
-static inline void uart_rts_alloc(machine_uart_obj_t *uart_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *rts = pin_phy_realloc(pin_name, PIN_PHY_FUNC_UART);
-    if (rts == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("UART pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    uart_obj->rts = rts;
-}
-
-static inline void uart_rts_free(machine_uart_obj_t *uart_obj) {
-    pin_phy_free(uart_obj->rts);
-}
-
 static void mp_machine_uart_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_uart_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_printf(print, "UART(baudrate=%u, bits=%u, parity=%s, stop=%u, tx=%d, rx=%d, rts=%d, cts=%d, rxbuf=%u, timeout=%u",
         self->baudrate, self->bits, _parity_name[self->parity],
-        self->stop, self->tx->addr, self->rx->addr, self->rts->addr, self->cts->addr, self->rxbuf, self->timeout);
+        self->stop, self->tx, self->rx, self->rts, self->cts, self->rxbuf, self->timeout);
     if (self->flow) {
         mp_printf(print, ", flow=");
         uint32_t flow_mask = self->flow;
@@ -296,7 +240,7 @@ static void mp_machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args,
 
     // Set TX/RX pins if configured.
     if (args[ARG_tx].u_obj != mp_const_none) {
-        uart_tx_alloc(self, args[ARG_tx].u_obj);
+        self->tx = pin_addr_by_name(args[ARG_tx].u_obj);
     } else {
         if (self->init_flag == 0) {
             mp_raise_TypeError(MP_ERROR_TEXT("tx pin must be provided"));
@@ -304,7 +248,7 @@ static void mp_machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args,
     }
 
     if (args[ARG_rx].u_obj != mp_const_none) {
-        uart_rx_alloc(self, args[ARG_rx].u_obj);
+        self->rx = pin_addr_by_name(args[ARG_rx].u_obj);
     } else {
         if (self->init_flag == 0) {
             mp_raise_TypeError(MP_ERROR_TEXT("rx pin must be provided"));
@@ -313,11 +257,11 @@ static void mp_machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args,
 
     // Set CTS/RTS pins if configured.
     if (args[ARG_rts].u_obj != mp_const_none) {
-        uart_rts_alloc(self, args[ARG_rts].u_obj);
+        self->rts = pin_addr_by_name(args[ARG_rts].u_obj);
     }
 
     if (args[ARG_cts].u_obj != mp_const_none) {
-        uart_cts_alloc(self, args[ARG_cts].u_obj);
+        self->cts = pin_addr_by_name(args[ARG_cts].u_obj);
     }
 
     // Set hardware flow control if configured.
@@ -378,10 +322,6 @@ static mp_obj_t mp_machine_uart_make_new(const mp_obj_type_t *type, size_t n_arg
 
 static void mp_machine_uart_deinit(machine_uart_obj_t *self) {
     cyhal_uart_free(&(self->uart_obj));
-    uart_tx_free(self);
-    uart_rx_free(self);
-    uart_cts_free(self);
-    uart_rts_free(self);
     uart_obj_free(self);
 }
 
