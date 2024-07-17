@@ -38,18 +38,9 @@ typedef struct _machine_i2s_obj_t {
     mp_obj_base_t base;
     uint8_t i2s_id;     // Private variable in this port case. ID not associated to any port pin i2s group.
     cyhal_i2s_t i2s_obj;
-    // HAL pin obj are kept for compatibility
-    // with extmod/machine_i2s print function
-    // Potential refactor together with pin_phy,
-    // mp_hal_pin functions resource acquisition
-    // and release.
-    mp_hal_pin_obj_t sck;
-    mp_hal_pin_obj_t ws;
-    mp_hal_pin_obj_t sd;
-    // ---------------------------------------
-    machine_pin_phy_obj_t *sck_phy;
-    machine_pin_phy_obj_t *ws_phy;
-    machine_pin_phy_obj_t *sd_phy;
+    uint32_t sck;
+    uint32_t ws;
+    uint32_t sd;
     uint16_t mode;
     int8_t bits;
     uint8_t channel_resolution_bits;
@@ -244,7 +235,7 @@ static void i2s_dma_irq_handler(void *arg, cyhal_i2s_event_t event) {
 }
 
 static void i2s_init(machine_i2s_obj_t *self, cyhal_clock_t *clock) {
-    cyhal_i2s_pins_t pins = { .sck = self->sck_phy->addr, .ws = self->ws_phy->addr, .data = self->sd_phy->addr, .mclk = NC };
+    cyhal_i2s_pins_t pins = { .sck = self->sck, .ws = self->ws, .data = self->sd, .mclk = NC };
     cyhal_i2s_config_t config =
     {
         .is_tx_slave = true,
@@ -372,17 +363,9 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
         mp_raise_ValueError(MP_ERROR_TEXT("invalid ibuf"));
     }
 
-    // All provided pins are realloc from any other machine allocation
-    machine_pin_phy_obj_t *sck_phy = pin_phy_realloc(args[ARG_sck].u_obj, PIN_PHY_FUNC_I2S);
-    machine_pin_phy_obj_t *ws_phy = pin_phy_realloc(args[ARG_ws].u_obj, PIN_PHY_FUNC_I2S);
-    machine_pin_phy_obj_t *sd_phy = pin_phy_realloc(args[ARG_sd].u_obj, PIN_PHY_FUNC_I2S);
-
-    self->sck_phy = sck_phy;
-    self->ws_phy = ws_phy;
-    self->sd_phy = sd_phy;
-    self->sck = sck_phy->addr;
-    self->ws = ws_phy->addr;
-    self->sd = sd_phy->addr;
+    self->sck = pin_addr_by_name(args[ARG_sck].u_obj);
+    self->ws = pin_addr_by_name(args[ARG_ws].u_obj);
+    self->sd = pin_addr_by_name(args[ARG_sd].u_obj);
     self->mode = i2s_mode;
     self->bits = i2s_bits;
     self->channel_resolution_bits = i2s_bits_resolution;
@@ -401,9 +384,6 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
 
 static void mp_machine_i2s_deinit(machine_i2s_obj_t *self) {
     cyhal_i2s_free(&self->i2s_obj);
-    pin_phy_free(self->sck_phy);
-    pin_phy_free(self->ws_phy);
-    pin_phy_free(self->sd_phy);
     MP_STATE_PORT(machine_i2s_obj[self->i2s_id]) = NULL;
 }
 
