@@ -3,6 +3,23 @@
 
 #include <stdint.h>
 
+
+#define PIN_PHY_GPIO_IN_USE_GENERAL_ERROR 0x4020d01
+#define PIN_PHY_I2C_IN_USE_ERROR 0x4020900
+#define PIN_PHY_SPI_IN_USE_ERROR 0x4021907
+#define PIN_PHY_UART_IN_USE_ERROR 0x4021f00
+
+#define assert_pin_phy_used(ret)  { \
+        switch (ret) { \
+            case PIN_PHY_GPIO_IN_USE_GENERAL_ERROR: \
+            case PIN_PHY_I2C_IN_USE_ERROR: \
+            case PIN_PHY_SPI_IN_USE_ERROR: \
+            case PIN_PHY_UART_IN_USE_ERROR: \
+                mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("The pin(s) might be already in used by other instance?")); \
+                break; \
+        } \
+}
+
 typedef enum {
     PIN_PHY_FUNC_NONE = 0x00,
     PIN_PHY_FUNC_DIO = 0x01,
