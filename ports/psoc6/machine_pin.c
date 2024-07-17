@@ -18,7 +18,8 @@ enum {GPIO_IRQ_LEVEL_NONE=0, GPIO_IRQ_FALLING, GPIO_IRQ_RISING, GPIO_IRQ_BOTH};
 
 typedef struct _machine_pin_io_obj_t {
     mp_obj_base_t base;
-    machine_pin_phy_obj_t *pin_phy;
+    // machine_pin_phy_obj_t *pin_phy;
+    uint32_t pin_addr;
     uint8_t mode;
     uint8_t drive;
     uint8_t pull;
@@ -32,11 +33,12 @@ machine_pin_io_obj_t *pin_io[MAX_IO_PINS] = {NULL};
 // helper function used by mphalport
 int pin_fetch_address(mp_obj_t pin) {
     machine_pin_io_obj_t *self = MP_OBJ_TO_PTR(pin);
-    return self->pin_phy->addr;
+    return self->pin_addr;
 }
 
 static inline machine_pin_io_obj_t *pin_io_allocate(mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *pin_phy = pin_phy_realloc(pin_name, PIN_PHY_FUNC_DIO);
+    // machine_pin_phy_obj_t *pin_phy = pin_phy_realloc(pin_name, PIN_PHY_FUNC_DIO);
+    uint32_t pin_addr = pin_addr_by_name(pin_name);
     uint16_t i;
     for (i = 0; i < machine_pin_num_of_cpu_pins; i++) {
         if (pin_io[i] == NULL) {
@@ -44,13 +46,13 @@ static inline machine_pin_io_obj_t *pin_io_allocate(mp_obj_t pin_name) {
         }
     }
     pin_io[i] = mp_obj_malloc(machine_pin_io_obj_t, &machine_pin_type);
-    pin_io[i]->pin_phy = pin_phy;
+    pin_io[i]->pin_addr = pin_addr;
 
     return pin_io[i];
 }
 
 static inline void pin_io_free(machine_pin_io_obj_t *pin) {
-    pin_phy_free(pin->pin_phy);
+    // pin_phy_free(pin->pin_phy);
     for (uint16_t i = 0; i < machine_pin_num_of_cpu_pins; i++) {
         if (pin_io[i] == pin) {
             pin_io[i] = NULL;
@@ -98,7 +100,7 @@ static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
             break;
     }
 
-    mp_printf(print, "Pin:%u or %s, Mode=%q, Pull=%q", self->pin_phy->addr, self->pin_phy->name, mode_qstr, pull_qstr);
+    mp_printf(print, "Pin:%u or %s, Mode=%q, Pull=%q", self->pin_addr, mp_obj_str_get_str(pin_name_by_addr(mp_obj_new_int_from_uint(self->pin_addr))), mode_qstr, pull_qstr);
 }
 
 static cyhal_gpio_direction_t mp_to_cy_get_gpio_direction(uint8_t mode) {
@@ -243,13 +245,14 @@ static mp_obj_t machine_pin_obj_init_helper(machine_pin_io_obj_t *self, size_t n
 
     cy_rslt_t result = CY_RSLT_SUCCESS;
     if (pin_already_inited) {
-        result = cyhal_gpio_configure(self->pin_phy->addr, direction, drive);
+        result = cyhal_gpio_configure(self->pin_addr, direction, drive);
     } else {
-        result = cyhal_gpio_init(self->pin_phy->addr, direction, drive, value);
+        result = cyhal_gpio_init(self->pin_addr, direction, drive, value);
     }
     mplogger_print("Direction: %d, Drive:%d, Value:%d\n", direction, drive, value);
 
     if (result != CY_RSLT_SUCCESS) {
+        assert_pin_phy_used(result);
         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("machine pin error: Init unsuccessful\n"));
     }
     return mp_const_none;
@@ -284,14 +287,14 @@ static mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n
 
     if (n_args == 0) {
         if (self->mode == GPIO_MODE_IN) {
-            return MP_OBJ_NEW_SMALL_INT(cyhal_gpio_read(self->pin_phy->addr));
+            return MP_OBJ_NEW_SMALL_INT(cyhal_gpio_read(self->pin_addr));
         } else {
             return mp_const_none;
         }
     } else {
         if (self->mode != GPIO_MODE_IN) {
             bool value = mp_obj_is_true(args[0]);
-            cyhal_gpio_write(self->pin_phy->addr, value);
+            cyhal_gpio_write(self->pin_addr, value);
         }
     }
 
@@ -314,7 +317,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_obj_init_obj, 1, machine_pin_obj_init);
 // Pin.deinit()
 static mp_obj_t machine_pin_obj_deinit(mp_obj_t self_in) {
     machine_pin_io_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    cyhal_gpio_free(self->pin_phy->addr);
+    cyhal_gpio_free(self->pin_addr);
     pin_io_free(self);
 
     return mp_const_none;
@@ -325,7 +328,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_deinit_obj, machine_pin_obj_deinit)
 static mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
     machine_pin_io_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (self->mode != GPIO_MODE_IN) {
-        cyhal_gpio_toggle(self->pin_phy->addr);
+        cyhal_gpio_toggle(self->pin_addr);
     }
 
     return mp_const_none;
@@ -336,7 +339,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
 static mp_obj_t machine_pin_high(mp_obj_t self_in) {
     machine_pin_io_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (self->mode != GPIO_MODE_IN) {
-        cyhal_gpio_write(self->pin_phy->addr, true);
+        cyhal_gpio_write(self->pin_addr, true);
     }
 
     return mp_const_none;
@@ -347,7 +350,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_high_obj, machine_pin_high);
 static mp_obj_t machine_pin_low(mp_obj_t self_in) {
     machine_pin_io_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (self->mode != GPIO_MODE_IN) {
-        cyhal_gpio_write(self->pin_phy->addr, false);
+        cyhal_gpio_write(self->pin_addr, false);
     }
 
     return mp_const_none;
@@ -373,8 +376,8 @@ static mp_obj_t machine_pin_irq(size_t n_args, const mp_obj_t *pos_args, mp_map_
         cyhal_gpio_event_t event = mp_to_cy_get_interrupt_mode(trigger);
         self->callback_data.callback = gpio_interrupt_handler;
         self->callback_data.callback_arg = self;
-        cyhal_gpio_register_callback(self->pin_phy->addr, &(self->callback_data));
-        cyhal_gpio_enable_event(self->pin_phy->addr, event, 3, true);
+        cyhal_gpio_register_callback(self->pin_addr, &(self->callback_data));
+        cyhal_gpio_enable_event(self->pin_addr, event, 3, true);
     }
     return MP_OBJ_FROM_PTR(&(self->callback_data));
 }
@@ -420,10 +423,10 @@ static mp_uint_t pin_ioctl(mp_obj_t self_in, mp_uint_t request, uintptr_t arg, i
     machine_pin_io_obj_t *self = self_in;
     switch (request) {
         case MP_PIN_READ: {
-            return cyhal_gpio_read(self->pin_phy->addr);
+            return cyhal_gpio_read(self->pin_addr);
         }
         case MP_PIN_WRITE: {
-            cyhal_gpio_write(self->pin_phy->addr, arg);
+            cyhal_gpio_write(self->pin_addr, arg);
             return 0;
         }
     }
