@@ -30,8 +30,8 @@ typedef struct _machine_i2c_obj_t {
     mp_obj_base_t base;
     int id; // This parameter is unused and added for compliance with reference API.
     cyhal_i2c_t i2c_obj;
-    machine_pin_phy_obj_t *scl;
-    machine_pin_phy_obj_t *sda;
+    uint32_t scl_pin;
+    uint32_t sda_pin;
     cyhal_i2c_cfg_t cfg;
     mp_obj_t callback;
 } machine_i2c_obj_t;
@@ -82,46 +82,17 @@ static void i2c_init(machine_i2c_obj_t *machine_i2c_obj, uint32_t freq_hz, int16
     }
 
     // Initialize I2C master, set the SDA and SCL pins and assign a new clock
-    cy_rslt_t result = cyhal_i2c_init(&machine_i2c_obj->i2c_obj, machine_i2c_obj->sda->addr, machine_i2c_obj->scl->addr, NULL);
+    cy_rslt_t result = cyhal_i2c_init(&machine_i2c_obj->i2c_obj, machine_i2c_obj->sda_pin, machine_i2c_obj->scl_pin, NULL);
+    assert_pin_phy_used(result);
     i2c_assert_raise_val("I2C initialisation failed with return code %lx !", result);
 
     result = cyhal_i2c_configure(&machine_i2c_obj->i2c_obj, &(machine_i2c_obj->cfg));
     i2c_assert_raise_val("I2C initialisation failed with return code %lx !", result);
 }
 
-static inline void i2c_sda_alloc(machine_i2c_obj_t *i2c_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *sda = pin_phy_realloc(pin_name, PIN_PHY_FUNC_I2C);
-
-    if (sda == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SDA pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    i2c_obj->sda = sda;
-}
-
-static inline void i2c_sda_free(machine_i2c_obj_t *i2c_obj) {
-    pin_phy_free(i2c_obj->sda);
-}
-
-static inline void i2c_scl_alloc(machine_i2c_obj_t *i2c_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *scl = pin_phy_realloc(pin_name, PIN_PHY_FUNC_I2C);
-
-    if (scl == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SCL pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    i2c_obj->scl = scl;
-}
-
-static inline void i2c_scl_free(machine_i2c_obj_t *i2c_obj) {
-    pin_phy_free(i2c_obj->scl);
-}
-
 static void machine_i2c_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "I2C(freq=%u, scl=%u, sda=%u, mode=%u, addr=%u)", self->cfg.frequencyhal_hz, self->scl->addr, self->sda->addr, self->cfg.is_slave, self->cfg.address);
+    mp_printf(print, "I2C(freq=%u, scl=%u, sda=%u, mode=%u, addr=%u)", self->cfg.frequencyhal_hz, self->scl_pin, self->sda_pin, self->cfg.is_slave, self->cfg.address);
 }
 
 mp_obj_t machine_i2c_master_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
@@ -152,8 +123,8 @@ mp_obj_t machine_i2c_master_make_new(const mp_obj_type_t *type, size_t n_args, s
     }
 
     // get scl & sda pins & configure them
-    i2c_scl_alloc(self, args[ARG_scl].u_obj);
-    i2c_sda_alloc(self, args[ARG_sda].u_obj);
+    self->scl_pin = pin_addr_by_name(args[ARG_scl].u_obj);
+    self->sda_pin = pin_addr_by_name(args[ARG_sda].u_obj);
 
     // initialise I2C at cyhal level
     i2c_init(self, args[ARG_freq].u_int, 0);
@@ -190,8 +161,8 @@ mp_obj_t machine_i2c_slave_make_new(const mp_obj_type_t *type, size_t n_args, si
     }
 
     // get scl & sda pins & configure them
-    i2c_scl_alloc(self, args[ARG_scl].u_obj);
-    i2c_sda_alloc(self, args[ARG_sda].u_obj);
+    self->scl_pin = pin_addr_by_name(args[ARG_scl].u_obj);
+    self->sda_pin = pin_addr_by_name(args[ARG_sda].u_obj);
 
     // initialise I2C at cyhal level
     i2c_init(self, args[ARG_freq].u_int, args[ARG_addr].u_int);
@@ -202,8 +173,6 @@ mp_obj_t machine_i2c_slave_make_new(const mp_obj_type_t *type, size_t n_args, si
 static void machine_i2c_deinit(mp_obj_base_t *self_in) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
     cyhal_i2c_free(&(self->i2c_obj));
-    i2c_sda_free(self);
-    i2c_scl_free(self);
     i2c_obj_free(self);
 }
 
