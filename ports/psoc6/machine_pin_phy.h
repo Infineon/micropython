@@ -15,7 +15,7 @@
             case PIN_PHY_I2C_IN_USE_ERROR: \
             case PIN_PHY_SPI_IN_USE_ERROR: \
             case PIN_PHY_UART_IN_USE_ERROR: \
-                mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("The pin(s) might be already in used by other instance?")); \
+                mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("The pin(s) might be already in used by other machine instance ?")); \
                 break; \
         } \
 }
