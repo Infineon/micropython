@@ -51,14 +51,14 @@ typedef struct _machine_sdcard_obj_t {
     mp_obj_base_t base;
     cyhal_sdhc_t sdhc_obj;
     uint16_t slot_num;
-    machine_pin_phy_obj_t *wp;
-    machine_pin_phy_obj_t *cmd;
-    machine_pin_phy_obj_t *dat0;
-    machine_pin_phy_obj_t *dat1;
-    machine_pin_phy_obj_t *dat2;
-    machine_pin_phy_obj_t *dat3;
-    machine_pin_phy_obj_t *clk;
-    machine_pin_phy_obj_t *cd;
+    uint32_t wp;
+    uint32_t cmd;
+    uint32_t dat0;
+    uint32_t dat1;
+    uint32_t dat2;
+    uint32_t dat3;
+    uint32_t clk;
+    uint32_t cd;
     uint32_t block_count;
 } machine_sdcard_obj_t;
 
@@ -99,47 +99,47 @@ static inline void sd_card_obj_free(machine_sdcard_obj_t *sdhc_obj_ptr) {
 
 static void sd_card_allocate_pin(machine_sdcard_obj_t *self, mp_arg_val_t *args) {
     if (args[ARG_cmd].u_obj != mp_const_none) {
-        self->cmd = pin_phy_realloc(args[ARG_cmd].u_obj, PIN_PHY_FUNC_SDHC);
+        self->cmd = pin_addr_by_name(args[ARG_cmd].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Cmd pin must be provided"));
     }
 
     if (args[ARG_dat0].u_obj != mp_const_none) {
-        self->dat0 = pin_phy_realloc(args[ARG_dat0].u_obj, PIN_PHY_FUNC_SDHC);
+        self->dat0 = pin_addr_by_name(args[ARG_dat0].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Data 0 pin must be provided"));
     }
 
     if (args[ARG_dat1].u_obj != mp_const_none) {
-        self->dat1 = pin_phy_realloc(args[ARG_dat1].u_obj, PIN_PHY_FUNC_SDHC);
+        self->dat1 = pin_addr_by_name(args[ARG_dat1].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Data 1 pin must be provided"));
     }
 
     if (args[ARG_dat2].u_obj != mp_const_none) {
-        self->dat2 = pin_phy_realloc(args[ARG_dat2].u_obj, PIN_PHY_FUNC_SDHC);
+        self->dat2 = pin_addr_by_name(args[ARG_dat2].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Data 2 pin must be provided"));
     }
 
     if (args[ARG_dat3].u_obj != mp_const_none) {
-        self->dat3 = pin_phy_realloc(args[ARG_dat3].u_obj, PIN_PHY_FUNC_SDHC);
+        self->dat3 = pin_addr_by_name(args[ARG_dat3].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Data 3 pin must be provided"));
     }
 
     if (args[ARG_clk].u_obj != mp_const_none) {
-        self->clk = pin_phy_realloc(args[ARG_clk].u_obj, PIN_PHY_FUNC_SDHC);
+        self->clk = pin_addr_by_name(args[ARG_clk].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("Clk pin must be provided"));
     }
 
     if (args[ARG_cd].u_obj != mp_const_none) {
-        self->cd = pin_phy_realloc(args[ARG_cd].u_obj, PIN_PHY_FUNC_SDHC);
+        self->cd = pin_addr_by_name(args[ARG_cd].u_obj);
     }
 
     if (args[ARG_wp].u_obj != mp_const_none) {
-        self->wp = pin_phy_realloc(args[ARG_wp].u_obj, PIN_PHY_FUNC_SDHC);
+        self->wp = pin_addr_by_name(args[ARG_wp].u_obj);
     }
 }
 
@@ -165,20 +165,20 @@ static cy_rslt_t sd_card_init_helper(machine_sdcard_obj_t *self, mp_arg_val_t *a
 
 
     sd_card_allocate_pin(self, args);
-    result = cyhal_sdhc_init(&self->sdhc_obj, &sdhc_config, self->cmd->addr, self->clk->addr, self->dat0->addr, self->dat1->addr,
-        self->dat2->addr, self->dat3->addr, NC, NC, NC, NC, self->cd->addr, NC, NC, NC, NC, NC, clock_source);
+    result = cyhal_sdhc_init(&self->sdhc_obj, &sdhc_config, self->cmd, self->clk, self->dat0, self->dat1,
+        self->dat2, self->dat3, NC, NC, NC, NC, self->cd, NC, NC, NC, NC, NC, &clock);
     return result;
 }
 
 static void sd_card_deallocate_pins(machine_sdcard_obj_t *self) {
-    cyhal_gpio_free(self->cd->addr);
-    cyhal_gpio_free(self->cmd->addr);
-    cyhal_gpio_free(self->clk->addr);
-    cyhal_gpio_free(self->wp->addr);
-    cyhal_gpio_free(self->dat0->addr);
-    cyhal_gpio_free(self->dat1->addr);
-    cyhal_gpio_free(self->dat2->addr);
-    cyhal_gpio_free(self->dat3->addr);
+    cyhal_gpio_free(self->cd);
+    cyhal_gpio_free(self->cmd);
+    cyhal_gpio_free(self->clk);
+    cyhal_gpio_free(self->wp);
+    cyhal_gpio_free(self->dat0);
+    cyhal_gpio_free(self->dat1);
+    cyhal_gpio_free(self->dat2);
+    cyhal_gpio_free(self->dat3);
 }
 
 static mp_obj_t machine_sdcard_deinit(mp_obj_t self_in) {
@@ -225,6 +225,7 @@ static mp_obj_t machine_sdcard_make_new(const mp_obj_type_t *type, size_t n_args
     if (CY_RSLT_SUCCESS == result) {
         cyhal_sdhc_get_block_count(&self->sdhc_obj, (uint32_t *)&self->block_count);
     } else {
+        assert_pin_phy_used(result);
         if (cyhal_sdhc_is_card_inserted(&self->sdhc_obj) == false) {
             machine_sdcard_deinit(self);
             mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("SD Card not inserted!\n"));
