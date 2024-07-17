@@ -46,10 +46,10 @@ typedef struct _machine_spi_obj_t {
     uint8_t phase;
     uint8_t bits;
     uint8_t firstbit;
-    machine_pin_phy_obj_t *ssel;
-    machine_pin_phy_obj_t *sck;
-    machine_pin_phy_obj_t *mosi;
-    machine_pin_phy_obj_t *miso;
+    uint32_t ssel;
+    uint32_t sck;
+    uint32_t mosi;
+    uint32_t miso;
     uint32_t baudrate;
 } machine_spi_obj_t;
 
@@ -119,49 +119,13 @@ static inline void spi_obj_free(machine_spi_obj_t *spi_obj_ptr) {
     }
 }
 
-static inline void spi_sck_alloc(machine_spi_obj_t *spi_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *sck = pin_phy_realloc(pin_name, PIN_PHY_FUNC_SPI);
-    spi_alloc_msg(pin_name, sck, "SCK pin (%s) not found !");
-    spi_obj->sck = sck;
-}
-
-static inline void spi_ssel_alloc(machine_spi_obj_t *spi_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *ssel = pin_phy_realloc(pin_name, PIN_PHY_FUNC_SPI);
-    spi_alloc_msg(pin_name, ssel, "SSEL pin (%s) not found !");
-    spi_obj->ssel = ssel;
-}
-
-static inline void spi_mosi_alloc(machine_spi_obj_t *spi_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *mosi = pin_phy_realloc(pin_name, PIN_PHY_FUNC_SPI);
-    spi_alloc_msg(pin_name, mosi, "MOSI pin (%s) not found !");
-    spi_obj->mosi = mosi;
-}
-
-static inline void spi_miso_alloc(machine_spi_obj_t *spi_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *miso = pin_phy_realloc(pin_name, PIN_PHY_FUNC_SPI);
-    spi_alloc_msg(pin_name, miso, "MISO pin (%s) not found !");
-    spi_obj->miso = miso;
-}
-
-static inline void spi_sck_free(machine_spi_obj_t *spi_obj) {
-    pin_phy_free(spi_obj->sck);
-}
-static inline void spi_ssel_free(machine_spi_obj_t *spi_obj) {
-    pin_phy_free(spi_obj->ssel);
-}
-static inline void spi_mosi_free(machine_spi_obj_t *spi_obj) {
-    pin_phy_free(spi_obj->mosi);
-}
-static inline void spi_miso_free(machine_spi_obj_t *spi_obj) {
-    pin_phy_free(spi_obj->miso);
-}
-
 static inline void spi_init(machine_spi_obj_t *machine_spi_obj, int spi_mode) {
     cyhal_spi_mode_t mode = spi_mode_select(machine_spi_obj->firstbit, machine_spi_obj->polarity, machine_spi_obj->phase);
     // set the baudrate
     cyhal_spi_set_frequency(&machine_spi_obj->spi_obj, machine_spi_obj->baudrate);
     // Initialise the SPI peripheral if any arguments given, or it was not initialised previously.
-    cy_rslt_t result = cyhal_spi_init(&machine_spi_obj->spi_obj, machine_spi_obj->mosi->addr, machine_spi_obj->miso->addr, machine_spi_obj->sck->addr, machine_spi_obj->ssel->addr, NULL, machine_spi_obj->bits, mode, spi_mode);
+    cy_rslt_t result = cyhal_spi_init(&machine_spi_obj->spi_obj, machine_spi_obj->mosi, machine_spi_obj->miso, machine_spi_obj->sck, machine_spi_obj->ssel, NULL, machine_spi_obj->bits, mode, spi_mode);
+    assert_pin_phy_used(result);
     spi_assert_raise_val("SPI initialisation failed with return code %x !", result);
 }
 
@@ -170,7 +134,7 @@ static void machine_spi_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
     mp_printf(print, "SPI(baudrate=%u, polarity=%u, phase=%u, bits=%u, firstbit=%u, ssel=%d, sck=%d, mosi=%d, miso=%d)",
         self->baudrate, self->polarity,
         self->phase, self->bits, self->firstbit,
-        self->ssel->addr, self->sck->addr, self->mosi->addr, self->miso->addr);
+        self->ssel, self->sck, self->mosi, self->miso);
 }
 
 mp_obj_t machine_spi_init_helper(machine_spi_obj_t *self, int spi_mode, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
@@ -226,11 +190,11 @@ mp_obj_t machine_spi_init_helper(machine_spi_obj_t *self, int spi_mode, size_t n
         if (args[ARG_ssel].u_obj != DEFAULT_SPI_SSEL_PIN) {
             mp_raise_TypeError(MP_ERROR_TEXT("SSEL pin cannot be provided in master constructor!"));
         } else {
-            spi_ssel_alloc(self, DEFAULT_SPI_SSEL_PIN);
+            self->ssel = pin_addr_by_name(DEFAULT_SPI_SSEL_PIN);
         }
     } else if (spi_mode == SLAVE_MODE) {
         if ((args[ARG_ssel].u_obj != DEFAULT_SPI_SSEL_PIN)) {
-            spi_ssel_alloc(self, args[ARG_ssel].u_obj);
+            self->ssel = pin_addr_by_name(args[ARG_ssel].u_obj);
         } else {
             mp_raise_TypeError(MP_ERROR_TEXT("SSEL pin must be provided in slave mode"));
         }
@@ -239,19 +203,19 @@ mp_obj_t machine_spi_init_helper(machine_spi_obj_t *self, int spi_mode, size_t n
     }
 
     if (args[ARG_sck].u_obj != mp_const_none) {
-        spi_sck_alloc(self, args[ARG_sck].u_obj);
+        self->sck = pin_addr_by_name(args[ARG_sck].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("SCK pin must be provided"));
     }
 
     if (args[ARG_mosi].u_obj != mp_const_none) {
-        spi_mosi_alloc(self, args[ARG_mosi].u_obj);
+        self->mosi = pin_addr_by_name(args[ARG_mosi].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("MOSI pin must be provided"));
     }
 
     if (args[ARG_miso].u_obj != mp_const_none) {
-        spi_miso_alloc(self, args[ARG_miso].u_obj);
+        self->miso = pin_addr_by_name(args[ARG_miso].u_obj);
     } else {
         mp_raise_TypeError(MP_ERROR_TEXT("MISO pin must be provided"));
     }
@@ -325,10 +289,6 @@ static void machine_spi_deinit(mp_obj_base_t *self_in) {
     machine_spi_obj_t *self = (machine_spi_obj_t *)self_in;
     cyhal_spi_clear(&self->spi_obj);
     cyhal_spi_free(&self->spi_obj);
-    spi_sck_free(self);
-    spi_ssel_free(self);
-    spi_mosi_free(self);
-    spi_miso_free(self);
     spi_obj_free(self);
 }
 
