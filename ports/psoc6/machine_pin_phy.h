@@ -44,13 +44,6 @@ extern machine_pin_phy_obj_t machine_pin_phy_obj[];
 
 extern const uint8_t machine_pin_num_of_cpu_pins;
 
-bool pin_phy_is_alloc(machine_pin_phy_obj_t *obj);
-machine_pin_phy_obj_t *pin_phy_alloc(mp_obj_t pin_name, machine_pin_phy_func_t func);
-machine_pin_phy_obj_t *pin_phy_realloc(mp_obj_t pin_name, machine_pin_phy_func_t func);
-void pin_phy_free(machine_pin_phy_obj_t *obj);
-
-void mod_pin_phy_deinit(void);
-
 int pin_fetch_address(mp_obj_t pin); // function to support the bitstream class (obj to pin address)
 
 // Function Prototypes to support interaction between c<->py
