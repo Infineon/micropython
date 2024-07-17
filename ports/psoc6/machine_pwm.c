@@ -11,7 +11,7 @@
 typedef struct _machine_pwm_obj_t {
     mp_obj_base_t base;
     cyhal_pwm_t pwm_obj;
-    machine_pin_phy_obj_t *pin;
+    uint32_t pin;
     uint32_t fz;
     uint8_t duty_type;
     mp_int_t duty;
@@ -41,21 +41,6 @@ static inline void pwm_obj_free(machine_pwm_obj_t *pwm_obj_ptr) {
     }
 }
 
-static inline void pwm_pin_alloc(machine_pwm_obj_t *pwm_obj, mp_obj_t pin_name) {
-    machine_pin_phy_obj_t *pin = pin_phy_realloc(pin_name, PIN_PHY_FUNC_PWM);
-
-    if (pin == NULL) {
-        size_t slen;
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("PWM pin (%s) not found !"), mp_obj_str_get_data(pin_name, &slen));
-    }
-
-    pwm_obj->pin = pin;
-}
-
-static inline void pwm_pin_free(machine_pwm_obj_t *pwm_obj) {
-    pin_phy_free(pwm_obj->pin);
-}
-
 enum {
     VALUE_NOT_SET = -1,
     DUTY_NOT_SET = 0,
@@ -74,7 +59,7 @@ static inline cy_rslt_t pwm_duty_set_ns(cyhal_pwm_t *pwm_obj, uint32_t fz, uint3
 }
 
 /*STATIC inline cy_rslt_t pwm_advanced_init(machine_pwm_obj_t *machine_pwm_obj) {
-    return cyhal_pwm_init_adv(&machine_pwm_obj->pwm_obj, machine_pwm_obj->pin->addr, NC, CYHAL_PWM_LEFT_ALIGN, true, 0, true, NULL); // complimentary pin set as not connected
+    return cyhal_pwm_init_adv(&machine_pwm_obj->pwm_obj, machine_pwm_obj->pin, NC, CYHAL_PWM_LEFT_ALIGN, true, 0, true, NULL); // complimentary pin set as not connected
 }*/
 
 static void mp_machine_pwm_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
@@ -139,16 +124,17 @@ static mp_obj_t mp_machine_pwm_make_new(const mp_obj_type_t *type, size_t n_args
 
     // Get static peripheral object.
     machine_pwm_obj_t *self = pwm_obj_alloc();
-    pwm_pin_alloc(self, all_args[0]);
+    self->pin = pin_addr_by_name(all_args[0]);
     self->duty_type = DUTY_NOT_SET;
     self->fz = -1;
     // self->invert = -1;
 
     // Initialize PWM
-    cy_rslt_t result = cyhal_pwm_init(&self->pwm_obj, self->pin->addr, NULL);
+    cy_rslt_t result = cyhal_pwm_init(&self->pwm_obj, self->pin, NULL);
 
     // To check whether PWM init is successful
     if (result != CY_RSLT_SUCCESS) {
+        assert_pin_phy_used(result);
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("PWM initialisation failed with return code %lx !"), result);
     }
 
@@ -163,7 +149,6 @@ static mp_obj_t mp_machine_pwm_make_new(const mp_obj_type_t *type, size_t n_args
 static void mp_machine_pwm_deinit(machine_pwm_obj_t *self) {
     cyhal_pwm_stop(&self->pwm_obj);
     cyhal_pwm_free(&self->pwm_obj);
-    pwm_pin_free(self);
     pwm_obj_free(self);
 }
 
