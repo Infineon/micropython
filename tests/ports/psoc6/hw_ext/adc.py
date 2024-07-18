@@ -44,7 +44,7 @@ tolerance_raw = 4000
 block = None
 
 
-def validate_adc_uv_value(adc_pin, exp_volt, act_volt):
+def validate_adc_uv_value(exp_volt, act_volt):
     if not (exp_volt - tolerance_uv) < act_volt < (exp_volt + tolerance_uv):
         print(
             "Expected voltage - ",
@@ -54,7 +54,7 @@ def validate_adc_uv_value(adc_pin, exp_volt, act_volt):
         )
 
 
-def validate_adc_raw_value(adc_pin, exp_volt, act_volt):
+def validate_adc_raw_value(exp_volt, act_volt):
     if not (exp_volt - tolerance_raw) < act_volt < (exp_volt + tolerance_raw):
         print(
             "Expected voltage - ",
