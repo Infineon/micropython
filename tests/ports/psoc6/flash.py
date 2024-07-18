@@ -10,7 +10,6 @@ os.umount("/")
 
 test_string = "This is a test string."
 long_test_string = "This is a very long string. And as a long string that it is, it is only getting longer and longer and the string goes. How long shall it be? Well, not really sure, but let´s try it like this."
-print(test_string)
 
 # first priority is always LFS2 filesystem as it is the default
 if "VfsLfs2" in dir(os):
@@ -51,7 +50,8 @@ if "VfsLfs2" in dir(os):
         print("Test successful")
     f.close()
 
-if "VfsFat" in dir(os):
+# Run fat filesystem test only if lfs2 is not enabled
+elif "VfsFat" in dir(os):
     # create a FAT fs and mount it, else format and mount it
     try:
         vfs = os.VfsFat(bdev)
