@@ -96,12 +96,12 @@ static inline machine_spi_obj_t *spi_obj_alloc(bool is_slave) {
     {
         if (spi_obj[i] == NULL) {
 
-            const mp_obj_type_t *obj_type;
+            const mp_obj_type_t *obj_type = &machine_spi_type;
+            #if MICROPY_PY_MACHINE_SPI_SLAVE
             if (is_slave) {
                 obj_type = &machine_spi_slave_type;
-            } else {
-                obj_type = &machine_spi_type;
             }
+            #endif
             spi_obj[i] = mp_obj_malloc(machine_spi_obj_t, obj_type);
             return spi_obj[i];
         }
@@ -168,15 +168,6 @@ static inline void spi_init(machine_spi_obj_t *machine_spi_obj, int spi_mode) {
 static void machine_spi_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_spi_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_printf(print, "SPI(baudrate=%u, polarity=%u, phase=%u, bits=%u, firstbit=%u, ssel=%d, sck=%d, mosi=%d, miso=%d)",
-        self->baudrate, self->polarity,
-        self->phase, self->bits, self->firstbit,
-        self->ssel->addr, self->sck->addr, self->mosi->addr, self->miso->addr);
-}
-
-
-static void machine_spi_slave_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    machine_spi_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    mp_printf(print, "SPISlave(baudrate=%u, polarity=%u, phase=%u, bits=%u, firstbit=%u, ssel=%d, sck=%d, mosi=%d, miso=%d)",
         self->baudrate, self->polarity,
         self->phase, self->bits, self->firstbit,
         self->ssel->addr, self->sck->addr, self->mosi->addr, self->miso->addr);
@@ -358,6 +349,14 @@ MP_DEFINE_CONST_OBJ_TYPE(
     );
 
 #if MICROPY_PY_MACHINE_SPI_SLAVE
+
+static void machine_spi_slave_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+    machine_spi_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_printf(print, "SPISlave(baudrate=%u, polarity=%u, phase=%u, bits=%u, firstbit=%u, ssel=%d, sck=%d, mosi=%d, miso=%d)",
+        self->baudrate, self->polarity,
+        self->phase, self->bits, self->firstbit,
+        self->ssel->addr, self->sck->addr, self->mosi->addr, self->miso->addr);
+}
 
 static mp_obj_t machine_spi_slave_deinit(mp_obj_t self_in) {
     mp_obj_base_t *self = MP_OBJ_TO_PTR(self_in);
