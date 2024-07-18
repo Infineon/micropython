@@ -14,6 +14,10 @@ except:
     vfs = os.VfsFat(bdev)
     os.mount(vfs, "/")
 
-print("FAT filesystem mounted at /\n")
+if "QSPI_Flash" in dir(psoc6):
+    print("External Flash with FAT filesystem mounted at /\n")
+
+else:
+    print("Internal Flash with FAT filesystem mounted at /\n")
 
 del machine, os, psoc6, bdev, vfs
