@@ -257,6 +257,7 @@ static void i2s_init(machine_i2s_obj_t *self, cyhal_clock_t *clock) {
     }
 
     cy_rslt_t result = cyhal_i2s_init(&self->i2s_obj, tx_pins, rx_pins, &config, clock);
+    assert_pin_phy_used(result);
     i2s_assert_raise_val("I2S initialisation failed with return code %lx !", result);
 }
 
