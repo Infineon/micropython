@@ -28,7 +28,6 @@ class Pin(object):
         self._name = name
         self._pin_addr = pin_addr
         self._pin_exp = pin_exp
-        self._pin_func = "PIN_PHY_FUNC_NONE"
         self._board_pin = False
 
     def cpu_pin_name(self):
@@ -59,7 +58,7 @@ class Pin(object):
         return [self._name]
 
     def print_const_table_entry(self):
-        print('{{{:s}, "{:s}", {:s}}},'.format(self._pin_exp, self._name, self._pin_func))
+        print('{{{:s}, "{:s}"}},'.format(self._pin_exp, self._name))
 
 
 class Pins(object):
