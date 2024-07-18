@@ -13,6 +13,6 @@ except:
     vfs = os.VfsFat(bdev)
     os.mount(vfs, "/flash")
 
-print("FAT filesystem mounted at /flash\n")
+print("External Flash with FAT filesystem mounted at /flash\n")
 
 del machine, os, psoc6, bdev, vfs
