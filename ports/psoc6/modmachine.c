@@ -310,9 +310,15 @@ static mp_obj_t machine_rng(void) {
 MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
 
 #ifdef MICROPY_PY_SD_CARD
-#define MICROPY_PY_MACHINE_SD_CARD_ENTRY { MP_ROM_QSTR(MP_QSTR_SDCard),              MP_ROM_PTR(&machine_sdcard_type) }
+#define MICROPY_PY_MACHINE_SD_CARD_ENTRY { MP_ROM_QSTR(MP_QSTR_SDCard),              MP_ROM_PTR(&machine_sdcard_type) },
 #else
 #define MICROPY_PY_MACHINE_SD_CARD_ENTRY
+#endif
+
+#if MICROPY_PY_MACHINE_SPI_SLAVE
+#define MICROPY_PY_MACHINE_SPI_SLAVE_ENTRY { MP_ROM_QSTR(MP_QSTR_SPISlave),            MP_ROM_PTR(&machine_spi_slave_type) },
+#else
+#define MICROPY_PY_MACHINE_SPI_SLAVE_ENTRY
 #endif
 
 #define MICROPY_PY_MACHINE_EXTRA_GLOBALS \
@@ -334,10 +340,11 @@ MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
     { MP_ROM_QSTR(MP_QSTR_I2CSlave),            MP_ROM_PTR(&machine_i2c_slave_type) }, \
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) }, \
     { MP_ROM_QSTR(MP_QSTR_RTC),                 MP_ROM_PTR(&machine_rtc_type) }, \
-    { MP_ROM_QSTR(MP_QSTR_SPISlave),            MP_ROM_PTR(&machine_spi_slave_type) }, \
+    \
     { MP_ROM_QSTR(MP_QSTR_Timer),               MP_ROM_PTR(&machine_timer_type) }, \
     { MP_ROM_QSTR(MP_QSTR_ADC),                 MP_ROM_PTR(&machine_adc_type) }, \
     { MP_ROM_QSTR(MP_QSTR_ADCBlock),            MP_ROM_PTR(&machine_adcblock_type) }, \
+    MICROPY_PY_MACHINE_SPI_SLAVE_ENTRY \
     MICROPY_PY_MACHINE_SD_CARD_ENTRY \
 
 #endif // MICROPY_PY_MACHINE
