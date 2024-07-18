@@ -84,9 +84,9 @@ if not gnd_tests_skip:
     adc0 = ADC(adc_pin_gnd, sample_ns=1000)
 
     adc0_value_uv = adc0.read_uv()
-    validate_adc_uv_value(adc_pin_gnd, 0, adc0_value_uv)
+    validate_adc_uv_value(0, adc0_value_uv)
     adc0_value_raw = adc0.read_u16()
-    validate_adc_raw_value(adc_pin_gnd, 0, adc0_value_raw)
+    validate_adc_raw_value(0, adc0_value_raw)
 
     adc0.deinit()
 
@@ -97,14 +97,14 @@ adc1 = block.connect(adc_mid_chan, adc_pin_mid)
 adc2 = ADC(adc_pin_max, sample_ns=1000)
 
 adc1_value_uv = adc1.read_uv()
-validate_adc_uv_value(adc_pin_mid, 1650000, adc1_value_uv)
+validate_adc_uv_value(1650000, adc1_value_uv)
 adc1_value_raw = adc1.read_u16()
-validate_adc_raw_value(adc_pin_mid, 16385, adc1_value_raw)
+validate_adc_raw_value(16385, adc1_value_raw)
 
 adc2_value_uv = adc2.read_uv()
-validate_adc_uv_value(adc_pin_max, 3300000, adc2_value_uv)
+validate_adc_uv_value(3300000, adc2_value_uv)
 adc2_value_raw = adc2.read_u16()
-validate_adc_raw_value(adc_pin_max, 32767, adc2_value_raw)
+validate_adc_raw_value(32767, adc2_value_raw)
 
 
 adc1.deinit()
