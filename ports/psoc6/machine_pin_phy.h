@@ -2,7 +2,7 @@
 #define MICROPY_INCLUDED_MACHINE_PIN_PHY_H
 
 #include <stdint.h>
-
+#include "genhdr/pins.h"
 
 #define PIN_PHY_GPIO_IN_USE_GENERAL_ERROR 0x4020d01
 #define PIN_PHY_I2C_IN_USE_ERROR 0x4020900
@@ -20,25 +20,10 @@
         } \
 }
 
-typedef enum {
-    PIN_PHY_FUNC_NONE = 0x00,
-    PIN_PHY_FUNC_DIO = 0x01,
-    PIN_PHY_FUNC_ADC = 0x02,
-    PIN_PHY_FUNC_I2C = 0x04,
-    PIN_PHY_FUNC_PWM = 0x08,
-    PIN_PHY_FUNC_SPI = 0x10,
-    PIN_PHY_FUNC_I2S = 0x20,
-    PIN_PHY_FUNC_UART = 0x40,
-    PIN_PHY_FUNC_SDHC = 0x80
-} machine_pin_phy_func_t;
-
 typedef struct _machine_pin_phy_obj_t {
     uint32_t addr;
     char *name;
-    machine_pin_phy_func_t allocated_func;
 } machine_pin_phy_obj_t;
-
-#include "genhdr/pins.h"
 
 extern machine_pin_phy_obj_t machine_pin_phy_obj[];
 
