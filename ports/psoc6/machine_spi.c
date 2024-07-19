@@ -315,7 +315,7 @@ static void machine_spi_slave_print(const mp_print_t *print, mp_obj_t self_in, m
     mp_printf(print, "SPISlave(baudrate=%u, polarity=%u, phase=%u, bits=%u, firstbit=%u, ssel=%d, sck=%d, mosi=%d, miso=%d)",
         self->baudrate, self->polarity,
         self->phase, self->bits, self->firstbit,
-        self->ssel->addr, self->sck->addr, self->mosi->addr, self->miso->addr);
+        self->ssel, self->sck, self->mosi, self->miso);
 }
 
 static mp_obj_t machine_spi_slave_deinit(mp_obj_t self_in) {
