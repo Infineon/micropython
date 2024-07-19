@@ -28,7 +28,10 @@
 #define EXT_FLASH_PAGE_SIZE                         (0x200)         /** 512 bytes*/
 #endif
 
-#define MAX_UART             10 // TODO: Change as per bsp?
-
 // Board specific configurations
+#define MAX_UART             2 
 #define MAX_TIMER (32)
+#define MAX_SPI              10 
+#define MAX_I2C              10 
+#define MAX_PWM_OBJS 10 
+#define MICROPY_HW_MAX_I2S 2 
