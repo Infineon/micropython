@@ -166,7 +166,7 @@ static cy_rslt_t sd_card_init_helper(machine_sdcard_obj_t *self, mp_arg_val_t *a
 
     sd_card_allocate_pin(self, args);
     result = cyhal_sdhc_init(&self->sdhc_obj, &sdhc_config, self->cmd, self->clk, self->dat0, self->dat1,
-        self->dat2, self->dat3, NC, NC, NC, NC, self->cd, NC, NC, NC, NC, NC, &clock);
+        self->dat2, self->dat3, NC, NC, NC, NC, self->cd, NC, NC, NC, NC, NC, &clock_source);
     return result;
 }
 
