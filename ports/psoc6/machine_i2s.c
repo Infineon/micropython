@@ -32,8 +32,6 @@ typedef enum {
     TX
 } i2s_mode_t;
 
-#define MICROPY_HW_MAX_I2S 2 // TODO: Move to per board.
-
 typedef struct _machine_i2s_obj_t {
     mp_obj_base_t base;
     uint8_t i2s_id;     // Private variable in this port case. ID not associated to any port pin i2s group.
