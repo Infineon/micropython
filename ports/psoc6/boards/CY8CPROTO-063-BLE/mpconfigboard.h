@@ -9,5 +9,9 @@
 #define MICROPY_PY_MACHINE_SPI_SLAVE            (1)
 
 // Board specific configurations
-#define MAX_UART             10 // TODO: Change as per bsp?
+#define MAX_UART             2 
 #define MAX_TIMER (32)
+#define MAX_SPI              10 
+#define MAX_I2C              10 
+#define MAX_PWM_OBJS 10 
+#define MICROPY_HW_MAX_I2S 2 
