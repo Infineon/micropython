@@ -6,8 +6,6 @@
 #include "machine_pin_phy.h"
 #include "mplogger.h"
 
-#define MAX_PWM_OBJS 10 // TODO: Derive this from BSP
-
 typedef struct _machine_pwm_obj_t {
     mp_obj_base_t base;
     cyhal_pwm_t pwm_obj;

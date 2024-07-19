@@ -18,7 +18,6 @@
 #include "machine_pin_phy.h"
 #include "mplogger.h"
 
-#define MAX_I2C              10 // TODO: Change as per bsp?
 #define DEFAULT_I2C_FREQ     (400000)
 #define PSOC_I2C_MASTER_MODE (CYHAL_I2C_MODE_MASTER)
 
