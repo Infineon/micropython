@@ -17,8 +17,6 @@
 #include "machine_pin_phy.h"
 #include "mplogger.h"
 
-#define MAX_SPI              10 // TODO: Change as per bsp?
-
 #define DEFAULT_SPI_BAUDRATE    (1000000)
 #define DEFAULT_SPI_POLARITY    (0)
 #define DEFAULT_SPI_PHASE       (0)
