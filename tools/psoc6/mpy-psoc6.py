@@ -7,7 +7,7 @@ boards = [
 ]
 
 opsys = ""
-version = "0.3.0"
+version = "0.4.0"
 
 
 # Decorator to flush every print
@@ -20,7 +20,7 @@ def flush_print(func):
     return wrapped
 
 
-print = flush_print(print)
+print_f = flush_print(print)
 
 
 def colour_str_success(msg):
@@ -65,12 +65,12 @@ def mpy_get_fw_hex_file_name(file_name, board):
 
 def mpy_firmware_deploy(file_name, board, silent=False, serial_adapter_sn=None):
     if not silent:
-        print(f"Deploying firmware {file_name} ...")
+        print_f(f"Deploying firmware {file_name} ...")
 
     hex_file = mpy_get_fw_hex_file_name(file_name, board)
     openocd_program(board, hex_file, serial_adapter_sn)
     if not silent:
-        print(colour_str_success(f"Firmware {file_name} deployed successfully"))
+        print_f(colour_str_success(f"Firmware {file_name} deployed successfully"))
 
 
 def mpy_firmware_download(file_name, board, version, silent=False):
@@ -81,7 +81,7 @@ def mpy_firmware_download(file_name, board, version, silent=False):
             os.remove(file_name_for_board)
 
     if not silent:
-        print(
+        print_f(
             "Downloading "
             + str(file_name)
             + " "
@@ -182,14 +182,14 @@ def fwloader_download_install():
             os.chmod(os.path.join("fw-loader", "bin", "fw-loader"), 0o755)
 
     if not is_fwloader_already_installed():
-        print("Downloading fw-loader...")
+        print_f("Downloading fw-loader...")
         file_url, file_name = get_fwloader_file_url_name()
         clean_fwloader(file_name)
         download_fwloader(file_url, file_name)
-        print("Extracting fw-loader...")
+        print_f("Extracting fw-loader...")
         extract_fwloader()
     else:
-        print("fw-loader installation skipped. Already installed")
+        print_f("fw-loader installation skipped. Already installed")
 
     fwloader_setup()
 
@@ -199,9 +199,9 @@ def fwloader_update_kitprog():
         fwloader_out_lines = fwloader_stdout.decode().split("\n")
         for line in fwloader_out_lines:
             if "Error" in line:
-                print("fw-loader output: \n" + fwloader_stdout.decode())
+                print_f("fw-loader output: \n" + fwloader_stdout.decode())
 
-    print("Updating kitprog3 firmware...")
+    print_f("Updating kitprog3 firmware...")
     fwloader_cmd = "fw-loader --update-kp3 all"
     fwloader_args = shlex.split(fwloader_cmd)
 
@@ -217,7 +217,7 @@ def fwloader_update_kitprog():
 
     parse_output_for_error(out)
 
-    print(colour_str_success("Debugger kitprog3 firmware updated successfully"))
+    print_f(colour_str_success("Debugger kitprog3 firmware updated successfully"))
 
 
 def fwloader_remove():
@@ -298,20 +298,20 @@ def openocd_download_install():
             os.chmod(os.path.join("openocd", "bin", "openocd"), 0o755)
 
     if not is_openocd_already_installed():
-        print("Downloading openocd...")
+        print_f("Downloading openocd...")
         file_url, file_name = get_openocd_file_url_name()
         clean_openocd(file_name)
         download_openocd(file_url, file_name)
-        print("Extracting openocd...")
+        print_f("Extracting openocd...")
         extract_openocd()
     else:
-        print("openocd already available. Installation skipped")
+        print_f("openocd already available. Installation skipped")
 
     openocd_setup()
 
 
 def openocd_board_conf_download(board):
-    print("Downloading openocd " + str(board) + " configuration...")
+    print_f("Downloading openocd " + str(board) + " configuration...")
 
     # Create and move to board dir in openocd folder
     parent_dir = os.path.abspath(os.curdir)
@@ -370,7 +370,12 @@ def openocd_program(board, hex_file, serial_adapter_sn=None):
         out, err = ocd_proc.communicate(timeout=30)
     except:
         ocd_proc.kill()
-        sys.exit(colour_str_error("openocd error"))
+        sys.exit(
+            colour_str_error(
+                'openocd error.\nTry to fix this issue by updating the device debugger firmware\n \
+                                  \rusing the "--kitprog-fw-update" option during "device-setup".\n'
+            )
+        )
     if err:
         sys.exit(colour_str_error(err.decode() + "Are you sure the board is connected?"))
 
@@ -416,19 +421,19 @@ def select_board():
 
         return board_index
 
-    print("")
-    print("      Supported MicroPython PSoC6 boards       ")
-    print("+---------+-----------------------------------+")
-    print("|   ID    |              Board                |")
-    print("+---------+-----------------------------------+")
-    print("|   0     |  CY8CPROTO-062-4343W              |")
-    print("+---------+-----------------------------------+")
-    print("|   1     |  CY8CPROTO-063-BLE                |")
-    print("+---------+-----------------------------------+")
-    print("|   2     |  CY8CKIT-062S2-AI                 |")
-    print("+---------+-----------------------------------+")
-    print("")
-    print("")
+    print_f("")
+    print_f("      Supported MicroPython PSoC6 boards       ")
+    print_f("+---------+-----------------------------------+")
+    print_f("|   ID    |              Board                |")
+    print_f("+---------+-----------------------------------+")
+    print_f("|   0     |  CY8CPROTO-062-4343W              |")
+    print_f("+---------+-----------------------------------+")
+    print_f("|   1     |  CY8CPROTO-063-BLE                |")
+    print_f("+---------+-----------------------------------+")
+    print_f("|   2     |  CY8CKIT-062S2-AI                 |")
+    print_f("+---------+-----------------------------------+")
+    print_f("")
+    print_f("")
 
     board_index = validate_user_input(
         input(colour_str_highlight("Please type the desired board ID: "))
@@ -446,23 +451,23 @@ def wait_and_request_board_connect():
     )
 
 
-def device_setup(board, version, skip_update_dbg_fw=True, quiet=False):
+def device_setup(board, version, kitprog_update_dbg_fw=True, quiet=False):
     if board is None:
         board = select_board()
     else:
         validate_board_name(board)
 
-    print("MicroPython PSoC6 Board  :: ", board)
+    print_f("MicroPython PSoC6 Board  :: ", board)
 
     if version is None:
         version = "latest"
 
-    print("MicroPython PSoC6 Version :: ", version)
+    print_f("MicroPython PSoC6 Version :: ", version)
 
     if not quiet:
         wait_and_request_board_connect()
 
-    if not skip_update_dbg_fw:
+    if kitprog_update_dbg_fw:
 
         def wait_for_dev_restart():
             print("Waiting for device restart ", end="", flush=True)
@@ -475,7 +480,7 @@ def device_setup(board, version, skip_update_dbg_fw=True, quiet=False):
                 sys.stdout.write("\b\b\b")
                 sys.stdout.flush()
 
-            print("\nDevice restarted")
+            print_f("\nDevice restarted")
 
         fwloader_download_install()
         fwloader_update_kitprog()
@@ -490,7 +495,7 @@ def device_setup(board, version, skip_update_dbg_fw=True, quiet=False):
     mpy_firmware_deploy("hello-world", board, True)
     mpy_firmware_deploy("mpy-psoc6", board)
 
-    print(colour_str_success("Device setup completed :)"))
+    print_f(colour_str_success("Device setup completed :)"))
 
 
 def device_erase(board, quiet=False):
@@ -507,20 +512,22 @@ def device_erase(board, quiet=False):
 
     mpy_firmware_deploy("device-erase", board)
 
-    print(
+    print_f(
         colour_str_warn(
             "Attention!\nThe on-board user LED will start blinking when the erasing is completed."
         )
     )
-    print(colour_str_warn("This can take up to a few minutes if the device memory is very full."))
+    print_f(
+        colour_str_warn("This can take up to a few minutes if the device memory is very full.")
+    )
 
 
 def firmware_deploy(board, hex_file):
     openocd_download_install()
     openocd_board_conf_download(board)
-    print(f"Deploying hex file {hex_file} ...")
+    print_f(f"Deploying hex file {hex_file} ...")
     openocd_program(board, hex_file)
-    print(colour_str_success(f"Firmware {hex_file} deployed successfully"))
+    print_f(colour_str_success(f"Firmware {hex_file} deployed successfully"))
 
 
 def clean_tool_downloads():
@@ -533,7 +540,7 @@ def parser():
         parser.print_help()
 
     def parser_device_setup(args):
-        device_setup(args.board, args.version, args.skip_fw_update, args.q)
+        device_setup(args.board, args.version, args.kitprog_fw_update, args.q)
 
     def parser_firmware_deploy(args):
         firmware_deploy(args.board, args.hexfile)
@@ -549,7 +556,7 @@ def parser():
             )
 
         def __call__(self, parser, namespace, values, option_string, **kwargs):
-            print("mpy-psoc6 version: " + version)
+            print_f("mpy-psoc6 version: " + version)
             parser.exit()
 
     main_parser_desc = """
@@ -588,10 +595,9 @@ def parser():
         "-q", action="store_true", help="Quiet. Do not prompt any user confirmation request"
     )
     parser_ds.add_argument(
-        "-s",
-        "--skip-fw-update",
+        "--kitprog-fw-update",
         action="store_true",
-        help="Skip board Kitprog3 debugger firmware update",
+        help="Updates the on-board Kitprog3 debugger firmware of the PSoC6 device",
     )
     parser_ds.set_defaults(func=parser_device_setup)
 
@@ -637,5 +643,5 @@ if __name__ == "__main__":
         set_environment()
         parser()
     except KeyboardInterrupt:
-        print(colour_str_error("error: keyboard interrupt"))
+        print_f(colour_str_error("error: keyboard interrupt"))
         clean_tool_downloads()
