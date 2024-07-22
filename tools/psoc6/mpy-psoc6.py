@@ -10,6 +10,19 @@ opsys = ""
 version = "0.3.0"
 
 
+# Decorator to flush every print
+def flush_print(func):
+    printer = func
+
+    def wrapped(*args):
+        printer(*args, flush=True)
+
+    return wrapped
+
+
+print = flush_print(print)
+
+
 def colour_str_success(msg):
     green_str_start = "\x1b[1;32;40m"
     str_color_end = "\x1b[0m"
