@@ -41,7 +41,6 @@ MicropPython firmware version:
 You can run this command whenever you want to upgrade to the latest MicroPython firmware version.
 This command will take care of the following steps:
 
-* Download and install fw-loader, which will be used to update the board flasher firmware.
 * Download and install openocd, which is the software required to deploy a firmware file on PSoC6™ controllers
 * Download the latest ``.hex`` file for your selected board
 * Deploy the latest version of MicroPython firmware on your board
@@ -70,12 +69,12 @@ Updating the flasher firmware
 The evaluation PSoC6™ boards include an integrated hardware programmer tool using `KitProg <https://www.infineon.com/cms/en/design-support/tools/programming-testing/psoc-programming-solutions/#collapse-703c72c0-50f2-11ec-9758-005056945905-3>`_ firmware. 
 Some older boards may come pre-flashed with KitProg version 2. For the MicroPython PSoC6™ port, KitProg version 3 is required, and the setup process will fail if version 2 is used.
 
-By default, ``device-setup`` automatically updates the flasher firmware, ensuring compatibility with the rest of the flashing tools.
-If you want to skip the KitProg firmware update step, you can use the flag ``-s`` or ``--skip-fw-update`` during the ``device-setup`` process. 
+In case of failure during ``device-setup``, the option ``--kitprog-fw-update`` can be added to the command. 
+This will update the KitProg firmware to version 3 before flashing the MicroPython firmware.
 
 .. code-block:: bash
     
-    $ python mpy-psoc6.py device-setup -s
+    $ python mpy-psoc6.py device-setup --kitprog-fw-update
 
 Direct binary flashing
 ----------------------
