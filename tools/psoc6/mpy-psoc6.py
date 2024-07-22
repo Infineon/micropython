@@ -451,7 +451,7 @@ def wait_and_request_board_connect():
     )
 
 
-def device_setup(board, version, kitprog_update_dbg_fw=True, quiet=False):
+def device_setup(board, version, kitprog_update_dbg_fw=False, quiet=False):
     if board is None:
         board = select_board()
     else:
