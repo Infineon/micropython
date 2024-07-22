@@ -27,9 +27,9 @@
 #endif
 
 // Board specific configurations
-#define MAX_UART             2 
-#define MAX_TIMER (32)
-#define MAX_SPI              10 
-#define MAX_I2C              10 
-#define MAX_PWM_OBJS 10 
-#define MICROPY_HW_MAX_I2S 2 
+#define MAX_UART             6 
+#define MAX_TIMER            32
+#define MAX_SPI              6
+#define MAX_I2C              5 
+#define MAX_PWM_OBJS         32 
+#define MICROPY_HW_MAX_I2S   1 
