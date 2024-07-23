@@ -32,6 +32,7 @@ usage() {
   echo "  no-hw-ext         run machine modules tests not requiring extended hardware"
   echo "  hw-ext            run machine modules tests requiring extended hardware"
   echo "  adc               run adc tests"
+  echo "  pwm               run pwm tests"
   echo "  i2c               run i2c tests"
   echo "  uart              run uart tests"
   echo "  spi               run spi tests"
@@ -197,6 +198,11 @@ hw_ext_tests() {
 
 adc_tests() {
   run_tests "adc" ${dev_test} "${tests_psoc6_dir}/hw_ext/adc.py"
+}
+
+#PWM
+pwm_tests() {
+  run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/hw_ext/pwm.py"
 }
 
 i2c_tests() {
@@ -368,6 +374,9 @@ case ${test_suite} in
         ;;
     "adc")
         adc_tests
+        ;;
+    "pwm")
+        pwm_tests
         ;;
     "i2c")
         i2c_tests
