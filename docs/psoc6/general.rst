@@ -4,7 +4,7 @@ General information about the PSoC6™ port
 =========================================
 
 The PSoC™ 6 family is built on an ultra-low-power architecture, and the MCUs feature low-power design catering to tailored application domains.
-The PSoC6™ port supports boards powered by the `Infineon PSoC6 family of microcontrollers <https://www.infineon.com/cms/en/product/microcontroller/32-bit-psoc-arm-cortex-microcontroller/psoc-6-32-bit-arm-cortex-m4-mcu/>`_ and currently supports the following MCU's:
+The PSoC6™ port supports boards powered by the `Infineon PSoC6 family of microcontrollers <https://www.infineon.com/cms/en/product/microcontroller/32-bit-psoc-arm-cortex-microcontroller/psoc-6-32-bit-arm-cortex-m4-mcu/>`_ and currently supports the following MCUs:
 
 * PSoC™ 62 - Performance
 * PSoC™ 63 - Bluetooth™ Low Energy
@@ -14,7 +14,7 @@ The PSoC6™ port supports boards powered by the `Infineon PSoC6 family of micro
 Supported boards
 ^^^^^^^^^^^^^^^^^
 
-Following are the boards supported on this port:
+The following boards are supported on this port:
 
 .. list-table::
    :widths: 20 20 50
@@ -33,7 +33,7 @@ Following are the boards supported on this port:
      - Wi-Fi, BT
      - user button, compact form factor, USB-C, MEMS microphone, radar sensor, pressure sensor, 6-axis IMU, 3-axis magnetometer
 
-For more hardware-related details, check the following sections.
+For more hardware-related details, refer to the following sections.
 
 CY8CPROTO-062-4343W
 --------------------
@@ -58,7 +58,7 @@ CY8CPROTO-063-BLE
 Pinout
 ******
 
-    .. image:: img/CY8PROTO-063-BLE-pinout.png
+    .. image:: img/CY8CPROTO-063-BLE-pinout.png
         :width: 350
 
 
