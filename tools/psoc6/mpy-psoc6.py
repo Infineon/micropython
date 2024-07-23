@@ -63,7 +63,7 @@ def mpy_get_fw_hex_file_name(file_name, board):
     return str(file_name) + "_" + str(board) + file_extension
 
 
-def mpy_firmware_deploy(file_name, board, silent=False, serial_adapter_sn=None):
+def mpy_firmware_deploy(file_name, board, serial_adapter_sn=None, silent=False):
     if not silent:
         print_f(f"Deploying firmware {file_name} ...")
 
@@ -451,7 +451,7 @@ def wait_and_request_board_connect():
     )
 
 
-def device_setup(board, version, kitprog_update_dbg_fw=False, quiet=False):
+def device_setup(board, version, serial_adapter_sn=None, kitprog_update_dbg_fw=False, quiet=False):
     if board is None:
         board = select_board()
     else:
@@ -492,13 +492,13 @@ def device_setup(board, version, kitprog_update_dbg_fw=False, quiet=False):
     mpy_firmware_download("hello-world", board, "v0.3.0", True)
     mpy_firmware_download("mpy-psoc6", board, version)
 
-    mpy_firmware_deploy("hello-world", board, True)
-    mpy_firmware_deploy("mpy-psoc6", board)
+    mpy_firmware_deploy("hello-world", board, serial_adapter_sn, True)
+    mpy_firmware_deploy("mpy-psoc6", board, serial_adapter_sn)
 
     print_f(colour_str_success("Device setup completed :)"))
 
 
-def device_erase(board, quiet=False):
+def device_erase(board, serial_adapter_sn=None, quiet=False):
     if (board != "CY8CPROTO-062-4343W") and (board != "CY8CKIT-062S2-AI"):
         sys.exit(colour_str_error("error: board is not supported"))
 
@@ -510,7 +510,7 @@ def device_erase(board, quiet=False):
 
     mpy_firmware_download("device-erase", board, "v0.10.0")
 
-    mpy_firmware_deploy("device-erase", board)
+    mpy_firmware_deploy("device-erase", board, serial_adapter_sn)
 
     print_f(
         colour_str_warn(
@@ -522,12 +522,12 @@ def device_erase(board, quiet=False):
     )
 
 
-def firmware_deploy(board, hex_file):
+def firmware_deploy(board, hex_file, serial_adapter_sn=None):
     openocd_download_install()
     openocd_board_conf_download(board)
-    print_f(f"Deploying hex file {hex_file} ...")
-    openocd_program(board, hex_file)
-    print_f(colour_str_success(f"Firmware {hex_file} deployed successfully"))
+    print(f"Deploying hex file {hex_file} ...")
+    openocd_program(board, hex_file, serial_adapter_sn)
+    print(colour_str_success(f"Firmware {hex_file} deployed successfully"))
 
 
 def clean_tool_downloads():
@@ -540,13 +540,13 @@ def parser():
         parser.print_help()
 
     def parser_device_setup(args):
-        device_setup(args.board, args.version, args.kitprog_fw_update, args.q)
-
-    def parser_firmware_deploy(args):
-        firmware_deploy(args.board, args.hexfile)
+        device_setup(args.board, args.version, args.serial_num, args.kitprog_fw_update, args.q)
 
     def parser_device_erase(args):
-        device_erase(args.board, args.q)
+        device_erase(args.board, args.serial_num, args.q)
+
+    def parser_firmware_deploy(args):
+        firmware_deploy(args.board, args.hexfile, args.serial_num)
 
     # Main parser
     class ver_action(argparse.Action):
@@ -589,6 +589,13 @@ def parser():
         "-b", "--board", default=None, type=str, help="PSoC6 prototyping kit name"
     )
     parser_ds.add_argument(
+        "-n",
+        "--serial-num",
+        default=None,
+        type=str,
+        help="Serial number of the board serial adapter",
+    )
+    parser_ds.add_argument(
         "-v", "--version", default=None, type=str, help="MicroPython PSoC6 firmware version"
     )
     parser_ds.add_argument(
@@ -614,6 +621,13 @@ def parser():
         "-b", "--board", default=None, type=str, required=True, help="PSoC6 prototyping kit name"
     )
     parser_de.add_argument(
+        "-n",
+        "--serial-num",
+        default=None,
+        type=str,
+        help="Serial number of the board serial adapter",
+    )
+    parser_de.add_argument(
         "-q", action="store_true", help="Quiet. Do not prompt any user confirmation request"
     )
     parser_de.set_defaults(func=parser_device_erase)
@@ -627,6 +641,13 @@ def parser():
     )
     parser_fd.add_argument(
         "-b", "--board", default=None, type=str, required=True, help="PSoC6 prototyping kit name"
+    )
+    parser_fd.add_argument(
+        "-n",
+        "--serial-num",
+        default=None,
+        type=str,
+        help="Serial number of the board serial adapter",
     )
     parser_fd.add_argument(
         "-f", "--hexfile", type=str, required=True, help="MicroPython PSoC6 firmware .hex file"
