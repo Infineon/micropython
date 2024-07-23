@@ -143,7 +143,7 @@ run_tests() {
   test_dir_flag="-d"
   case ${tests} in *.py)  test_dir_flag="";; esac
 
-  ./run-tests.py --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
+  ./run-tests.py --print-failures --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
 
   update_test_result $?
 }
