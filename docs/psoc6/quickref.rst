@@ -7,7 +7,7 @@ Quick reference for the PSoC6™
     :alt: CY8CPROTO-062-4343W board
     :width: 640px
 
-The `CY8CPROTO-062-4343W PSoC6™ Board. <https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/#>`_
+The `CY8CPROTO-062-4343W PSoC6™ Board <https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/#>`_.
 
 Below is a quick reference for PSoC6™ boards. If it is your first time
 working with this port it may be useful to get an overview of the microcontroller:
@@ -25,18 +25,15 @@ working with this port it may be useful to get an overview of the microcontrolle
 
     The PSoC6™ port is now a mature port and is expected any MicroPython built-in
     library to be supported, but not all libraries, modules and features may have been implemented yet.
-    For those modules relying on platform and hardware dependencies, only the listed and documented in this
-    quick reference are certainly supported.
+    For modules relying on platform and hardware dependencies, only those listed and documented in this quick reference are supported.
         
-    Please, consider opening an `issue <https://github.com/infineon/micropython/issues>`_ or
-    `discussion <https://github.com/infineon/micropython/discussions>`_ on GitHub for any clarification
-    required on available features or requests for missing ones. 
+    Please consider opening an `issue <https://github.com/infineon/micropython/issues>`_ or
+    `discussion <https://github.com/infineon/micropython/discussions>`_ on GitHub for clarification on available features or to request missing features.
 
 General board control
 ---------------------
 
-The MicroPython REPL is accessed via the USB serial port. Paste mode (ctrl-E) is useful to paste a
-a large slab of Python code into the REPL. 
+The MicroPython REPL is accessed via the USB serial port. Paste mode (Ctrl+E) is useful for pasting large sections of Python code into the REPL.
 
 This port implements most of the methods described in the :mod:`machine` module. Tab completion is useful to
 find out what methods an instantiated object has. 
@@ -56,7 +53,7 @@ The :mod:`machine` module::
     bitstream('P13_6', 0, timing, buf)         # bitstrem buffer data with timing through pin P13_6
 
 .. note::
-    All timings greater than 1500 ns work and the accuracy of the timing is +/- 400ns. 
+    All timings greater than 1500 ns work and the accuracy of the timing is +/- 400 ns. 
     Supported timing_ns ranges below 1500 ns is [500, 1125, 800, 750].
 
 Delay and timing
@@ -139,7 +136,7 @@ Methods
 ^^^^^^^
 .. method:: Pin.irq(handler=None, trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING)
 
-Here two arguments should be passed mandatorily. 
+Two arguments must be passed here.
 Trigger can be ``Pin.IRQ_FALLING`` or ``Pin.IRQ_RISING`` or ``PIN.IRQ_FALLING | PIN.IRQ_RISING``.
 
 ::
