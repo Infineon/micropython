@@ -25,18 +25,8 @@ elif "CY8CKIT-062S2-AI" in board:
 
 input_pin = Pin(pin_in, Pin.IN)
 
-start_time = 0
-low_signal_start_time = 0
-high_signal_start_time = 0
-tolerance = 8.0
-duty_tolerance = 8.0
 
-
-def measure_signal():
-    global start_time
-    global low_signal_start_time
-    global high_signal_start_time
-
+def measure_signal(start_time=0, low_signal_start_time=0, high_signal_start_time=0):
     while input_pin.value() == 0:
         pass
     start_time = time.ticks_us()
@@ -51,6 +41,8 @@ def measure_signal():
 
 
 def validate_signal(exp_freq=0, exp_duty_u16=0, exp_duty_ns=0, exp_dutycycle=0):
+    tolerance = 8.0
+    duty_tolerance = 8.0
     on_time = time.ticks_diff(low_signal_start_time, start_time)
     off_time = time.ticks_diff(high_signal_start_time, low_signal_start_time)
     time_period = on_time + off_time
@@ -91,6 +83,10 @@ def validate_signal(exp_freq=0, exp_duty_u16=0, exp_duty_ns=0, exp_dutycycle=0):
 
 
 print("*** PWM tests ***")
+start_time = 0
+low_signal_start_time = 0
+high_signal_start_time = 0
+
 # T = 1sec (25% dc)
 pwm = PWM(pwm_pin, freq=1, duty_ns=250000000)
 # Let the first pulse pass
@@ -102,7 +98,8 @@ print(
     pwm.duty_ns(),
     ", dutycycle(%): 25%",
 )
-measure_signal()
+measure_signal(start_time, low_signal_start_time, high_signal_start_time)
+
 validate_signal(exp_freq=1, exp_duty_u16=0, exp_duty_ns=250000000, exp_dutycycle=25)
 
 # T = 1sec (50% dc)
