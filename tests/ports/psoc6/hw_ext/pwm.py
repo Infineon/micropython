@@ -89,6 +89,7 @@ calc_freq = 0
 pwm = PWM(pwm_pin, freq=1, duty_ns=250000000)
 # Let the first pulse pass
 time.sleep(1)
+
 print(
     "\nTest Case 1: \n freq(Hz): ",
     pwm.freq(),
@@ -105,6 +106,8 @@ validate_signal(
     exp_duty_u16=0,
     exp_duty_ns=250000000,
 )
+
+calc_dc, calc_freq = 0, 0
 
 # T = 1sec (50% dc)
 pwm.duty_ns(500000000)
@@ -126,6 +129,7 @@ validate_signal(
     exp_duty_u16=0,
     exp_duty_ns=500000000,
 )
+calc_dc, calc_freq = 0, 0
 
 # T = 1sec (75% dc)
 pwm.duty_u16(49151)
@@ -142,6 +146,7 @@ calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=1, calc_freq=calc_freq, exp_dc=75, calc_dc=calc_dc, exp_duty_u16=49151, exp_duty_ns=0
 )
+calc_dc, calc_freq = 0, 0
 
 # Reconfigure frequency and dutycycle T = 1sec (50% dc)
 pwm.init(freq=2, duty_u16=32767)
@@ -158,5 +163,5 @@ calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=2, calc_freq=calc_freq, exp_dc=50, calc_dc=calc_dc, exp_duty_u16=32767, exp_duty_ns=0
 )
-
+calc_dc, calc_freq = 0, 0
 pwm.deinit()
