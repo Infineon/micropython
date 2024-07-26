@@ -6,11 +6,6 @@ from machine import PWM, Pin
 import os
 import time
 
-# TODO: This tests is failing too often. Enable it after proper review of timing, setup() teardown of resources.
-# Maybe the blocking implementation is not the most convenient. Interrupt based?
-# print("SKIP")
-# raise SystemExit
-
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
@@ -26,7 +21,7 @@ elif "CY8CKIT-062S2-AI" in board:
 input_pin = Pin(pin_in, Pin.IN)
 
 
-def measure_signal(start_time=0, low_signal_start_time=0, high_signal_start_time=0):
+def measure_signal():
     while input_pin.value() == 0:
         pass
     start_time = time.ticks_us()
@@ -39,15 +34,18 @@ def measure_signal(start_time=0, low_signal_start_time=0, high_signal_start_time
         pass
     high_signal_start_time = time.ticks_us()
 
-
-def validate_signal(exp_freq=0, exp_duty_u16=0, exp_duty_ns=0, exp_dutycycle=0):
-    tolerance = 8.0
-    duty_tolerance = 8.0
+    # Calculate frequency and duty cycle
     on_time = time.ticks_diff(low_signal_start_time, start_time)
     off_time = time.ticks_diff(high_signal_start_time, low_signal_start_time)
     time_period = on_time + off_time
     calc_freq = 1000000 / (time_period)
-    dc = on_time / (time.ticks_diff(high_signal_start_time, start_time)) * 100
+    calc_dc = on_time / time_period * 100
+    return calc_dc, calc_freq
+
+
+def validate_signal(exp_freq=0, calc_freq=0, calc_dc=0, exp_dc=0, exp_duty_u16=0, exp_duty_ns=0):
+    tolerance = 8.0
+    duty_tolerance = 8.0
 
     set_freq = pwm.freq()
     set_duty_u16 = 0
@@ -59,15 +57,17 @@ def validate_signal(exp_freq=0, exp_duty_u16=0, exp_duty_ns=0, exp_dutycycle=0):
         set_duty_u16 = pwm.duty_u16()
 
     if ((exp_freq - tolerance) < set_freq < (exp_freq + tolerance)) == False:
-        print(f"Exp freq does not match set freq! \n Exp freq: {exp_freq} \n Set freq: {set_freq}")
+        print(
+            f"Expected freq does not match set freq! \n Exp freq: {exp_freq} \n Set freq: {set_freq}"
+        )
 
     if ((exp_freq - tolerance) < calc_freq < (exp_freq + tolerance)) == False:
         print(
-            f"Exp freq does not match calc freq! \n Exp freq: {exp_freq} \n Set freq: {calc_freq}"
+            f"Expected freq does not match calc freq! \n Exp freq: {exp_freq} \n Set freq: {calc_freq}"
         )
-
-    if ((exp_dutycycle - duty_tolerance) < dc < (exp_dutycycle + duty_tolerance)) == False:
-        print(f"Exp dc(%) does not match calc dc(%)! \n Exp dc: {exp_dutycycle} \n Calc dc: {dc}")
+    # This one is failing intermittently on the CI/CD
+    if ((exp_dc - duty_tolerance) < calc_dc < (exp_dc + duty_tolerance)) == False:
+        print(f"Exp dc(%) does not match calc dc(%)! \n Exp dc: {exp_dc} \n Calc dc: {calc_dc}")
 
     if set_duty_ns != 0:
         if set_duty_ns != exp_duty_ns:
@@ -83,10 +83,8 @@ def validate_signal(exp_freq=0, exp_duty_u16=0, exp_duty_ns=0, exp_dutycycle=0):
 
 
 print("*** PWM tests ***")
-start_time = 0
-low_signal_start_time = 0
-high_signal_start_time = 0
-
+calc_dc = 0
+calc_freq = 0
 # T = 1sec (25% dc)
 pwm = PWM(pwm_pin, freq=1, duty_ns=250000000)
 # Let the first pulse pass
@@ -98,9 +96,15 @@ print(
     pwm.duty_ns(),
     ", dutycycle(%): 25%",
 )
-measure_signal(start_time, low_signal_start_time, high_signal_start_time)
-
-validate_signal(exp_freq=1, exp_duty_u16=0, exp_duty_ns=250000000, exp_dutycycle=25)
+calc_dc, calc_freq = measure_signal()
+validate_signal(
+    exp_freq=1,
+    calc_freq=calc_freq,
+    exp_dc=25,
+    calc_dc=calc_dc,
+    exp_duty_u16=0,
+    exp_duty_ns=250000000,
+)
 
 # T = 1sec (50% dc)
 pwm.duty_ns(500000000)
@@ -113,8 +117,15 @@ print(
     pwm.duty_ns(),
     ", dutycycle(%): 50%",
 )
-measure_signal()
-validate_signal(exp_freq=1, exp_duty_u16=0, exp_duty_ns=500000000, exp_dutycycle=50)
+calc_dc, calc_freq = measure_signal()
+validate_signal(
+    exp_freq=1,
+    calc_freq=calc_freq,
+    exp_dc=50,
+    calc_dc=calc_dc,
+    exp_duty_u16=0,
+    exp_duty_ns=500000000,
+)
 
 # T = 1sec (75% dc)
 pwm.duty_u16(49151)
@@ -127,8 +138,10 @@ print(
     pwm.duty_u16(),
     ", dutycycle(%): 75%",
 )
-measure_signal()
-validate_signal(exp_freq=1, exp_duty_u16=49151, exp_duty_ns=0, exp_dutycycle=75)
+calc_dc, calc_freq = measure_signal()
+validate_signal(
+    exp_freq=1, calc_freq=calc_freq, exp_dc=75, calc_dc=calc_dc, exp_duty_u16=49151, exp_duty_ns=0
+)
 
 # Reconfigure frequency and dutycycle T = 1sec (50% dc)
 pwm.init(freq=2, duty_u16=32767)
@@ -141,7 +154,9 @@ print(
     pwm.duty_u16(),
     ", dutycycle(%): 50%",
 )
-measure_signal()
-validate_signal(exp_freq=2, exp_duty_u16=32767, exp_duty_ns=0, exp_dutycycle=50)
+calc_dc, calc_freq = measure_signal()
+validate_signal(
+    exp_freq=2, calc_freq=calc_freq, exp_dc=50, calc_dc=calc_dc, exp_duty_u16=32767, exp_duty_ns=0
+)
 
 pwm.deinit()
