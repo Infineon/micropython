@@ -69,7 +69,7 @@ jobs:
         cp mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
         source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml
     - name: Run psoc6 tests
-      timeout-minutes: 10
+      timeout-minutes: 15
       run: | 
         devs=($(python tools/psoc6/get-devs.py port -b ${{ matrix.board }} -y tools/psoc6/${{ runner.name }}-devs.yml --hw-ext 0.5.0.a))
         echo "${devs}"
