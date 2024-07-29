@@ -234,7 +234,7 @@ i2s_tests() {
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
 }
 
-wtd_tests() {
+wdt_tests() {
   start_test_info "watchdog timer"
 
   python3 ${tests_psoc6_dir}/mp_custom/wdt_script.py ${dev_test} 
@@ -359,7 +359,7 @@ run_ci_tests() {
     # bitstream_tests
 
     dev_test=${devs[0]}
-    wtd_tests
+    wdt_tests
 
     dev_test=${devs[0]}
     dev_stub=${devs[1]}
@@ -410,7 +410,7 @@ case ${test_suite} in
         bitstream_tests
         ;;
     "watchdog")
-        wtd_tests
+        wdt_tests
         ;;
     "multi-instance")
         multi_tests
