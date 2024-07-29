@@ -200,7 +200,6 @@ static mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_READ);
 
     if (n_args == 3) {
-        mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
         for (uint32_t i = 0; i <= numSectors; ++i) {
@@ -211,7 +210,6 @@ static mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
                 mp_raise_ValueError(MP_ERROR_TEXT("psoc6_flash_writeblocks() - Flash Erase failed !"));
             }
         }
-        MICROPY_END_ATOMIC_SECTION(atomic_state);
     } else {
         offset += mp_obj_get_int(args[3]);
     }
