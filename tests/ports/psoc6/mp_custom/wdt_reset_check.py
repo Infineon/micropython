@@ -6,6 +6,7 @@ import os
 
 print("\n***** Test 1: Check if WDT triggered reset *****\n")
 
+print("machine.WDT_RESET: ", machine.WDT_RESET)
 if machine.reset_cause() == machine.WDT_RESET:
     print("PASS")
 else:
