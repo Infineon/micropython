@@ -287,16 +287,17 @@ static mp_int_t mp_machine_reset_cause(void) {
     if (reset_cause == CYHAL_SYSTEM_RESET_SOFT) {
         return MACHINE_SOFT_RESET;
     } else {
-        uint32_t reset_cause = cyhal_system_get_reset_reason();
+        return cyhal_system_get_reset_reason();
+        /*reset_cause = cyhal_system_get_reset_reason();
         if (reset_cause == 0UL) {
             return MACHINE_HARD_RESET;
         } else if (reset_cause == CYHAL_SYSTEM_RESET_WDT) {
             return MACHINE_WDT_RESET;
         } else if (reset_cause == CYHAL_SYSTEM_RESET_DEEPSLEEP_FAULT) {
             return MACHINE_DEEPSLEEP_RESET;
-        }
+        }*/
     }
-    return MACHINE_PWRON_RESET;
+    // return MACHINE_PWRON_RESET;
 }
 
 // machine.disable_irq()
