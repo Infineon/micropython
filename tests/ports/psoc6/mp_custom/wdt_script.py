@@ -66,5 +66,5 @@ def wdt_reset_check():
 
 
 wdt_test()
-# time.sleep(10)
-# wdt_reset_check()
+time.sleep(10)
+wdt_reset_check()
