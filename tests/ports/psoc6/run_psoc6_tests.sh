@@ -125,13 +125,14 @@ start_test_info() {
 
 run_tests() {
   tests_name=$1
-  test_dev=$2
-  tests=$3
-  excluded_tests=$4
-  stub_name=$5
-  stub_dev=$6
-  stub_script=$7
-
+  debug=$2
+  test_dev=$3
+  tests=$4
+  excluded_tests=$5
+  stub_name=$6
+  stub_dev=$7
+  stub_script=$8
+  
   start_test_info "${tests_name}" "${test_dev}" "${stub_dev}"
 
   if [ -n "${stub_name}" ]; then
@@ -144,8 +145,11 @@ run_tests() {
   case ${tests} in *.py)  test_dir_flag="";; esac
 
   ./run-tests.py --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
-  ./run-tests.py --print-failures
-
+  if [ "${debug}" = "true" ]; then
+    echo "Running command: ./run_tests.py --print_failures"
+    ./run_tests.py --print_failures
+  fi
+  
   update_test_result $?
 }
 
@@ -168,7 +172,7 @@ mpremote_vfs_large_file_tests() {
 }
 
 vfs_flash_tests() {
-  run_tests "file system flash" ${dev_test} \
+  run_tests "file system flash" false ${dev_test} \
   "extmod/vfs_basic.py 
    extmod/vfs_lfs_superblock.py
    extmod/vfs_userfs.py"
@@ -178,54 +182,55 @@ vfs_flash_tests() {
 }
 
 vfs_sdcard_tests() {
-  run_tests "file system sdcard" ${dev_test} "${tests_psoc6_dir}/hw_ext/sdcard.py"
+  run_tests "file system sdcard" false ${dev_test} "${tests_psoc6_dir}/hw_ext/sdcard.py"
   
   storage_device="sd"
   mpremote_vfs_large_file_tests
 }
 
 no_ext_hw_tests() {
-  run_tests "no extended hardware" ${dev_test} "${tests_psoc6_dir}" \
+  run_tests "no extended hardware" false ${dev_test} "${tests_psoc6_dir}" \
   "-e ${tests_psoc6_dir}/wdt.py -e ${tests_psoc6_dir}/wdt_reset_check.py"
 }
 
 hw_ext_tests() {
-  run_tests "hardware extended" ${dev_test} "${tests_psoc6_dir}/hw_ext" \
+  run_tests "hardware extended" false ${dev_test} "${tests_psoc6_dir}/hw_ext" \
   "-e ${tests_psoc6_dir}/hw_ext/i2c.py \
    -e ${tests_psoc6_dir}/hw_ext/sdcard.py \
    -e ${tests_psoc6_dir}/hw_ext/uart.py \
-   -e ${tests_psoc6_dir}/hw_ext/adc.py"
+   -e ${tests_psoc6_dir}/hw_ext/adc.py \
+   -e ${tests_psoc6_dir}/hw_ext/pwm.py" \
 }
 
 adc_tests() {
-  run_tests "adc" ${dev_test} "${tests_psoc6_dir}/hw_ext/adc.py"
+  run_tests "adc" false ${dev_test} "${tests_psoc6_dir}/hw_ext/adc.py"
 }
 
 #PWM
 pwm_tests() {
-  run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/hw_ext/pwm.py"
+  run_tests "pwm" true ${dev_test} "${tests_psoc6_dir}/hw_ext/pwm.py"
 }
 
 i2c_tests() {
-  run_tests "i2c" ${dev_test} "${tests_psoc6_dir}/hw_ext/i2c.py"
+  run_tests "i2c" false ${dev_test} "${tests_psoc6_dir}/hw_ext/i2c.py"
 }
 
 uart_tests() {
-  run_tests "uart" ${dev_test} "${tests_psoc6_dir}/hw_ext/uart.py"
+  run_tests "uart" false ${dev_test} "${tests_psoc6_dir}/hw_ext/uart.py"
 }
 
 bitstream_tests() {
-  run_tests "bitstream" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/bitstream_rx.py" \
+  run_tests "bitstream" false ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/bitstream_rx.py" \
    "" "bitstream_tx" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi_stub/bitstream_tx.py"
 }
 
 spi_tests() {
-  run_tests "spi" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/spi_master.py" \
+  run_tests "spi" false ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/spi_master.py" \
   "" "spi_slave" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi_stub/spi_slave.py"
 }
 
 i2s_tests() {
-  run_tests "i2s" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/i2s_rx.py" \
+  run_tests "i2s" false ${dev_test} "${tests_psoc6_dir}/hw_ext/multi_stub/i2s_rx.py" \
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi_stub/i2s_tx.py"
 }
 
@@ -285,6 +290,9 @@ run_ci_tests() {
 
     dev_test=${devs_a[0]}
     hw_ext_tests
+
+    dev_test=${devs_a[0]}
+    pwm_tests
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
