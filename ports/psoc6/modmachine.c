@@ -288,9 +288,9 @@ static mp_int_t mp_machine_reset_cause(void) {
         return MACHINE_SOFT_RESET;
     } else {
         // return cyhal_system_get_reset_reason();
-        reset_cause = cyhal_system_get_reset_reason();
-        cyhal_system_clear_reset_reason();
-        return reset_cause;
+        // reset_cause = cyhal_system_get_reset_reason();
+        // cyhal_system_clear_reset_reason();
+        return cyhal_system_get_reset_reason();
         /*printf("reset_cause...: %ld\n", reset_cause);
         printf("WDT reset: %d\n", CYHAL_SYSTEM_RESET_WDT);
         if (reset_cause == 0UL) {
