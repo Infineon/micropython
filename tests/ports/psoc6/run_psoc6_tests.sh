@@ -146,8 +146,8 @@ run_tests() {
 
   ./run-tests.py --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
   if [ "${debug}" = "true" ]; then
-    echo "Running command: ./run_tests.py --print_failures"
-    ./run_tests.py --print_failures
+    echo "Running command: ./run-tests.py --print_failures"
+    ./run-tests.py --print_failures
   fi
   
   update_test_result $?
