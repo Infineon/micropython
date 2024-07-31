@@ -192,6 +192,68 @@ static cyhal_gpio_event_t mp_to_cy_get_interrupt_mode(uint8_t mode) {
     return event;
 }
 
+static bool mp_get_gpio_dlf_value(uint8_t mode, uint8_t pull, int8_t value_arg) {
+    bool value;
+    switch (mode) {
+        case GPIO_MODE_IN: {
+            switch (pull) {
+                case GPIO_PULL_UP: {
+                    if (value_arg == -1 || value_arg == 1) {
+                        value = true;
+                    } else {
+                        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("machine pin error: Incompatible configuration. Input pull-up can not be initialized as low. \n"));
+                    }
+                }
+                break;
+
+                case GPIO_PULL_DOWN: {
+                    if (value_arg == -1 || value_arg == 0) {
+                        value = false;
+                    } else {
+                        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("machine pin error: Incompatible configuration. Input pull-down can not be initialized as high. \n"));
+                    }
+                }
+                break;
+
+                case GPIO_PULL_NONE:
+                default: {
+                    // Value is undefined.
+                    value = false;
+                    if (value_arg != -1) {
+                        mp_printf(&mp_plat_print, "machine pin warning: Initial value is undefined for input pull-none configuration. \n");
+                    }
+                }
+                break;
+            }
+        }
+        break;
+
+        case GPIO_MODE_OUT:
+        case GPIO_MODE_OPEN_DRAIN: {
+            // No conflicts with pull-up/down for output mode.
+            if (value_arg == 0) {
+                value = false;
+            } else if (value_arg == 1) {
+                value = true;
+            } else {
+                switch (pull) {
+                    case GPIO_PULL_UP:
+                        value = true;
+                        break;
+
+                    case GPIO_PULL_DOWN:
+                    case GPIO_PULL_NONE:
+                        value = false;
+                        break;
+                }
+            }
+        }
+        break;
+    }
+
+    return value;
+}
+
 static void gpio_interrupt_handler(void *handler_arg,  cyhal_gpio_event_t event) {
     machine_pin_io_obj_t *self = handler_arg;
     mp_sched_schedule(self->callback, MP_OBJ_FROM_PTR(self));
@@ -222,9 +284,9 @@ static mp_obj_t machine_pin_obj_init_helper(machine_pin_io_obj_t *self, size_t n
 
     bool pin_already_inited = machine_pin_is_inited(self);
 
-    bool value = false; // Default low. Initial value irrelevant if not specified.
+    int8_t value_arg = -1;
     if (args[ARG_value].u_obj != mp_const_none) {
-        value = mp_obj_is_true(args[ARG_value].u_obj);
+        value_arg = mp_obj_is_true(args[ARG_value].u_obj);
     }
 
     self->mode = GPIO_MODE_NONE;
@@ -239,6 +301,7 @@ static mp_obj_t machine_pin_obj_init_helper(machine_pin_io_obj_t *self, size_t n
 
     cyhal_gpio_direction_t direction = mp_to_cy_get_gpio_direction(self->mode);
     cyhal_gpio_drive_mode_t drive = mp_to_cy_get_gpio_drive(self->mode, self->pull);
+    bool value = mp_get_gpio_dlf_value(self->mode, self->pull, value_arg);
 
     cy_rslt_t result = CY_RSLT_SUCCESS;
     if (pin_already_inited) {
