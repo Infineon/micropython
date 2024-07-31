@@ -199,7 +199,7 @@ hw_ext_tests() {
    -e ${tests_psoc6_dir}/hw_ext/sdcard.py \
    -e ${tests_psoc6_dir}/hw_ext/uart.py \
    -e ${tests_psoc6_dir}/hw_ext/adc.py \
-   -e ${tests_psoc6_dir}/hw_ext/pwm.py" \
+   -e ${tests_psoc6_dir}/hw_ext/pwm.py" 
 }
 
 adc_tests() {
