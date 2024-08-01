@@ -86,9 +86,8 @@ An instance of the :mod:`machine.Pin` class can be created by invoking the const
 
     from machine import Pin
 
-    p0 = Pin('P13_7', Pin.OUT, Pin.PULL_DOWN, value=0)   # create output pin on pin P13_7, 
-                                                         # with pull-down resistor enabled,
-                                                         # with initial value 0 (low)     
+    p0 = Pin('P13_7', Pin.OUT, value=0)   # create output pin on pin P13_7,
+                                          # with initial value 0 (low)     
 
 
 Additionally, with any combination of parameters (except the Pin number or ``id`` which should be passed mandatorily), a :mod:`machine.Pin` object with various configuration levels can be instantiated. In these cases, the :meth:`Pin.init` function has to be called proactively to set the other necessary configurations, as needed.
@@ -100,9 +99,9 @@ Moreover, a pre-configured pin object can be repurposed by calling the :meth:`Pi
 
     from machine import Pin
 
-    p0 = Pin('P13_7')                    # create pin object for pin P13_7. 
-    p0.init(Pin.OUT, Pin.PULL_DOWN)      # set pin as output and enable pull-down resistor.
-    p0.low()                             # set value low.     
+    p0 = Pin('P13_7')       # create pin object for pin P13_7. 
+    p0.init(Pin.OUT)        # set pin as output.
+    p0.low()                # set value low.     
 
 
 
@@ -114,14 +113,13 @@ Similar to CPython, the parameters can be passed in any order if keywords are us
 
     from machine import Pin
 
-    p0 = Pin('P13_7', value=0, pull=Pin.PULL_DOWN, mode=Pin.OUT)     # create output pin on pin P13_7, 
-                                                                        # with pull-down resistor enabled,
-                                                                        # with initial value 0 (low) 
+    p0 = Pin('P13_7', value=0, mode=Pin.OUT)     # create output pin on pin P13_7, 
+                                                 # with initial value 0 (low) 
 
 
-    p1 = Pin('P0_2', Pin.OUT, None, value=1)                           # create output pin on pin P0_0, 
-                                                                       # with pull as NONE,
-                                                                       # with initial value 1 (high)                                                                       
+    p1 = Pin('P0_2', Pin.OUT, None, value=1)     # create output pin on pin P0_0, 
+                                                 # with pull as NONE,
+                                                 # with initial value 1 (high)                                                                       
 
 Note that the parameters such as ``value`` can only be passed as keyword arguments.  
 
@@ -143,8 +141,8 @@ Trigger can be ``Pin.IRQ_FALLING`` or ``Pin.IRQ_RISING`` or ``PIN.IRQ_FALLING | 
     
     from machine import Pin
 
-    p0 = Pin('P0_4', value=1, pull=Pin.PULL_UP, mode=Pin.IN)          
-    p1 = Pin('P13_7', value=0, pull=Pin.PULL_DOWN, mode=Pin.OUT)      
+    p0 = Pin('P0_4', mode=Pin.IN, pull=Pin.PULL_UP)          
+    p1 = Pin('P13_7', mode=Pin.OUT, value=0)      
 
     p0.irq(handler=lambda t:p1.high(),trigger=Pin.IRQ_RISING) #configure an IRQ callback function P1.high() when there is a rising edge on pin object p0.
     
