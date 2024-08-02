@@ -149,6 +149,40 @@ Using MicroPython remote control (mpremote) for filesystem operations
 The :ref:`mpremote <mpremote>` tool can be used to transfer files located on the user's host filesystem into the MicroPython filesystem.
 
 
+Resetting the board
+-------------------
+
+If something goes wrong, you can reset the board in two ways. The first is
+to press CTRL-D at the MicroPython prompt, which performs a soft reset.
+
+If that isn't working you can perform a hard reset by pressing the RESET button. 
+This will end your session, disconnecting whatever program (PuTTY, Thonny, etc) that you used to connect to the board.
+
+Boot modes
+----------
+
+There are 2 boot modes:
+
+  * normal boot mode
+  * safe boot mode
+
+boot.py and main.py are executed on "normal boot mode".
+
+boot.py and main.py are *NOT* executed on "safe boot mode".
+
+Changing boot mode :
+
+  * For normal boot mode, just press and release RESET button on the board.
+
+  * For safe boot mode, press and release the RESET button with pressing USER button on the board. Release the USER button after LED on board flashes 2 times.
+
+
+If you change the boot mode to safe boot mode, the MicroPython starts without
+the execution of main.py. Then you can remove the main.py by following command. ::
+    
+    import os
+    os.remove('main.py')
+
 Using third-party IDEs for filesystem operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
