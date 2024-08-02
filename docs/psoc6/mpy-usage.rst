@@ -166,19 +166,19 @@ There are 2 boot modes:
   * normal boot mode
   * safe boot mode
 
-boot.py and main.py are executed on "normal boot mode".
+``boot.py`` and ``main.py`` are executed on "normal boot mode".
 
-boot.py and main.py are *NOT* executed on "safe boot mode".
+``boot.py`` and ``main.py`` are **not** executed in "safe boot mode".
 
-Changing boot mode :
+Changing boot mode:
 
-  * For normal boot mode, just press and release RESET button on the board.
+  * For normal boot mode, just press and the release RESET button on the board.
 
-  * For safe boot mode, press and release the RESET button with pressing USER button on the board. Release the USER button after LED on board flashes 2 times.
+  * For safe boot mode, press and release the RESET button while pressing the USER button on the board. Release the USER button after the LED on the board flashes twice.
 
 
 If you change the boot mode to safe boot mode, the MicroPython starts without
-the execution of main.py. Then you can remove the main.py by following command. ::
+the execution of ``main.py``. Then you can remove the ``main.py`` by following command: ::
     
     import os
     os.remove('main.py')
