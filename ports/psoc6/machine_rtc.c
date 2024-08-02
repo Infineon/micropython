@@ -4,6 +4,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2021 "Krzysztof Adamski" <k@japko.eu>
+ * Copyright (c) 2022-2024 Infineon Technologies AG
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
