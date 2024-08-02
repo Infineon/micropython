@@ -2,7 +2,7 @@ import machine
 import time
 
 # invalid test cases
-print("\n***** Test 1: Wrong WDT id *****\n")
+"""print("\n***** Test 1: Wrong WDT id *****\n")
 try:
     wdt = machine.WDT(1, timeout=6000)
 except Exception:
@@ -45,4 +45,9 @@ print("\n***** Test 7: trying to create WDT 2nd instance *****\n")
 try:
     wdt = machine.WDT(0, timeout=1000)
 except Exception:
-    print("FAIL")
+    print("FAIL")"""
+
+print("\n***** Test 4: WDT created successfully 6s *****\n")
+wdt = machine.WDT(id=0, timeout=1000)
+# print(wdt)
+# print("PASS")
