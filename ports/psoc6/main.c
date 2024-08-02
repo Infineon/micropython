@@ -44,6 +44,12 @@
 
 #define MPY_TASK_STACK_SIZE                    (4096u)
 #define MPY_TASK_PRIORITY                      (3u)
+#define BUTTON_PRESSED                         (0) // active low
+
+typedef enum {
+    BOOT_MODE_NORMAL,
+    BOOT_MODE_SAFE
+} BootMode;
 
 #if MICROPY_ENABLE_GC
 extern uint8_t __StackTop, __StackLimit;
@@ -59,6 +65,35 @@ extern void network_deinit(void);
 void mpy_task(void *arg);
 
 TaskHandle_t mpy_task_handle;
+
+BootMode check_boot_mode(void) {
+    BootMode boot_mode;
+
+    // initialize user LED
+    cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT,
+        CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+
+    // initialize user button
+    cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
+        CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
+
+    if (cyhal_gpio_read(CYBSP_USER_BTN) == BUTTON_PRESSED) {
+        // Blink LED twice to indicate safe boot mode was entered
+        for (int i = 0; i < 4; i++)
+        {
+            cyhal_gpio_toggle(CYBSP_USER_LED);
+            cyhal_system_delay_ms(500); // delay in millisecond
+        }
+        boot_mode = BOOT_MODE_SAFE;
+    } else { // normal boot mode
+        boot_mode = BOOT_MODE_NORMAL;
+    }
+    // free the user LED and user button
+    cyhal_gpio_free(CYBSP_USER_BTN);
+    cyhal_gpio_free(CYBSP_USER_LED);
+
+    return boot_mode;
+}
 
 int main(int argc, char **argv) {
     // Initialize the device and board peripherals
@@ -141,18 +176,20 @@ soft_reset:
 
     #endif
 
-    // Execute user scripts.
-    int ret = pyexec_file_if_exists("/boot.py");
-
-    if (ret & PYEXEC_FORCED_EXIT) {
-        goto soft_reset;
-    }
-
-    if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
-        ret = pyexec_file_if_exists("/main.py");
+    if (check_boot_mode() == BOOT_MODE_NORMAL) {
+        // Execute user scripts.
+        int ret = pyexec_file_if_exists("/boot.py");
 
         if (ret & PYEXEC_FORCED_EXIT) {
             goto soft_reset;
+        }
+
+        if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
+            ret = pyexec_file_if_exists("/main.py");
+
+            if (ret & PYEXEC_FORCED_EXIT) {
+                goto soft_reset;
+            }
         }
     }
 
