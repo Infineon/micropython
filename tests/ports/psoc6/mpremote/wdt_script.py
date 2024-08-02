@@ -7,14 +7,14 @@ device = sys.argv[1]
 
 remote_directory_path = "/"
 
-wdt = "ports/psoc6/wdt.py"
-wdt_reset_check = "ports/psoc6/wdt_reset_check.py"
+wdt = "ports/psoc6/mpremote/wdt.py"
+wdt_reset_check = "ports/psoc6/mpremote/wdt_reset_check.py"
 
 # out and exp file paths
-wdt_op_fp = "./ports/psoc6/test_scripts/wdt.py.out"
-wdt_reset_check_op_fp = "./ports/psoc6/test_scripts/wdt_reset_check.py.out"
-exp_wdt = "./ports/psoc6/test_scripts/wdt.py.exp"
-exp_wdt_reset_check = "./ports/psoc6/test_scripts/wdt_reset_check.py.exp"
+wdt_op_fp = "./ports/psoc6/mpremote/wdt.py.out"
+wdt_reset_check_op_fp = "./ports/psoc6/mpremote/wdt_reset_check.py.out"
+exp_wdt = "./ports/psoc6/mpremote/wdt.py.exp"
+exp_wdt_reset_check = "./ports/psoc6/mpremote/wdt_reset_check.py.exp"
 
 # List of mpremote commands
 mpr_run_wdt = f"../tools/mpremote/mpremote.py connect {device} run {wdt}"
