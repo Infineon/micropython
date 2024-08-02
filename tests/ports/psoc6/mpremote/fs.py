@@ -8,7 +8,7 @@ mem_type = sys.argv[3]
 
 # tests inputs and script paths
 test_input_dir = "./ports/psoc6/test_inputs"
-test_script_dir = "./ports/psoc6/test_scripts"
+test_script_dir = "./ports/psoc6/mpremote"
 
 # List of mpremote commands
 mpr_connect = f"../tools/mpremote/mpremote.py connect {device}"
