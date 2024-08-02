@@ -19,9 +19,7 @@ exp_wdt_reset_check = "./ports/psoc6/mp_custom/wdt_reset_check.py.exp"
 # List of mpremote commands
 mpr_run_wdt = f"../tools/mpremote/mpremote.py connect {device} run {wdt}"
 # mpr_run_resume = f"../tools/mpremote/mpremote.py resume run {wdt_reset_check} "
-mpr_run_resume = (
-    f'../tools/mpremote/mpremote.py resume exec "import machine; print(machine.reset_cause())"'
-)
+mpr_run_resume = f'../tools/mpremote/mpremote.py resume exec "print_state_info()"'
 
 
 def exec(cmd, output_file):
@@ -69,5 +67,5 @@ def wdt_reset_check():
 
 
 wdt_test()
-time.sleep(10)
+time.sleep(1)
 wdt_reset_check()
