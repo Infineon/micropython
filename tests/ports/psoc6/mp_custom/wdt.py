@@ -49,5 +49,8 @@ except Exception:
 
 print("\n***** Test 4: WDT created successfully 6s *****\n")
 wdt = machine.WDT(id=0, timeout=1000)
-# print(wdt)
-# print("PASS")
+print(wdt)
+print("PASS")
+time.sleep_ms(1200)
+print("Sleep-over")
+print(machine.reset_cause())
