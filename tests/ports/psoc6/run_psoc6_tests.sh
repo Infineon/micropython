@@ -145,12 +145,15 @@ run_tests() {
   case ${tests} in *.py)  test_dir_flag="";; esac
 
   ./run-tests.py --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
+
+  update_test_result $?
+
   if [ "${debug}" = "true" ]; then
     echo "Running command: ./run-tests.py --print-failures"
     ./run-tests.py --print-failures
   fi
   
-  update_test_result $?
+
 }
 
 mpremote_vfs_large_file_tests() {
