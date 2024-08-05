@@ -152,27 +152,27 @@ The :ref:`mpremote <mpremote>` tool can be used to transfer files located on the
 Resetting the board
 -------------------
 
-If something goes wrong, you can reset the board in two ways. The first is
-to press CTRL-D at the MicroPython prompt, which performs a soft reset.
+If something goes wrong, you can reset the board in two ways. 
+The first way is to press CTRL-D at the MicroPython prompt, which performs a soft reset.
 
-If that isn't working you can perform a hard reset by pressing the RESET button. 
-This will end your session, disconnecting whatever program (PuTTY, Thonny, etc) that you used to connect to the board.
+If that does not work, you can perform a hard reset by pressing the RESET button. 
+This will end your session, disconnecting whatever program (PuTTY, Thonny, etc.) you used to connect to the board.
 
 Boot modes
 ----------
 
 There are 2 boot modes:
 
-  * normal boot mode
-  * safe boot mode
+  * Normal boot mode
+  * Safe boot mode
 
-``boot.py`` and ``main.py`` are executed on "normal boot mode".
+``boot.py`` and ``main.py`` are executed in "Normal boot mode".
 
-``boot.py`` and ``main.py`` are **not** executed in "safe boot mode".
+``boot.py`` and ``main.py`` are **not** executed in "Safe boot mode".
 
 Changing boot mode:
 
-  * For normal boot mode, just press and the release RESET button on the board.
+  * For normal boot mode, just press and release the RESET button on the board.
 
   * For safe boot mode, press and release the RESET button while pressing the USER button on the board. Release the USER button after the LED on the board flashes twice.
 
