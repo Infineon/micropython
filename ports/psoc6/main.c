@@ -76,6 +76,9 @@ boot_mode_t check_boot_mode(void) {
     cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
         CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
 
+    // Added 5ms delay to allow bypass capacitor on the board without external pull-up to charge.
+    cyhal_system_delay_ms(5);
+
     if (cyhal_gpio_read(CYBSP_USER_BTN) == CYBSP_BTN_PRESSED) {
         // Blink LED twice to indicate safe boot mode was entered
         for (int i = 0; i < 4; i++)
@@ -87,7 +90,6 @@ boot_mode_t check_boot_mode(void) {
         mp_printf(&mp_plat_print, "- DEVICE IS IN SAFE BOOT MODE -\n");
     } else { // normal boot mode
         boot_mode = BOOT_MODE_NORMAL;
-        mp_printf(&mp_plat_print, "- DEVICE IS IN NORMAL BOOT MODE -\n");
     }
     // free the user LED and user button
     cyhal_gpio_free(CYBSP_USER_BTN);
