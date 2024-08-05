@@ -76,7 +76,7 @@ boot_mode_t check_boot_mode(void) {
     cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
         CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
 
-    // Added 5ms delay to allow bypass capacitor on the board without external pull-up to charge.
+    // Added 5ms delay to allow bypass capacitor connected to the user button without external pull-up to charge.
     cyhal_system_delay_ms(5);
 
     if (cyhal_gpio_read(CYBSP_USER_BTN) == CYBSP_BTN_PRESSED) {
