@@ -44,12 +44,11 @@
 
 #define MPY_TASK_STACK_SIZE                    (4096u)
 #define MPY_TASK_PRIORITY                      (3u)
-#define BUTTON_PRESSED                         (0) // active low
 
 typedef enum {
     BOOT_MODE_NORMAL,
     BOOT_MODE_SAFE
-} BootMode;
+} boot_mode_t;
 
 #if MICROPY_ENABLE_GC
 extern uint8_t __StackTop, __StackLimit;
@@ -66,8 +65,8 @@ void mpy_task(void *arg);
 
 TaskHandle_t mpy_task_handle;
 
-BootMode check_boot_mode(void) {
-    BootMode boot_mode;
+boot_mode_t check_boot_mode(void) {
+    boot_mode_t boot_mode;
 
     // initialize user LED
     cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT,
@@ -77,7 +76,7 @@ BootMode check_boot_mode(void) {
     cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
         CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
 
-    if (cyhal_gpio_read(CYBSP_USER_BTN) == BUTTON_PRESSED) {
+    if (cyhal_gpio_read(CYBSP_USER_BTN) == CYBSP_BTN_PRESSED) {
         // Blink LED twice to indicate safe boot mode was entered
         for (int i = 0; i < 4; i++)
         {
@@ -85,8 +84,10 @@ BootMode check_boot_mode(void) {
             cyhal_system_delay_ms(500); // delay in millisecond
         }
         boot_mode = BOOT_MODE_SAFE;
+        mp_printf(&mp_plat_print, "- DEVICE IS IN SAFE BOOT MODE -\n");
     } else { // normal boot mode
         boot_mode = BOOT_MODE_NORMAL;
+        mp_printf(&mp_plat_print, "- DEVICE IS IN NORMAL BOOT MODE -\n");
     }
     // free the user LED and user button
     cyhal_gpio_free(CYBSP_USER_BTN);
