@@ -84,7 +84,7 @@ def wdt_reset_check():
 
 device = sys.argv[1]
 wdt = "ports/psoc6/wdt.py"
-mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} resume run {wdt} resume exec \"import machine; print('True' if machine.reset_cause()==machine.WDT_RESET else ' ')\""
+mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} run {wdt} resume exec \"import machine; print('True' if machine.reset_cause()==machine.WDT_RESET else ' ')\""
 wdt_op_fp = "./ports/psoc6/test_scripts/wdt.py.out"
 mpr_connect_cmd_out = "./ports/psoc6/test_scripts/connect.py.out"
 exp_wdt = "./ports/psoc6/test_scripts/wdt.py.exp"
@@ -127,11 +127,14 @@ def validate_test(op, exp_op):
         print("Test successful!")
 
 
-def wdt_test():
+def wdt_test(validate=False):
     print("Running wdt test")
     exec(mpr_cmd, wdt_op_fp)
-    validate_test(wdt_op_fp, exp_wdt)
+    if validate:
+        validate_test(wdt_op_fp, exp_wdt)
     os.remove(wdt_op_fp)
 
 
 wdt_test()
+time.sleep(1)
+wdt_test(True)
