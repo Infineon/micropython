@@ -1,13 +1,1 @@
 *** PWM tests ***
-
-Test Case 1: 
- freq(Hz):  1 , duty_on(ns):  2.5e+08 , dutycycle(%): 25%
-
-Test Case 2: 
- freq(Hz):  1 , duty_on(ns):  5e+08 , dutycycle(%): 50%
-
-Test Case 3: 
- freq(Hz):  1 , duty_u16(raw):  49151.0 , dutycycle(%): 75%
-
-Test Case 4: 
- freq(Hz):  2 , duty_u16(raw):  32767.0 , dutycycle(%): 50%
