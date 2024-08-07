@@ -221,6 +221,10 @@ static mp_obj_t machine_sdcard_make_new(const mp_obj_type_t *type, size_t n_args
         return mp_const_none;
     }
 
+    if (args[ARG_slot].u_int != -1) {
+        mp_printf(&mp_plat_print, "machine.SDCard: slot parameter is ignored in this port.\n");
+    }
+
     cy_rslt_t result = sd_card_init_helper(self, args);
 
     if (CY_RSLT_SUCCESS == result) {
