@@ -182,7 +182,7 @@ mp_obj_t machine_spi_init_helper(machine_spi_obj_t *self, int spi_mode, size_t n
     // set id if provided
     if (args[ARG_id].u_int != -1) {
         self->id = args[ARG_id].u_int;
-        mp_printf(&mp_plat_print, "ID parameter is ignored in this port!\n");
+        mp_printf(&mp_plat_print, "machine.SPI: ID parameter is ignored in this port.\n");
     }
     // set baudrate if provided
     if (args[ARG_baudrate].u_int != -1) {

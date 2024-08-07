@@ -152,20 +152,6 @@ void mpy_task(void *arg) {
     gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
     #endif
 
-    #ifdef SIGPIPE
-    // Do not raise SIGPIPE, instead return EPIPE. Otherwise, e.g. writing
-    // to peer-closed socket will lead to sudden termination of MicroPython
-    // process. SIGPIPE is particularly nasty, because unix shell doesn't
-    // print anything for it, so the above looks like completely sudden and
-    // silent termination for unknown reason. Ignoring SIGPIPE is also what
-    // CPython does. Note that this may lead to problems using MicroPython
-    // scripts as pipe filters, but again, that's what CPython does. So,
-    // scripts which want to follow unix shell pipe semantics (where SIGPIPE
-    // means "pipe was requested to terminate, it's not an error"), should
-    // catch EPIPE themselves.
-    signal(SIGPIPE, SIG_IGN);
-    #endif
-
     // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
     os_init();
     time_init();
@@ -178,9 +164,9 @@ soft_reset:
     // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
     mp_printf(&mp_plat_print, "\033[H\033[2J");
 
-    mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
-    mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
-    mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
+    // mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
+    // mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
+    // mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
