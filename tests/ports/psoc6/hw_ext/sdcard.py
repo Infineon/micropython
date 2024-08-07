@@ -12,7 +12,6 @@ MOUNT_POINT_LFS2 = "/SDCardLfs2"
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
     sdcard_config = {
-        "slot": 1,
         "width": 4,
         "cd": "P13_5",
         "cmd": "P12_4",
