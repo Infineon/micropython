@@ -22,30 +22,60 @@ input_pin = Pin(pin_in, Pin.IN)
 
 
 def measure_signal():
-    while input_pin.value() == 0:
-        pass
-    start_time = time.ticks_us()
-    # wait for low
-    while input_pin.value():
-        pass
-    low_signal_start_time = time.ticks_us()
-    # wait for high
-    while input_pin.value() < 1:
-        pass
-    high_signal_start_time = time.ticks_us()
+    # In some cases, the first measurement is not accurate
+    # (negative time)
+    # so we need to measure the signal until we get a positive timing
+    positive_timing = False
+    attempts = 0
+    while not positive_timing and attempts < 3:
+        init_level = input_pin.value()
+        # Transient until edge transition
+        # when the synch is done
+        while input_pin.value() == init_level:
+            pass
+
+        # start measuring just after the edge transition
+        init_level_start_time = time.ticks_us()
+
+        # wait for edge transition
+        while input_pin.value() == (not init_level):
+            pass
+        init_level_end_time = time.ticks_us()
+
+        # wait for next edge transition
+        while input_pin.value() == init_level:
+            pass
+        second_level_start_time = time.ticks_us()
+
+        # Identify the low and high level timestamps
+        if init_level == 1:
+            low_level_start_time = init_level_start_time
+            low_level_end_time = init_level_end_time
+            high_level_start_time = init_level_end_time
+            high_level_end_time = second_level_start_time
+        else:
+            low_level_start_time = init_level_end_time
+            low_level_end_time = second_level_start_time
+            high_level_start_time = init_level_start_time
+            high_level_end_time = init_level_end_time
+
+        on_time = time.ticks_diff(high_level_end_time, high_level_start_time)
+        off_time = time.ticks_diff(low_level_end_time, low_level_start_time)
+        time_period = on_time + off_time
+
+        attempts += 1
+        if time_period > 0:
+            positive_timing = True
 
     # Calculate frequency and duty cycle
-    on_time = time.ticks_diff(low_signal_start_time, start_time)
-    off_time = time.ticks_diff(high_signal_start_time, low_signal_start_time)
-    time_period = on_time + off_time
     calc_freq = 1000000 / (time_period)
-    calc_dc = on_time / time_period * 100
+    calc_dc = (on_time / time_period) * 100
     return calc_dc, calc_freq
 
 
 def validate_signal(exp_freq=0, calc_freq=0, calc_dc=0, exp_dc=0, exp_duty_u16=0, exp_duty_ns=0):
-    tolerance = 8.0
-    duty_tolerance = 8.0
+    tolerance = 0.5
+    duty_tolerance = 1.0
 
     set_freq = pwm.freq()
     set_duty_u16 = 0
@@ -83,20 +113,9 @@ def validate_signal(exp_freq=0, calc_freq=0, calc_dc=0, exp_dc=0, exp_duty_u16=0
 
 
 print("*** PWM tests ***")
-calc_dc = 0
-calc_freq = 0
 # T = 1sec (25% dc)
 pwm = PWM(pwm_pin, freq=1, duty_ns=250000000)
-# Let the first pulse pass
-time.sleep(1)
-
-print(
-    "\nTest Case 1: \n freq(Hz): ",
-    pwm.freq(),
-    ", duty_on(ns): ",
-    pwm.duty_ns(),
-    ", dutycycle(%): 25%",
-)
+time.sleep(2)  # Wait for the pwm signal to be initialized and started
 calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=1,
@@ -107,19 +126,8 @@ validate_signal(
     exp_duty_ns=250000000,
 )
 
-calc_dc, calc_freq = 0, 0
-
 # T = 1sec (50% dc)
 pwm.duty_ns(500000000)
-# Let the first pulse pass
-time.sleep(2)
-print(
-    "\nTest Case 2: \n freq(Hz): ",
-    pwm.freq(),
-    ", duty_on(ns): ",
-    pwm.duty_ns(),
-    ", dutycycle(%): 50%",
-)
 calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=1,
@@ -129,39 +137,21 @@ validate_signal(
     exp_duty_u16=0,
     exp_duty_ns=500000000,
 )
-calc_dc, calc_freq = 0, 0
 
 # T = 1sec (75% dc)
 pwm.duty_u16(49151)
-# Let the first pulse pass
-time.sleep(1)
-print(
-    "\nTest Case 3: \n freq(Hz): ",
-    pwm.freq(),
-    ", duty_u16(raw): ",
-    pwm.duty_u16(),
-    ", dutycycle(%): 75%",
-)
 calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=1, calc_freq=calc_freq, exp_dc=75, calc_dc=calc_dc, exp_duty_u16=49151, exp_duty_ns=0
 )
-calc_dc, calc_freq = 0, 0
 
-# Reconfigure frequency and dutycycle T = 1sec (50% dc)
+# Reconfigure frequency and dutycycle
+# T = 0.5 sec (50% dc)
 pwm.init(freq=2, duty_u16=32767)
-# Let the first 2 pulses pass
-time.sleep(1)
-print(
-    "\nTest Case 4: \n freq(Hz): ",
-    pwm.freq(),
-    ", duty_u16(raw): ",
-    pwm.duty_u16(),
-    ", dutycycle(%): 50%",
-)
 calc_dc, calc_freq = measure_signal()
 validate_signal(
     exp_freq=2, calc_freq=calc_freq, exp_dc=50, calc_dc=calc_dc, exp_duty_u16=32767, exp_duty_ns=0
 )
-calc_dc, calc_freq = 0, 0
+
 pwm.deinit()
+input_pin.deinit()
