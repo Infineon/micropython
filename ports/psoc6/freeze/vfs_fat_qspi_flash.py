@@ -13,6 +13,6 @@ except:
     vfs = os.VfsFat(bdev)
     os.mount(vfs, "/flash")
 
-print("External Flash with FAT filesystem mounted at /flash\n")
+print("Virtual File System: mounted at '/flash' with FAT format in external QSPI flash.\n")
 
 del machine, os, psoc6, bdev, vfs
