@@ -164,10 +164,6 @@ soft_reset:
     // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
     mp_printf(&mp_plat_print, "\033[H\033[2J");
 
-    // mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
-    // mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
-    // mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
-
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
