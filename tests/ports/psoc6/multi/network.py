@@ -6,10 +6,8 @@ except ImportError:
     print("SKIP")
     raise SystemExit
 
-channel_default = 9
-channel_new = 5
+channel_new = 1
 ssid_default = "mpy-psoc6-wlan"
-ssid_new = "mpy-test-conf-wlan"
 
 
 # Access Point
@@ -19,6 +17,7 @@ def instance0():
 
     ap_if = network.WLAN(network.AP_IF)
     print("ap instance created")
+    ap_if.config(channel=channel_new)
 
     # active()
     print("ap initially not active: ", ap_if.active() == False)
