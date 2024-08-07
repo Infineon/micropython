@@ -15,9 +15,10 @@ except:
     os.mount(vfs, "/")
 
 if "QSPI_Flash" in dir(psoc6):
-    print("External Flash with FAT filesystem mounted at /\n")
-
+    location = "external QSPI"
 else:
-    print("Internal Flash with FAT filesystem mounted at /\n")
+    location = "internal"
+
+print(f"Virtual File System: mounted at '/' with FAT format in {location} flash.\n")
 
 del machine, os, psoc6, bdev, vfs
