@@ -339,7 +339,7 @@ static mp_obj_t mp_machine_uart_make_new(const mp_obj_type_t *type, size_t n_arg
         // set id if provided
         if (mp_obj_get_int(args[0]) != -1) {
             self->id = mp_obj_get_int(args[0]);
-            mp_printf(&mp_plat_print, "UART object is created. But ID parameter is ignored in this port!\n");
+            mp_printf(&mp_plat_print, "machine.UART: ID parameter is ignored in this port.\n");
         }
     }
     self->init_flag = 0;
