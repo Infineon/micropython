@@ -246,7 +246,7 @@ static bool mp_get_gpio_dlf_value(uint8_t mode, uint8_t pull, int8_t value_arg) 
                     // Value is undefined.
                     value = false;
                     if (value_arg != -1) {
-                        mp_printf(&mp_plat_print, "machine pin warning: Initial value is undefined for input pull-none configuration. \n");
+                        mp_printf(&mp_plat_print, "machine.Pin: Initial value is undefined for input pull-none configuration.\n");
                     }
                 }
                 break;
