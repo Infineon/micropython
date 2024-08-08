@@ -57,7 +57,7 @@ def test_boundary_us_cond():
         if tick_var[i][3]:
             print("PASS")
         else:
-            print("FAIL")
+            print("diff: ", tick_var[i][2])
             break
 
 
