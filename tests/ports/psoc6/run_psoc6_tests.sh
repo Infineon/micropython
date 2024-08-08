@@ -160,7 +160,7 @@ mpremote_vfs_large_file_tests() {
   echo 
   echo "running tests : vfs large files"
   echo
-  chmod 777 ${tests_psoc6_dir}/mpremote/fs.py
+  chmod 777 ${tests_psoc6_dir}/mp_custom/fs.py
 
   # On device file saving tests for medium and large size takes considerable 
   # amount of time. Hence only when needed, this should be triggered.
@@ -169,7 +169,7 @@ mpremote_vfs_large_file_tests() {
      enable_adv_tests="adv"
   fi
 
-  python3 ${tests_psoc6_dir}/mpremote/fs.py ${dev_test} ${enable_adv_tests} ${storage_device}
+  python3 ${tests_psoc6_dir}/mp_custom/fs.py ${dev_test} ${enable_adv_tests} ${storage_device}
   
   update_test_result $?
 }
@@ -185,61 +185,59 @@ vfs_flash_tests() {
 }
 
 vfs_sdcard_tests() {
-  run_tests "file system sdcard" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/sdcard.py"
+  run_tests "file system sdcard" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/sdcard.py"
   
   storage_device="sd"
   mpremote_vfs_large_file_tests
 }
 
 no_ext_hw_tests() {
-  run_tests "no extended hardware" ${dev_test} "${tests_psoc6_dir}" \
-  "-e ${tests_psoc6_dir}/wdt.py -e ${tests_psoc6_dir}/wdt_reset_check.py"
+  run_tests "no extended hardware" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single" 
 }
 
 adc_tests() {
-  run_tests "adc" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/adc.py"
+  run_tests "adc" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/adc.py"
 }
 
 pwm_tests() {
-  run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/pwm.py"
+  run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pwm.py"
 }
 
 pin_tests() {
-  run_tests "pin" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/pin.py"
+  run_tests "pin" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pin.py"
 }
 
 signal_tests() {
-  run_tests "signal" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/signal.py"
+  run_tests "signal" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/signal.py"
 }
 
 i2c_tests() {
-  run_tests "i2c" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/i2c.py"
+  run_tests "i2c" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/i2c.py"
 }
 
 uart_tests() {
-  run_tests "uart" ${dev_test} "${tests_psoc6_dir}/hw_ext/single/uart.py"
+  run_tests "uart" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/uart.py"
 }
 
 bitstream_tests() {
-  run_tests "bitstream" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi/bitstream_rx.py" \
-   "" "bitstream_tx" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi/bitstream_tx.py"
+  run_tests "bitstream" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/bitstream_rx.py" \
+   "" "bitstream_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/bitstream_tx.py"
 }
 
 spi_tests() {
-  run_tests "spi" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi/spi_master.py" \
-  "" "spi_slave" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi/spi_slave.py"
+  run_tests "spi" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/spi_master.py" \
+  "" "spi_slave" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/spi_slave.py"
 }
 
 i2s_tests() {
-  run_tests "i2s" ${dev_test} "${tests_psoc6_dir}/hw_ext/multi/i2s_rx.py" \
-  "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/hw_ext/multi/i2s_tx.py"
-  run_tests "no extended hardware" false ${dev_test} "${tests_psoc6_dir}/stand_alone/single" 
+  run_tests "i2s" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_rx.py" \
+  "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
 }
 
 wtd_tests() {
   start_test_info "watchdog timer"
 
-  python3 ${tests_psoc6_dir}/mpremote/wdt_script.py ${dev_test} 
+  python3 ${tests_psoc6_dir}/mp_custom/wdt_script.py ${dev_test} 
   if [ $? -ne 0 ]; then
     echo "watchdog test failed"
     exit 1
@@ -249,7 +247,7 @@ wtd_tests() {
 multi_tests() {
   start_test_info "multiple boards instances" ${dev_test} ${dev_stub}
 
-  multi_tests=$(find ${tests_psoc6_dir}/stand_alone/multi/ -type f -name "*.py")
+  multi_tests=$(find ${tests_psoc6_dir}/board_only_hw/multi/ -type f -name "*.py")
 
   ./run-multitests.py -i pyb:${dev_test} -i pyb:${dev_stub} ${multi_tests} 
   
@@ -267,7 +265,7 @@ run_ci_tests() {
     echo "board          : ${board}"
     echo "hil            : ${hil_name}"
 
-    devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml))
+    devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${hil_name}-devs.yml))
 
     # TODO: This mess needs to be solved in a future script rework using yml files to define the compatible boards requirements
     board_version=0.5.0
