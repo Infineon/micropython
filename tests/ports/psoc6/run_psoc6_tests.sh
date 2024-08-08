@@ -273,9 +273,9 @@ run_ci_tests() {
       board_version=0.1.0
     fi
 
-    devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.a))
-    devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b))
-    devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c))
+    devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${hil_name}-devs.yml --hw-ext ${board_version}.a))
+    devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${hil_name}-devs.yml --hw-ext ${board_version}.b))
+    devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${hil_name}-devs.yml --hw-ext ${board_version}.c))
 
     dev_test=${devs[0]}
     vfs_flash_tests  
