@@ -153,7 +153,6 @@ run_tests() {
   fi
   
   update_test_result ${exit_code}
-
 }
 
 mpremote_vfs_large_file_tests() {
@@ -360,10 +359,9 @@ run_ci_tests() {
     dev_test=${devs[0]}
     wtd_tests
 
-    # Commented until multi-instance tests are fixed
-    # dev_test=${devs[0]}
-    # dev_test=${devs[1]}
-    # multi_tests
+    dev_test=${devs[0]}
+    dev_test=${devs[1]}
+    multi_tests
     echo
     echo "##########################################"
 }
