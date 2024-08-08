@@ -360,7 +360,7 @@ run_ci_tests() {
     #     dev_test=${devs_c[0]}
     #     dev_stub=${devs_b[0]}
     #   fi
-    # fi
+    fi
     # bitstream_tests
 
 
