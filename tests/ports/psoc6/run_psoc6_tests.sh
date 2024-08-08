@@ -361,11 +361,12 @@ run_ci_tests() {
     # bitstream_tests
 
     dev_test=${devs[0]}
-    wtd_tests
-
-    dev_test=${devs[0]}
     dev_test=${devs[1]}
     multi_tests
+
+    dev_test=${devs[0]}
+    wtd_tests
+
     echo
     echo "##########################################"
 }
