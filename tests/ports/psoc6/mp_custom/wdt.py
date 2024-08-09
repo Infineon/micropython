@@ -49,6 +49,7 @@ except Exception:
 
 
 import machine
+import psoc6
 import time
 
 # invalid test cases
@@ -75,11 +76,10 @@ except Exception:
 
 # valid test cases
 
-print("Test 4: Rest cause check executing...")
+print("Test 4: Reset cause check executing...")
 try:
-    wdt = machine.WDT(id=0, timeout=500)
+    wdt = machine.WDT(id=0, timeout=1000)
 except Exception:
     print("WDT instance creation failed!")
 
-time.sleep_ms(500)
-print("Sleep over")
+time.sleep_ms(1200)
