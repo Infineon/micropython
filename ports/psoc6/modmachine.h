@@ -71,3 +71,6 @@ should stay that way.  */
 void machine_init(void);
 void machine_deinit(void);
 #endif // MICROPY_INCLUDED_PSOC6_MODMACHINE_H
+
+mp_obj_t system_reset_cause(void);
+mp_obj_t clear_system_reset_cause(void);
