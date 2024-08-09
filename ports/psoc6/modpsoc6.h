@@ -42,8 +42,8 @@ typedef enum
     SYSTEM_RESET_WCO_ERR,               /**< A reset has occurred due to a watch-crystal clock error */
     SYSTEM_RESET_SYS_CLK_ERR,           /**< A reset has occurred due to a system clock error */
     SYSTEM_RESET_PROTECTION,            /**< A reset has occurred due to a protection violation */
-    SYSTEM_RESET_WARMBOOT,                  /**< A reset has occurred due wake up from DSRAM, which is a Warm Boot */
-    SYSTEM_RESET_MP_SOFT               /**< A reset has occurred due to a soft reset from micropython side*/
+    SYSTEM_RESET_WARMBOOT,              /**< A reset has occurred due wake up from DSRAM, which is a Warm Boot */
+    SYSTEM_RESET_MP_SOFT                /**< A reset has occurred due to a soft reset from micropython side*/
 } system_reset_reason_t;
 
 extern const mp_obj_type_t psoc6_flash_type;
