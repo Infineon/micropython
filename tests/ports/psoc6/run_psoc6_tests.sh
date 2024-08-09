@@ -235,13 +235,9 @@ i2s_tests() {
 }
 
 wdt_tests() {
-  start_test_info "watchdog timer"
-
-  python3 ${tests_psoc6_dir}/mp_custom/wdt_script.py ${dev_test} 
-  if [ $? -ne 0 ]; then
-    echo "watchdog test failed"
-    exit 1
-  fi
+  run_tests "wdt" ${dev_test} "${tests_psoc6_dir}/wdt.py"
+  sleep 1.5
+  run_tests "wdt reset check" ${dev_test} "${tests_psoc6_dir}/wdt_reset_check.py"
 }
 
 multi_tests() {
