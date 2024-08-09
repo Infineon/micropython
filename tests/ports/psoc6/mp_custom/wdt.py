@@ -81,5 +81,3 @@ try:
     wdt = machine.WDT(id=0, timeout=1000)
 except Exception:
     print("WDT instance creation failed!")
-
-time.sleep_ms(1200)
