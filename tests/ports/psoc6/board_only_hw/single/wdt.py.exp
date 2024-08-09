@@ -11,17 +11,17 @@ FAIL
 
 FAIL
 
-***** Test 4: WDT created successfully 6s *****
+***** Test 4: WDT created successfully 1.5s *****
 
 <WDT>
 PASS
 
-***** Test 5: WDT feed after 500ms *****
+***** Test 5: WDT feed after 100ms *****
 
 <WDT>
 PASS
 
-***** Test 6: WDT feed after 900ms *****
+***** Test 6: WDT feed after 200ms *****
 
 <WDT>
 PASS
