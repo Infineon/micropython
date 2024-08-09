@@ -300,9 +300,11 @@ static mp_int_t mp_machine_reset_cause(void) {
             reset_cause = MACHINE_WDT_RESET;
         } else if (sys_reset_cause == SYSTEM_RESET_DEEPSLEEP_FAULT) {
             reset_cause = MACHINE_DEEPSLEEP_RESET;
+        } else {
+            reset_cause = MACHINE_HARD_RESET;
         }
     }
-    reset_cause = MACHINE_HARD_RESET;
+
     return reset_cause;
 }
 
