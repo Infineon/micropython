@@ -90,6 +90,7 @@ void mpy_task(void *arg);
 
 TaskHandle_t mpy_task_handle;
 
+<<<<<<< HEAD
 boot_mode_t check_boot_mode(void) {
     boot_mode_t boot_mode;
 
@@ -121,6 +122,40 @@ boot_mode_t check_boot_mode(void) {
     cyhal_gpio_free(CYBSP_USER_LED);
 
     return boot_mode;
+=======
+void wdt_test() {
+    cyhal_wdt_t wdt_obj;
+    printf("******************"
+        "HAL: Watchdog Timer"
+        "****************** \r\n\n");
+
+    /* Check the reason for device restart */
+    uint32_t reset_reason = cyhal_system_get_reset_reason();
+    printf("RESET_REASON: %ld\r\n", reset_reason);
+
+    /* Clears the reset cause register */
+    cyhal_system_clear_reset_reason();
+
+    /* Initialize WDT */
+    cy_rslt_t result = cyhal_wdt_init(&wdt_obj, 2000);
+
+    /* WDT initialization failed. Stop program execution */
+    if (result != CY_RSLT_SUCCESS) {
+        printf("WDT init failed \r\n");
+    }
+
+    cyhal_system_delay_ms(2200);
+
+    for (;;)
+    {
+        #if (1)
+        while (1) {
+            ;
+        }
+        #endif
+    }
+
+>>>>>>> b8e516685 (ports/psoc6: Add system reset cause and clear.)
 }
 
 int main(int argc, char **argv) {
@@ -155,9 +190,8 @@ void mpy_task(void *arg) {
     // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
     os_init();
     time_init();
-
+    // wdt_test();
 soft_reset:
-
     mod_rtc_init();
     mp_init();
 
