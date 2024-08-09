@@ -76,22 +76,58 @@ import subprocess
 import sys
 import os
 
-
 device = sys.argv[1]
 wdt = "ports/psoc6/wdt.py"
 mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} run {wdt}"
-mpr_run_resume = f"../tools/mpremote/mpremote.py resume exec \"import psoc6; print(psoc6.system_reset_cause() if psoc6.system_reset_cause() != 1 else ' ')\""
+# mpr_run_resume = f"../tools/mpremote/mpremote.py resume exec \"import psoc6; import sys; print(psoc6.system_reset_cause() if psoc6.system_reset_cause() != 1 else ' ')\""
+
+mpr_run_resume = """
+../tools/mpremote/mpremote.py resume exec "
+import psoc6
+import sys
+reset_cause = psoc6.system_reset_cause()
+if reset_cause != 1:
+    print(reset_cause)
+    print('Failed as reset reason is: '+ str(reset_cause))
+    sys.exit(1)
+else:
+    print('Passed')
+    sys.exit(0)
+"
+"""
 
 wdt_op_fp = "./ports/psoc6/test_scripts/wdt.py.out"
 wdt_reset_check_op_fp = "./ports/psoc6/test_scripts/wdt_reset_check.py.out"
-mpr_connect_cmd_out = "./ports/psoc6/test_scripts/connect.py.out"
 exp_wdt = "./ports/psoc6/test_scripts/wdt.py.exp"
-exp_wdt_reset_check = "./ports/psoc6/test_scripts/wdt_reset_check.py.exp"
+exp_wdt_reset_check = exp_wdt
+# exp_wdt_reset_check = "./ports/psoc6/test_scripts/wdt_reset_check.py.exp"
 
 
-def exec(cmd, output_file):
+"""def exec(cmd, output_file):
     try:
         with open(output_file, "w") as f:
+            process = subprocess.Popen(
+                cmd,
+                shell=True,
+                stdout=f,
+                stderr=subprocess.PIPE,
+                bufsize=0,
+                universal_newlines=True,
+            )
+            output, error = process.communicate()
+        if process.returncode != 0:
+            print(f"Command execution failed with error: {error}")
+            sys.exit(1)
+        else:
+            print(f"Command executed successfully: {cmd}")
+    except Exception as e:
+        print(f"An error occurred while executing the command: {cmd}\nError: {e}")
+"""
+
+
+def exec(cmd, output_file, access_mode="w"):
+    try:
+        with open(output_file, access_mode) as f:
             process = subprocess.Popen(
                 cmd,
                 shell=True,
@@ -129,15 +165,15 @@ def validate_test(op, exp_op):
 def wdt_test():
     print("Running wdt test")
     exec(mpr_cmd, wdt_op_fp)
-    validate_test(wdt_op_fp, exp_wdt)
-    os.remove(wdt_op_fp)
+    # validate_test(wdt_op_fp, exp_wdt)
+    # os.remove(wdt_op_fp)
 
 
 def wdt_reset_check():
     print("Running wdt reset test")
-    exec(mpr_run_resume, wdt_reset_check_op_fp)
-    validate_test(wdt_reset_check_op_fp, exp_wdt_reset_check)
-    os.remove(wdt_reset_check_op_fp)
+    exec(mpr_run_resume, wdt_op_fp, "a")
+    validate_test(wdt_op_fp, exp_wdt_reset_check)
+    # os.remove(wdt_reset_check_op_fp)
 
 
 wdt_test()
