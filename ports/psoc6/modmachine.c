@@ -104,14 +104,15 @@ static uint32_t system_get_cpu_freq(void) {
 
 void machine_init(void) {
     mplogger_print("machine init\n");
-
+    // mp_obj_t reset = system_reset_cause();
+    // reset_cause = mp_obj_get_int(reset);
     // TODO: put all module init functions here ?
     // machine_pin_init(); ?
 }
 
 void machine_deinit(void) {
     // we are doing a soft-reset so change the reset_cause
-    reset_cause = CYHAL_SYSTEM_RESET_SOFT;
+    reset_cause = CYHAL_SYSTEM_RESET_SOFT; // mpy_soft_reset = true;
     mplogger_print("machine deinit\n");
     mod_wdt_deinit();
     mod_pin_deinit();
@@ -282,23 +283,9 @@ NORETURN static void mp_machine_reset(void) {
     }
     ;
 }
-
+// This function is called from MPY side and is for addressing soft reset from micropython side. This does not indicate a system level soft reset.
 static mp_int_t mp_machine_reset_cause(void) {
-    reset_cause = cyhal_system_get_reset_reason();
-    uint32_t ret_reset_cause = cyhal_system_get_reset_reason();
-    if (reset_cause == CYHAL_SYSTEM_RESET_SOFT) {
-        ret_reset_cause = MACHINE_SOFT_RESET;
-    } else if (reset_cause == 0UL) {
-        ret_reset_cause = MACHINE_HARD_RESET;
-    } else if (reset_cause == CYHAL_SYSTEM_RESET_WDT) {
-        ret_reset_cause = MACHINE_WDT_RESET;
-    } else if (reset_cause == CYHAL_SYSTEM_RESET_DEEPSLEEP_FAULT) {
-        ret_reset_cause = MACHINE_DEEPSLEEP_RESET;
-    } else {
-        ret_reset_cause = MACHINE_PWRON_RESET;
-    }
-    cyhal_system_clear_reset_reason();
-    return ret_reset_cause;
+    return MACHINE_SOFT_RESET;
 }
 
 // machine.disable_irq()
