@@ -80,7 +80,7 @@ import os
 device = sys.argv[1]
 wdt = "ports/psoc6/wdt.py"
 mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} run {wdt}"
-mpr_run_resume = f"../tools/mpremote/mpremote.py resume exec \"import psoc6; print('False' if psoc6.system_reset_cause() != 1 else ' ')\""
+mpr_run_resume = f"../tools/mpremote/mpremote.py resume exec \"import psoc6; print(psoc6.system_reset_cause() if psoc6.system_reset_cause() != 1 else ' ')\""
 
 wdt_op_fp = "./ports/psoc6/test_scripts/wdt.py.out"
 wdt_reset_check_op_fp = "./ports/psoc6/test_scripts/wdt_reset_check.py.out"
