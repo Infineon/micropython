@@ -79,12 +79,14 @@ import os
 
 device = sys.argv[1]
 wdt = "ports/psoc6/wdt.py"
-mpr_cmd = f'../tools/mpremote/mpremote.py connect {device} run {wdt} resume exec "import psoc6; print(psoc6.system_reset_cause())"'
-# mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} run {wdt} resume exec \"import machine; print('True' if machine.reset_cause()==machine.WDT_RESET else ' ')\""
+mpr_cmd = f"../tools/mpremote/mpremote.py connect {device} run {wdt}"
+mpr_run_resume = f"../tools/mpremote/mpremote.py resume exec \"import psoc6; print('False' if psoc6.system_reset_cause() != 1 else ' ')\""
 
 wdt_op_fp = "./ports/psoc6/test_scripts/wdt.py.out"
+wdt_reset_check_op_fp = "./ports/psoc6/test_scripts/wdt_reset_check.py.out"
 mpr_connect_cmd_out = "./ports/psoc6/test_scripts/connect.py.out"
 exp_wdt = "./ports/psoc6/test_scripts/wdt.py.exp"
+exp_wdt_reset_check = "./ports/psoc6/test_scripts/wdt_reset_check.py.exp"
 
 
 def exec(cmd, output_file):
@@ -124,14 +126,20 @@ def validate_test(op, exp_op):
         print("Test successful!")
 
 
-def wdt_test(validate=False):
+def wdt_test():
     print("Running wdt test")
     exec(mpr_cmd, wdt_op_fp)
-    if validate:
-        validate_test(wdt_op_fp, exp_wdt)
+    validate_test(wdt_op_fp, exp_wdt)
     os.remove(wdt_op_fp)
 
 
+def wdt_reset_check():
+    print("Running wdt reset test")
+    exec(mpr_run_resume, wdt_reset_check_op_fp)
+    validate_test(wdt_reset_check_op_fp, exp_wdt_reset_check)
+    os.remove(wdt_reset_check_op_fp)
+
+
 wdt_test()
-# time.sleep(1)
-# wdt_test(True)
+time.sleep(2)
+wdt_reset_check()
