@@ -150,7 +150,7 @@ run_tests() {
 
   if [ ${exit_code} -ne 0 ]; then
     ./run-tests.py --print-failures
-    ./run-tests.py --clean-failures
+    # ./run-tests.py --clean-failures
   fi
   
   update_test_result ${exit_code}
@@ -185,7 +185,9 @@ vfs_flash_tests() {
 }
 
 vfs_sdcard_tests() {
-  run_tests "file system sdcard" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/sdcard.py"
+  run_tests "file system sdcard" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/sdcard.py" \
+  "-e ${tests_psoc6_dir}/board_ext_hw/single/wdt.py \
+   -e ${tests_psoc6_dir}/board_ext_hw/single/wdt_reset_check.py"
   
   storage_device="sd"
   mpremote_vfs_large_file_tests
@@ -235,9 +237,9 @@ i2s_tests() {
 }
 
 wdt_tests() {
-  run_tests "wdt" ${dev_test} "${tests_psoc6_dir}/wdt.py"
+  run_tests "wdt" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/wdt.py"
   sleep 1.5
-  run_tests "wdt reset check" ${dev_test} "${tests_psoc6_dir}/wdt_reset_check.py"
+  run_tests "wdt reset check" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/wdt_reset_check.py"
 }
 
 multi_tests() {
