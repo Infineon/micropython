@@ -64,7 +64,7 @@ Find below the hardware diagrams for each of the supported boards:
 
 ![CY8CPROTO-063-BLE HIL setup](board_ext_hw/diagrams/cy8cproto-063-ble-hil-test-diag.png)
 
-#### CY8CPROTO-063-BLE
+#### CY8CKIT-062S2-AI
 
 ![CY8CKIT-062S2-AI HIL setup](board_ext_hw/diagrams/cy8ckit-062s2-ai-hil-test-diag.png)
 
