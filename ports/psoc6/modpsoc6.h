@@ -31,6 +31,21 @@
 // micropython includes
 #include "py/obj.h"
 
+typedef enum
+{
+    SYSTEM_RESET_NONE,                  /**< No cause */
+    SYSTEM_RESET_WDT,                   /**< A watchdog timer (WDT) reset has occurred */
+    SYSTEM_RESET_ACTIVE_FAULT,          /**< The fault logging system requested a reset from its Active logic. */
+    SYSTEM_RESET_DEEPSLEEP_FAULT,       /**< The fault logging system requested a reset from its Deep-Sleep logic. */
+    SYSTEM_RESET_SOFT,                  /**< The CPU requested a system reset through it's SYSRESETREQ. */
+    SYSTEM_RESET_HIB_WAKEUP,            /**< A reset has occurred due to a a wakeup from hibernate power mode. */
+    SYSTEM_RESET_WCO_ERR,               /**< A reset has occurred due to a watch-crystal clock error */
+    SYSTEM_RESET_SYS_CLK_ERR,           /**< A reset has occurred due to a system clock error */
+    SYSTEM_RESET_PROTECTION,            /**< A reset has occurred due to a protection violation */
+    SYSTEM_RESET_WARMBOOT,                  /**< A reset has occurred due wake up from DSRAM, which is a Warm Boot */
+    SYSTEM_RESET_MP_SOFT               /**< A reset has occurred due to a soft reset from micropython side*/
+} system_reset_reason_t;
+
 extern const mp_obj_type_t psoc6_flash_type;
 extern const mp_obj_type_t psoc6_qspi_flash_type;
 extern const mp_obj_type_t machine_sdcard_type;
