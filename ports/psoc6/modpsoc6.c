@@ -33,13 +33,6 @@
 #include "modpsoc6.h"
 #include "cyhal.h"
 
-mp_obj_t clear_system_reset_cause(void) {
-    cyhal_system_clear_reset_reason();
-    return mp_const_none;
-}
-MP_DEFINE_CONST_FUN_OBJ_0(clear_system_reset_cause_obj, clear_system_reset_cause);
-
-
 mp_obj_t system_reset_cause(void) {
     uint32_t set_reset_cause = SYSTEM_RESET_NONE;
 
@@ -82,7 +75,6 @@ static const mp_rom_map_elem_t psoc6_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SD_CARD),          MP_ROM_PTR(&machine_sdcard_type) },
     #endif
     { MP_ROM_QSTR(MP_QSTR_system_reset_cause),  MP_ROM_PTR(&system_reset_cause_obj)},
-    { MP_ROM_QSTR(MP_QSTR_clear_system_reset_cause),  MP_ROM_PTR(&clear_system_reset_cause_obj)},
 };
 static MP_DEFINE_CONST_DICT(psoc6_module_globals, psoc6_module_globals_table);
 
