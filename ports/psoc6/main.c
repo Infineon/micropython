@@ -155,7 +155,7 @@ void mpy_task(void *arg) {
     // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
     os_init();
     time_init();
-    // wdt_test();
+
 soft_reset:
     mod_rtc_init();
     mp_init();
