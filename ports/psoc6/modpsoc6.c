@@ -31,18 +31,72 @@
 
 // port-specific includes
 #include "modpsoc6.h"
+#include "cyhal.h"
+typedef enum
+{
+    SYSTEM_RESET_NONE,                  /**< No cause */
+    SYSTEM_RESET_WDT,                   /**< A watchdog timer (WDT) reset has occurred */
+    SYSTEM_RESET_ACTIVE_FAULT,          /**< The fault logging system requested a reset from its Active logic. */
+    SYSTEM_RESET_DEEPSLEEP_FAULT,       /**< The fault logging system requested a reset from its Deep-Sleep logic. */
+    SYSTEM_RESET_SOFT,                  /**< The CPU requested a system reset through it's SYSRESETREQ. */
+    SYSTEM_RESET_HIB_WAKEUP,            /**< A reset has occurred due to a a wakeup from hibernate power mode. */
+    SYSTEM_RESET_WCO_ERR,               /**< A reset has occurred due to a watch-crystal clock error */
+    SYSTEM_RESET_SYS_CLK_ERR,           /**< A reset has occurred due to a system clock error */
+    SYSTEM_RESET_PROTECTION,            /**< A reset has occurred due to a protection violation */
+    SYSTEM_RESET_WARMBOOT,                  /**< A reset has occurred due wake up from DSRAM, which is a Warm Boot */
+    SYSTEM_RESET_MP_SOFT               /**< A reset has occurred due to a soft reset from micropython side*/
+} system_reset_reason_t;
 
+mp_obj_t clear_system_reset_cause(void) {
+    cyhal_system_clear_reset_reason();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(clear_system_reset_cause_obj, clear_system_reset_cause);
+
+
+mp_obj_t system_reset_cause(void) {
+    uint32_t set_reset_cause = SYSTEM_RESET_NONE;
+
+    uint32_t reset_reason = cyhal_system_get_reset_reason();
+
+    if (reset_reason & CYHAL_SYSTEM_RESET_NONE) {
+        set_reset_cause = SYSTEM_RESET_NONE;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_WDT) {
+        set_reset_cause = SYSTEM_RESET_WDT;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_ACTIVE_FAULT) {
+        set_reset_cause = SYSTEM_RESET_ACTIVE_FAULT;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_DEEPSLEEP_FAULT) {
+        set_reset_cause = SYSTEM_RESET_DEEPSLEEP_FAULT;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_SOFT) {
+        set_reset_cause = SYSTEM_RESET_SOFT;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_HIB_WAKEUP) {
+        set_reset_cause = SYSTEM_RESET_HIB_WAKEUP;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_WCO_ERR) {
+        set_reset_cause = SYSTEM_RESET_WCO_ERR;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_SYS_CLK_ERR) {
+        set_reset_cause = SYSTEM_RESET_SYS_CLK_ERR;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_PROTECTION) {
+        set_reset_cause = SYSTEM_RESET_PROTECTION;
+    } else if (reset_reason & CYHAL_SYSTEM_RESET_WARMBOOT) {
+        set_reset_cause = SYSTEM_RESET_WARMBOOT;
+    }
+    cyhal_system_clear_reset_reason();
+    return MP_OBJ_NEW_SMALL_INT(set_reset_cause);
+}
+MP_DEFINE_CONST_FUN_OBJ_0(system_reset_cause_obj, system_reset_cause);
 
 static const mp_rom_map_elem_t psoc6_module_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_psoc6) },
+    { MP_ROM_QSTR(MP_QSTR___name__),         MP_ROM_QSTR(MP_QSTR_psoc6) },
     #if MICROPY_ENABLE_EXT_QSPI_FLASH
-    { MP_ROM_QSTR(MP_QSTR_QSPI_Flash),          MP_ROM_PTR(&psoc6_qspi_flash_type) },
+    { MP_ROM_QSTR(MP_QSTR_QSPI_Flash),       MP_ROM_PTR(&psoc6_qspi_flash_type) },
     #else
-    { MP_ROM_QSTR(MP_QSTR_Flash),               MP_ROM_PTR(&psoc6_flash_type) },
+    { MP_ROM_QSTR(MP_QSTR_Flash),            MP_ROM_PTR(&psoc6_flash_type) },
     #endif
     #if MICROPY_ENABLE_SD_CARD
     { MP_ROM_QSTR(MP_QSTR_SD_CARD),          MP_ROM_PTR(&machine_sdcard_type) },
     #endif
+    { MP_ROM_QSTR(MP_QSTR_system_reset_cause),  MP_ROM_PTR(&system_reset_cause_obj)},
+    { MP_ROM_QSTR(MP_QSTR_clear_system_reset_cause),  MP_ROM_PTR(&clear_system_reset_cause_obj)},
 };
 static MP_DEFINE_CONST_DICT(psoc6_module_globals, psoc6_module_globals_table);
 
