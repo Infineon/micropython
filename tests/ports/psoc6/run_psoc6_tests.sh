@@ -343,18 +343,17 @@ run_ci_tests() {
     i2s_tests
     
     # TODO: Bitstream not working for CY8CPROTO-062-4343W. Fix needed.
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+    #if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]}
       dev_stub=${devs_b[0]}
-      bitstream_tests
-    # else
-    #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_c[0]}
-    #     dev_stub=${devs_b[0]}
-    #   fi
+     else
+       if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+         dev_test=${devs_c[0]}
+         dev_stub=${devs_b[0]}
+       fi
     fi
-    # bitstream_tests
+     bitstream_tests
 
     dev_test=${devs[0]}
     wdt_tests
