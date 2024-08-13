@@ -13,7 +13,7 @@ another is configured as an input, which is used for receiving the bitstream sig
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
     bitstream_in_pin_name = "P12_1"
-    rx_ready_signal_pin_name = "P0_4"
+    rx_ready_signal_pin_name = "P13_4"
 elif "CY8CPROTO-063-BLE" in board:
     bitstream_in_pin_name = "P5_2"
     rx_ready_signal_pin_name = "P6_2"
@@ -45,7 +45,7 @@ tolerance = 100
 def notify_readiness_to_tx():
     rx_ready_signal_pin = Pin(
         rx_ready_signal_pin_name, Pin.OUT, value=0
-    )  # signal to inform the transmitter that receiver is read
+    )  # signal to inform the transmitter that receiver is ready
     rx_ready_signal_pin.low()
     # delay
     for i in range(1000):
