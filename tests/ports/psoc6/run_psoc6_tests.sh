@@ -342,9 +342,7 @@ run_ci_tests() {
     fi
     i2s_tests
     
-    # TODO: Bitstream not working for CY8CPROTO-062-4343W. Fix needed.
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]}
       dev_stub=${devs_b[0]}
      else
