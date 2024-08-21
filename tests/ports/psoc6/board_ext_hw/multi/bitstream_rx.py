@@ -18,7 +18,7 @@ elif "CY8CPROTO-063-BLE" in board:
     bitstream_in_pin_name = "P5_2"
     rx_ready_signal_pin_name = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
-    bitstream_in_pin_name = "P9_3"
+    bitstream_in_pin_name = "P9_2"
     rx_ready_signal_pin_name = "P9_7"
 
 expected_values = [
