@@ -57,31 +57,31 @@ The :mod:`machine` module::
     All timings greater than 1500 ns work and the accuracy of the timing is +/- 400 ns. 
     Supported timing_ns ranges below 1500 ns are [500, 1125, 800, 750], [400, 850, 800, 450], [300, 900, 600, 600] and [800, 1700, 1600, 900].
 
-Neopixel driver
+NeoPixel driver
 ---------------
 
-Neopixel library is supported in this port. The library can be installed using mip. 
+The [NeoPixel library](https://docs.micropython.org/en/latest/library/neopixel.html) for controlling various addressable LEDs (like WS2812B, SK6812, ...) is supported in this port. The library can be installed using [mip](https://docs.micropython.org/en/latest/reference/packages.html). 
 
 ::
 
     import mip
     mip.install('neopixel')
 
-neopixel driver can be used as follows. see the :mod:`neopixel` for more details. 
+The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more details):
 
 ::
 
     import neopixel
     from machine import Pin
-    p0 = Pin('P9_1', Pin.OUT, value=0) # set P9_1 to output to drive NeoPixels
-    np = neopixel.NeoPixel(p0,8,bpp=3) # create NeoPixel object on pin P9_1 with 8 pixels and 3 bytes per pixel with default timing=1
-    np[0] = (255, 255, 255)            # set the first pixel to white
-    np.write()                         # write data to all pixels
+    data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 to output to control NeoPixels
+    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object on pin P9_1 with 8 pixels and 3 bytes per pixel with default timing=1
+    np[0] = (255, 255, 255)                # set the first pixel to white
+    np.write()                             # write data to all pixels
 
 .. note::
-   - The timing parameter can be used in the Neopixel constructor as timing tuples supported by bitstream() function. The timing parameter is optional and by default set to 1 which is the default timing [400, 850, 800, 450] for WS2812B LEDs at 800kHz. 
-   - Use timing = 0 for  WS2812B LEDs at 400kHz ie, [800, 1700, 1600, 900].
-   - Use timing = [300, 900, 600, 600] for SK612 LEDs. 
+   - The timing parameter can be used in the `NeoPixel()` constructor with timing tuples supported by the `machine.bitstream()` module. The timing parameter is optional and by default set to 1 which is the default timing [400, 850, 800, 450] for WS2812B LEDs at 800kHz.
+   - Use timing = 0 for WS2812B LEDs at 400kHz ie, [800, 1700, 1600, 900].
+   - Use timing = [300, 900, 600, 600] for SK6812 LEDs. 
 
 Delay and timing
 ----------------
