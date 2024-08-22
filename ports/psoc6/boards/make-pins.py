@@ -1,7 +1,7 @@
 from __future__ import print_function
+from itertools import islice
 import argparse
 import sys
-import csv
 import re
 import os
 
@@ -23,6 +23,28 @@ class NamedPin(object):
         return self._name
 
 
+class PinsTable(object):
+    def __init__(self):
+        self.pins = []
+
+    def add_pin(self, pin_name, pin_addr):
+        self.pins.append([pin_name, pin_addr])
+
+    def get_pins(self):
+        return self.pins
+
+
+class PinsDetailsTable(object):
+    def __init__(self):
+        self.pins_details = []
+
+    def add_pin_details(self, pin_name, pin_addr, pin_exp):
+        self.pins_details.append([pin_name, pin_addr, pin_exp])
+
+    def get_pins_details(self):
+        return self.pins_details
+
+
 class Pin(object):
     def __init__(self, name, pin_addr, pin_exp):
         self._name = name
@@ -41,15 +63,6 @@ class Pin(object):
 
     def set_board_index(self, index):
         self.board_index = index
-
-    def print(self):
-        """print(
-            "const machine_pin_phy_obj_t pin_{:s}_obj = PIN({:s}, {:s});".format(
-                self._name,
-                self._name,
-                self._pin_addr,
-            )
-        )"""
 
     def print_header(self, num_pins, hdr_file):
         hdr_file.write("#define MAX_IO_PINS {:d} \n".format(num_pins))
@@ -98,34 +111,22 @@ class Pins(object):
                 pin.print_const_table_entry()
         print("};")
 
-    # ToDo: Complete for alternate functions
-    def parse_af_file(self):
-        with open("./pins_af.csv", "r") as csvfile:
-            rows = csv.reader(csvfile)
-            for row in rows:
-                try:
-                    pin_name = row[0]
-                    pin_addr = row[1]
-                    pin_exp = row[2].strip('"')
-                except:
-                    continue
-                pin = Pin(pin_name, pin_addr, pin_exp)
-                self.cpu_pins.append(NamedPin(pin_name, pin))
+    def parse_pin_details_table(self, pins_details_table):
+        for pin in pins_details_table.get_pins_details():
+            pin_name = pin[0]
+            pin_addr = pin[1]
+            pin_exp = pin[2].strip('"')
+            pin = Pin(pin_name, pin_addr, pin_exp)
+            self.cpu_pins.append(NamedPin(pin_name, pin))
 
-    def parse_board_file(self):
-        # Assuming the same path has required board files
-        with open("./pins.csv", "r") as csvfile:
-            rows = csv.reader(csvfile)
-            for row in rows:
-                try:
-                    board_pin_name = row[0]
-                    cpu_pin_name = row[1]
-                except:
-                    continue
-                pin = self.find_pin(cpu_pin_name)
-                if pin:
-                    pin.set_is_board_pin()
-                    self.board_pins.append(NamedPin(board_pin_name, pin))
+    def parse_board_table(self, pins_table):
+        for pin in pins_table.get_pins():
+            board_pin_name = pin[0]
+            cpu_pin_name = pin[1]
+            pin = self.find_pin(cpu_pin_name)
+            if pin:
+                pin.set_is_board_pin()
+                self.board_pins.append(NamedPin(board_pin_name, pin))
 
     def print_named(self, label, named_pins):
         print(
@@ -167,15 +168,73 @@ class Pins(object):
             for named_pin in self.board_pins:
                 qstr_set |= set([named_pin.name()])
             for qstr in sorted(qstr_set):
-                # cond_var = None
                 print("Q({})".format(qstr), file=qstr_file)
+
+    def get_pin_addr_helper(self, pin_def):
+        pattern = r"CYHAL_PORT_(\d+),\s*(\d+)"
+        match = re.search(pattern, pin_def)
+        port_number = match.group(1)
+        pin_number = match.group(2)
+        return (int(port_number) << 3) + int(pin_number)
+
+    def get_pin_package_path(self, filename):
+        root_dir = "./mtb_shared/mtb-hal-cat1"
+        mid_dir = "COMPONENT_CAT1A/include/pin_packages"
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            for dirname in dirnames:
+                if dirname.startswith("release-"):
+                    release_version = dirname
+                    file_path = os.path.join(root_dir, release_version, mid_dir, filename)
+                    if os.path.isfile(file_path):
+                        return file_path
+            return None
+
+    def generate_pins_table(self, pin_pacakge_file_name):
+        file_path = self.get_pin_package_path(pin_pacakge_file_name)
+
+        if file_path is None:
+            sys.exit(1)
+
+        with open(file_path, "r") as file:
+            content = file.read()
+
+        enum_start = content.find("typedef enum {")
+        enum_end = content.find("}")
+
+        if enum_start != -1 and enum_end != -1:
+            enum_content = content[enum_start:enum_end]
+            enum_values = re.findall(r"\b(\w+)\s*=", enum_content)
+            pin_name = re.findall(r"\b(?!NC\b)(\w+)\s*=", enum_content)
+            pin_defs = re.findall(r"=\s*(.*?\))", enum_content)
+
+            pins_table = PinsTable()
+            pins_details_table = PinsDetailsTable()
+
+            for value in enum_values:
+                if value.startswith("P") or value.startswith("N"):
+                    pins_table.add_pin(value, value)
+
+            pins_details_table.add_pin_details("NC", 255, "CYHAL_GET_GPIO(CYHAL_PORT_31, 7)")
+            for pname, pdef in zip(pin_name, pin_defs):
+                val = self.get_pin_addr_helper(pdef)
+                pins_details_table.add_pin_details(pname, val, pdef.strip('"'))
+            return pins_table, pins_details_table
+        else:
+            print("// Error: pins table and pins details table generation failed")
 
 
 def main():
     parser = argparse.ArgumentParser(
         prog="make-pins.py",
         usage="%(prog)s [options] [command]",
-        description="Generate board specific pin file",
+        description="Generate board specific pin details",
+    )
+
+    parser.add_argument(
+        "-g",
+        "--gen-pin-for",
+        dest="pin_package_filename",
+        help="Specifies the pin package file from mtb assets to generate pin details",
     )
 
     parser.add_argument(
@@ -196,10 +255,15 @@ def main():
 
     pins = Pins()
 
-    pins.parse_af_file()
+    if args.pin_package_filename:
+        print("// Generating pins table")
+        print("// - --gen-pin-for {:s}".format(args.pin_package_filename))
+        pins_table, pins_details_table = pins.generate_pins_table(args.pin_package_filename)
+
+    pins.parse_pin_details_table(pins_details_table)
 
     if args.hdr_filename and args.qstr_filename:
-        pins.parse_board_file()
+        pins.parse_board_table(pins_table)
         pins.update_num_cpu_pins()
         pins.print_const_table()
         pins.print()
