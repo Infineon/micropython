@@ -3,6 +3,7 @@
 This directory contains the imagimob generated model files and the interface for it's enablement in micropython. To access your edge ai models developed for PSoC6 based kit from a micropython application, please follow the description below.
 
 ## Folder structure
+Currently the existing sample model files are generated for [Human Activity Recognition](https://developer.imagimob.com/getting-started/modus-toolbox-solution-and-Imagimob-Studio#human-activity-recognition) code from imagimob.
 
 **model.c** : Imagimob generated source code in C for your developed model in the studio.
 
@@ -24,7 +25,7 @@ Follow the steps below to generate micropython bindings for your imagimob genera
 
         git clone https://github.com/Infineon/micropython.git
 
-        git checkout --track origin/imai-mp-integration
+        git checkout --track origin/ports-psoc6-main
 
 2. Then initialize the ModusToolbox™ environment: 
 
@@ -34,12 +35,14 @@ Follow the steps below to generate micropython bindings for your imagimob genera
 
         make submodules
 
-4. In the examples/imagimob/ folder, replace the **model.c** and **model.h** files by your imagimob generated model files.
+4. In the examples/usercimaimodule/imagimob/ folder, replace the **model.c** and **model.h** files by your imagimob generated model files.
 
 5. Compile it alongwith psoc6 port source code and generate the final .hex to be flashed into your device. From your root:
 
         cd ports/psoc6
         
+        make USER_C_MODULES=../../examples/usercimaimodule/
+
         make program
 
 # Run micropython
