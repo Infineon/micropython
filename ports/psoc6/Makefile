@@ -100,18 +100,13 @@ GEN_PINS_SRC := $(BUILD)/pins_$(BOARD).c
 HEADER_BUILD := $(BUILD)/genhdr
 GEN_PINS_HDR := $(BUILD)/genhdr/pins.h
 GEN_PINS_QSTR := $(BUILD)/pins_qstr.h
-BOARD_PINS := pins.csv 
-BOARD_AF_PINS := pins_af.csv
 
 GENERATED_PINS = $(GEN_PINS_SRC) $(GEN_PINS_HDR) $(GEN_PINS_QSTR)
 
 $(GENERATED_PINS): 
 	@echo "Generating $@"
-	$(PYTHON) boards/make-pins-csv.py --gen-pin-for $(PIN_PACKAGE_FILE) --save-pins-csv-at $(BOARD_PINS) --save-pins-af-csv-at $(BOARD_AF_PINS)
 	$(MKDIR) -p $(BUILD)/genhdr
-	$(PYTHON) boards/make-pins.py --hdr $(GEN_PINS_HDR) --qstr $(GEN_PINS_QSTR) > $(GEN_PINS_SRC)
-	rm -rf $(BOARD_PINS) $(BOARD_AF_PINS)
-
+	$(PYTHON) boards/make-pins.py --gen-pin-for $(PIN_PACKAGE_FILE) --hdr $(GEN_PINS_HDR) --qstr $(GEN_PINS_QSTR) > $(GEN_PINS_SRC)
 
 # Flags for optional C++ source code
 CXXFLAGS += $(filter-out -std=c99,$(CFLAGS))
