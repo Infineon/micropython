@@ -220,6 +220,8 @@ extern void machine_deinit();
 
 #define MICROPY_LOGGER_DEBUG                    (0)
 
+#define MICROPY_PY_IMAI                         (1)
+
 // extern void lwip_lock_acquire(void);
 // extern void lwip_lock_release(void);
 
