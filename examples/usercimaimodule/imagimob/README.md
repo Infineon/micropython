@@ -29,6 +29,8 @@ Follow the steps below to generate micropython bindings for your imagimob genera
 
 2. Then initialize the ModusToolbox™ environment: 
 
+        cd ports/psoc6
+
         make mtb_init BOARD=<board-name>
 
 3. Retrieve submodules:
