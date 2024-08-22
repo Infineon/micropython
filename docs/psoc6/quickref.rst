@@ -44,45 +44,6 @@ The :mod:`machine` module::
 
     machine.freq()          # get the current frequency of the CPU
 
-::
-
-    from machine import bitstream
-    
-    timing = [1000, 7000, 5000, 2500]          # timing (high_time_0, low_time_0, high_time_1, low_time_1)in ns
-    buf = bytearray([0xAB])                    # buffer data 
-    bitstream('P13_6', 0, timing, buf)         # bitstrem buffer data with timing through pin P13_6
-
-.. note::
-    Bitstream is set for the CPU frequency of 100MHz. At other clock frequencies, the timing will not fit.
-    All timings greater than 1500 ns work and the accuracy of the timing is +/- 400 ns. 
-    Supported timing_ns ranges below 1500 ns are [500, 1125, 800, 750], [400, 850, 800, 450], [300, 900, 600, 600] and [800, 1700, 1600, 900].
-
-NeoPixel driver
----------------
-
-The [NeoPixel library](https://docs.micropython.org/en/latest/library/neopixel.html) for controlling various addressable LEDs (like WS2812B, SK6812, ...) is supported in this port. The library can be installed using [mip](https://docs.micropython.org/en/latest/reference/packages.html). 
-
-::
-
-    import mip
-    mip.install('neopixel')
-
-The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more details):
-
-::
-
-    import neopixel
-    from machine import Pin
-    data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 to output to control NeoPixels
-    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object on pin P9_1 with 8 pixels and 3 bytes per pixel with default timing=1
-    np[0] = (255, 255, 255)                # set the first pixel to white
-    np.write()                             # write data to all pixels
-
-.. note::
-   - The timing parameter can be used in the `NeoPixel()` constructor with timing tuples supported by the `machine.bitstream()` module. The timing parameter is optional and by default set to 1 which is the default timing [400, 850, 800, 450] for WS2812B LEDs at 800kHz.
-   - Use timing = 0 for WS2812B LEDs at 400kHz ie, [800, 1700, 1600, 900].
-   - Use timing = [300, 900, 600, 600] for SK6812 LEDs. 
-
 Delay and timing
 ----------------
 
@@ -188,6 +149,129 @@ using ``Signal.on()`` or ``Signal.value(1)``.
 .. warning::
 
     The :ref:`machine.Signal value()<machine.Signal>` getter functionality is not supported in this port, and the returned value is undefined. This is the same behavior as the :ref:`machine.Pin value()<machine.Pin>` for Pin.OUT mode, which is the object supporting the Signal object.
+
+Timers
+------
+
+This port supports hardware timers, which can be used for timing-related applications.
+
+Use the :mod:`machine.Timer` class::
+
+    from machine import Timer
+    import time
+    tim0 = Timer(0, period=1000, mode=Timer.ONE_SHOT, callback=lambda t:print("One shot timer triggered")) #Default assignment: period=9999, frequency=10000
+    tim1 = Timer(1, period=3000, mode=Timer.PERIODIC, callback=lambda t:print("Periodic timer triggered"))
+
+    tim0.deinit() # Deinitialise the timer
+    tim1.deinit() # Deinitialise the timer
+
+Here, id can take values between 0 and 31 as a maximum of 32 hardware timers is supported.
+
+.. note::
+    Virtual timers are not supported in this port.
+
+
+Real time clock (RTC)
+---------------------
+
+See :ref:`machine.RTC <machine.RTC>`: ::
+
+    from machine import RTC
+    import time
+
+    irq_counter = 0
+
+    def cback(event):
+        global irq_counter
+        irq_counter += 1
+
+    rtc = RTC()
+    rtc.init((2023, 1, 1, 0, 0, 0, 0, 0)) # initialise rtc with specific date and time,
+                                          # eg. 2023/1/1 00:00:00
+    rtc.datetime((2017, 8, 23, 2, 12, 48, 0, 0)) # set a specific date and
+                                                 # time, eg. 2017/8/23 1:12:48
+    rtc.datetime() # get date and time
+    rtc.now() # get current date and time
+
+    rtc.irq(trigger=RTC.ALARM0, handler=cback)
+    rtc.alarm(1000, repeat=False) # set one-shot short alarm in ms
+    rtc.alarm_left() # Read the time left for the alarm to expire
+    time.sleep_ms(1008) # wait sufficient time
+    print(irq_counter) # Check irq counter
+
+    rtc.irq(trigger=RTC.ALARM0, handler=cback)
+    rtc.alarm(3000, repeat=True) # set periodic short alarm in ms
+    rtc.cancel() # cancel the alarm
+
+    rtc.irq(trigger=RTC.ALARM0, handler=cback)
+    rtc.alarm((2023, 1, 1, 0, 0, 1, 0, 0), repeat=False) # set one-shot longer duration alarm
+
+    rtc.memory((2023, 1, 1, 0, 0, 1, 0, 0)) # Retains date time value post reset
+
+
+.. note::
+    Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
+    calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
+    for this but rather re-write the field with the last calculated actual value.
+
+.. warning::
+    For setting a short-time periodic alarm, the minimum precision possible is 3 secs. Anything less than this may 
+    or may not work accurately. Also, the PSoC6 RTC has a precision of seconds. Hence for any alarm, the minimum period can be 1 second.
+
+Watch dog timer (WDT)
+---------------------
+
+See :ref:`machine.WDT <machine.WDT>`: ::
+
+    from machine import WDT
+
+    wdt = WDT(timeout=2000) # initialise wdt with id = 0 (default),
+                            # timeout in milliseconds
+    wdt.feed() # Feed the WDT. Do this periodically before the timeout.
+
+.. note::
+    The minimum timeout is 1 millisecond and the maximum timeout is 6000 milliseconds.
+    
+PWM (pulse width modulation)
+----------------------------
+
+PWM can be enabled on all output-capable pins. The frequency can range from 1Hz to 100MHz. As the frequency
+increases the PWM resolution decreases. Refer to datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+for additional details regarding board-specific PWM.
+
+Use the :ref:`machine.PWM <machine.PWM>` class: 
+
+The constructor can be called by passing the required arguments. All initialisation and configurations are handled by the constructor. Create a PWM object using 
+
+::  
+
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised for the given pin with respective frequency & duty cycle given as raw value.
+    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised for the given pin with respective frequency & duty cycle given in nanoseconds.
+
+    All four arguments have to be passed mandatorily to create a PWM object. duty_u16 or duty_ns should be specified at a time.  
+
+::
+
+    from machine import PWM
+
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) 
+    print(pwm)                                # view PWM settings
+
+    pwm.freq()                                # get current frequency
+    pwm.freq(100)                             # Set PWM frequency to 100 Hz
+
+    pwm.duty_u16()                            # get current duty cycle, range 0-65535
+    pwm.duty_u16(8192)                        # Set duty cycle from 0 to 65535 as a ratio of duty_u16/65535, now 25%
+    
+    pwm.duty_ns()                             # get current pulse width in ns
+    pwm.duty_ns(1000)                         # Set the current pulse width in ns from 0 to 1000000000/freq
+
+    pwm.init(freq=90,duty_ns=100)             # Modify the settings of PWM object
+    pwm.deinit()                              # Deinitialisation of PWM pin
+
+
+.. note::
+    invert functionality is not enabled in this port.
 
 Software I2C bus
 ----------------
@@ -331,204 +415,6 @@ Methods
 
     Disables the I2C slave interrupts.
 
-
-Real time clock (RTC)
----------------------
-
-See :ref:`machine.RTC <machine.RTC>`: ::
-
-    from machine import RTC
-    import time
-
-    irq_counter = 0
-
-    def cback(event):
-        global irq_counter
-        irq_counter += 1
-
-    rtc = RTC()
-    rtc.init((2023, 1, 1, 0, 0, 0, 0, 0)) # initialise rtc with specific date and time,
-                                          # eg. 2023/1/1 00:00:00
-    rtc.datetime((2017, 8, 23, 2, 12, 48, 0, 0)) # set a specific date and
-                                                 # time, eg. 2017/8/23 1:12:48
-    rtc.datetime() # get date and time
-    rtc.now() # get current date and time
-
-    rtc.irq(trigger=RTC.ALARM0, handler=cback)
-    rtc.alarm(1000, repeat=False) # set one-shot short alarm in ms
-    rtc.alarm_left() # Read the time left for the alarm to expire
-    time.sleep_ms(1008) # wait sufficient time
-    print(irq_counter) # Check irq counter
-
-    rtc.irq(trigger=RTC.ALARM0, handler=cback)
-    rtc.alarm(3000, repeat=True) # set periodic short alarm in ms
-    rtc.cancel() # cancel the alarm
-
-    rtc.irq(trigger=RTC.ALARM0, handler=cback)
-    rtc.alarm((2023, 1, 1, 0, 0, 1, 0, 0), repeat=False) # set one-shot longer duration alarm
-
-    rtc.memory((2023, 1, 1, 0, 0, 1, 0, 0)) # Retains date time value post reset
-
-
-.. note::
-    Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
-    calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
-    for this but rather re-write the field with the last calculated actual value.
-
-.. warning::
-    For setting a short-time periodic alarm, the minimum precision possible is 3 secs. Anything less than this may 
-    or may not work accurately. Also, the PSoC6 RTC has a precision of seconds. Hence for any alarm, the minimum period can be 1 second.
-
-
-Watch dog timer (WDT)
----------------------
-
-See :ref:`machine.WDT <machine.WDT>`: ::
-
-    from machine import WDT
-
-    wdt = WDT(timeout=2000) # initialise wdt with id = 0 (default),
-                            # timeout in milliseconds
-    wdt.feed() # Feed the WDT. Do this periodically before the timeout.
-
-.. note::
-    The minimum timeout is 1 millisecond and the maximum timeout is 6000 milliseconds.
-
-Network Module
---------------
-
-The :mod:`network` module.
-
-See :ref:`network.WLAN <network.WLAN>`:
-
-For some methods and constants, the PSoC6 network port implements certain specializations and slightly different behaviour. This is explained in this section.
-
-Methods
-^^^^^^^
-
-.. method:: WLAN.scan(ssid=None, bssid=None)
-
-    The scan option accepts the following filters as keyword arguments, removing from scan results any network not matching these parameters values:
-
-    * ``ssid``
-    * ``bssid``
-
-.. method:: WLAN.status('param')
-
-    .. warning:: 
-        The function does not provide the status of the connection. Use the ``active()`` for that purpose. Any errors or failures are communicated when using the corresponding enable/disable or connect/disconnect functions.
-
-    The following query parameters are allowed:
-        * ``rssi``. Only for STA.
-        * ``stations``. List of connected stations (only for AP).
-
-.. method:: WLAN.config('param')
-            WLAN.config(param=value, ...)
-
-    Among the suggested parameters of the general network WLAN API, for this port, only these are available:
-
-    * AP & STA query parameters
-
-        - ``channel``
-        - ``ssid``
-        - ``security```
-        - ``key/password``. Only for default AP key.
-        - ``mac``
-    * AP set parameters
-
-        - ``channel``
-        - ``ssid``
-        - ``security```
-        - ``key/password``. Only for default AP key.
-        
-    * STA has no configurable parameter.
-
-Constants
-^^^^^^^^^
-
-Security modes constants:
-
-.. data:: WLAN.OPEN
-        WLAN.WEP
-        WLAN.WPA
-        WLAN.WPA2
-        WLAN.WPA3
-        WLAN.WPA2_WPA_PSK
-        WLAN.SEC_UNKNOWN
-
-.. note::
-    Power modes configuration not implemented.
-     
-Here is a function you can run (or put in your boot.py file) to automatically connect to your Wi-Fi network:
-
-::
-
-    def network_connect() :
-        import network
-        from utime import sleep,sleep_ms
-        wlan = network.WLAN(network.STA_IF)
-        if wlan.isconnected():
-            print('[Network] already connected')
-            return
-
-        # enable and connect wlan
-        wlan.active(True)
-        wlan.connect('<ssid>','<key>')
-
-        # wait for the connection to establish
-        sleep(5)
-        for i in range(0,100):
-            if not wlan.isconnected() and wlan.status() >= 0:
-                print("[Network] Waiting to connect..")
-                sleep(2)
-
-        # check connection
-        if not wlan.isconnected():
-            print("[Network] Connection failed!")
-        else:
-            print(wlan.ifconfig())
-
-PWM (pulse width modulation)
-----------------------------
-
-PWM can be enabled on all output-capable pins. The frequency can range from 1Hz to 100MHz. As the frequency
-increases the PWM resolution decreases. Refer to datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
-for additional details regarding board-specific PWM.
-
-Use the :ref:`machine.PWM <machine.PWM>` class: 
-
-The constructor can be called by passing the required arguments. All initialisation and configurations are handled by the constructor. Create a PWM object using 
-
-::  
-
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised for the given pin with respective frequency & duty cycle given as raw value.
-    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised for the given pin with respective frequency & duty cycle given in nanoseconds.
-
-    All four arguments have to be passed mandatorily to create a PWM object. duty_u16 or duty_ns should be specified at a time.  
-
-::
-
-    from machine import PWM
-
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) 
-    print(pwm)                                # view PWM settings
-
-    pwm.freq()                                # get current frequency
-    pwm.freq(100)                             # Set PWM frequency to 100 Hz
-
-    pwm.duty_u16()                            # get current duty cycle, range 0-65535
-    pwm.duty_u16(8192)                        # Set duty cycle from 0 to 65535 as a ratio of duty_u16/65535, now 25%
-    
-    pwm.duty_ns()                             # get current pulse width in ns
-    pwm.duty_ns(1000)                         # Set the current pulse width in ns from 0 to 1000000000/freq
-
-    pwm.init(freq=90,duty_ns=100)             # Modify the settings of PWM object
-    pwm.deinit()                              # Deinitialisation of PWM pin
-
-
-.. note::
-    invert functionality is not enabled in this port.
-
 Software SPI bus
 ----------------
 
@@ -621,27 +507,6 @@ Methods
       - *buf* should be a buffer where data from the bus needs to be stored.
     
     Returns ``None``.
-
-
-Timers
-------
-
-This port supports hardware timers, which can be used for timing-related applications.
-
-Use the :mod:`machine.Timer` class::
-
-    from machine import Timer
-    import time
-    tim0 = Timer(0, period=1000, mode=Timer.ONE_SHOT, callback=lambda t:print("One shot timer triggered")) #Default assignment: period=9999, frequency=10000
-    tim1 = Timer(1, period=3000, mode=Timer.PERIODIC, callback=lambda t:print("Periodic timer triggered"))
-
-    tim0.deinit() # Deinitialise the timer
-    tim1.deinit() # Deinitialise the timer
-
-Here, id can take values between 0 and 31 as a maximum of 32 hardware timers is supported.
-
-.. note::
-    Virtual timers are not supported in this port.
 
 ADC (analog to digital conversion)
 ----------------------------------
@@ -874,4 +739,139 @@ Methods
         print(read_data)
 
     bdev.deinit()
+
+Bitstream
+---------
+
+::
+
+    from machine import bitstream
+    
+    timing = [1000, 7000, 5000, 2500]          # timing (high_time_0, low_time_0, high_time_1, low_time_1)in ns
+    buf = bytearray([0xAB])                    # buffer data 
+    bitstream('P13_6', 0, timing, buf)         # bitstrem buffer data with timing through pin P13_6
+
+.. note::
+    Bitstream is set for the CPU frequency of 100MHz. At other clock frequencies, the timing will not fit.
+    All timings greater than 1500 ns work and the accuracy of the timing is +/- 400 ns. 
+    Supported timing_ns ranges below 1500 ns are [500, 1125, 800, 750], [400, 850, 800, 450], [300, 900, 600, 600] and [800, 1700, 1600, 900].
             
+Network Module
+--------------
+
+The :mod:`network` module.
+
+See :ref:`network.WLAN <network.WLAN>`:
+
+For some methods and constants, the PSoC6 network port implements certain specializations and slightly different behaviour. This is explained in this section.
+
+Methods
+^^^^^^^
+
+.. method:: WLAN.scan(ssid=None, bssid=None)
+
+    The scan option accepts the following filters as keyword arguments, removing from scan results any network not matching these parameters values:
+
+    * ``ssid``
+    * ``bssid``
+
+.. method:: WLAN.status('param')
+
+    .. warning:: 
+        The function does not provide the status of the connection. Use the ``active()`` for that purpose. Any errors or failures are communicated when using the corresponding enable/disable or connect/disconnect functions.
+
+    The following query parameters are allowed:
+        * ``rssi``. Only for STA.
+        * ``stations``. List of connected stations (only for AP).
+
+.. method:: WLAN.config('param')
+            WLAN.config(param=value, ...)
+
+    Among the suggested parameters of the general network WLAN API, for this port, only these are available:
+
+    * AP & STA query parameters
+
+        - ``channel``
+        - ``ssid``
+        - ``security```
+        - ``key/password``. Only for default AP key.
+        - ``mac``
+    * AP set parameters
+
+        - ``channel``
+        - ``ssid``
+        - ``security```
+        - ``key/password``. Only for default AP key.
+        
+    * STA has no configurable parameter.
+
+Constants
+^^^^^^^^^
+
+Security modes constants:
+
+.. data:: WLAN.OPEN
+        WLAN.WEP
+        WLAN.WPA
+        WLAN.WPA2
+        WLAN.WPA3
+        WLAN.WPA2_WPA_PSK
+        WLAN.SEC_UNKNOWN
+
+.. note::
+    Power modes configuration not implemented.
+     
+Here is a function you can run (or put in your boot.py file) to automatically connect to your Wi-Fi network:
+
+::
+
+    def network_connect() :
+        import network
+        from utime import sleep,sleep_ms
+        wlan = network.WLAN(network.STA_IF)
+        if wlan.isconnected():
+            print('[Network] already connected')
+            return
+
+        # enable and connect wlan
+        wlan.active(True)
+        wlan.connect('<ssid>','<key>')
+
+        # wait for the connection to establish
+        sleep(5)
+        for i in range(0,100):
+            if not wlan.isconnected() and wlan.status() >= 0:
+                print("[Network] Waiting to connect..")
+                sleep(2)
+
+        # check connection
+        if not wlan.isconnected():
+            print("[Network] Connection failed!")
+        else:
+            print(wlan.ifconfig())
+
+NeoPixel driver
+---------------
+
+The [NeoPixel library](https://docs.micropython.org/en/latest/library/neopixel.html) for controlling various addressable LEDs (like WS2812B, SK6812, ...) is supported in this port. The library can be installed using [mip](https://docs.micropython.org/en/latest/reference/packages.html). 
+
+::
+
+    import mip
+    mip.install('neopixel')
+
+The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more details):
+
+::
+
+    import neopixel
+    from machine import Pin
+    data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 to output to control NeoPixels
+    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object on pin P9_1 with 8 pixels and 3 bytes per pixel with default timing=1
+    np[0] = (255, 255, 255)                # set the first pixel to white
+    np.write()                             # write data to all pixels
+
+.. note::
+   - The timing parameter can be used in the `NeoPixel()` constructor with timing tuples supported by the `machine.bitstream()` module. The timing parameter is optional and by default set to 1 which is the default timing [400, 850, 800, 450] for WS2812B LEDs at 800kHz.
+   - Use timing = 0 for WS2812B LEDs at 400kHz ie, [800, 1700, 1600, 900].
+   - Use timing = [300, 900, 600, 600] for SK6812 LEDs. 
