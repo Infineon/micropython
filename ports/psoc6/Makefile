@@ -49,6 +49,7 @@ CONFIG        ?= Debug
 
 # include py core make definitions
 include ../../py/mkenv.mk
+include $(TOP)/examples/imagimob/micropython.mk
 include mpconfigport.mk
 include $(BOARD_DIR)/mpconfigboard.mk
 include $(TOP)/py/py.mk
@@ -178,6 +179,11 @@ CFLAGS += -DMICROPY_PY_NETWORK=1 -DMICROPY_PY_NETWORK_IFX_WCM=1 -Wno-stringop-tr
 	MOD_SRC_C += network_ifx_wcm.c 
 endif
 
+IMAGIMOB_SRC_C += $(addprefix examples/,\
+	imagimob/imai_mp_iface.c \
+	imagimob/model.c \
+	)
+
 SRC_C = help.c \
 		main.c \
 		mphalport.c \
@@ -226,7 +232,7 @@ build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
 all: build
 
-clean: mtb_clean
+#clean: mtb_clean
 
 rebuild: clean mtb_clean all
 
