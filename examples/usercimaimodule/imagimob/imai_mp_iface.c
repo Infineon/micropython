@@ -64,6 +64,4 @@ const mp_obj_module_t imai_module = {
 };
 
 // Register the module to make it available in Python.
-#if MICROPY_PY_IMAI
 MP_REGISTER_MODULE(MP_QSTR_imai, imai_module);
-#endif
