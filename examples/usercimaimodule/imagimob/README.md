@@ -15,7 +15,7 @@ Currently the existing sample model files are generated for [Human Activity Reco
 
 ## Installation
 
-Please check for the pre-requisites mentioned [here](../../ports/psoc6/README.md#Pre-requisites).
+Please check for the pre-requisites mentioned [here](https://github.com/Infineon/micropython/tree/ports-psoc6-main/ports/psoc6#pre-requisites).
 
 ## Usage
 
