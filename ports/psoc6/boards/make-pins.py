@@ -211,7 +211,7 @@ class Pins(object):
             pins_details_table = PinsDetailsTable()
 
             for value in enum_values:
-                if value.startswith("P") or value.startswith("N"):
+                if value.startswith("P") or value.startswith("N") or value.startswith("U"):
                     pins_table.add_pin(value, value)
 
             pins_details_table.add_pin_details("NC", 255, "CYHAL_GET_GPIO(CYHAL_PORT_31, 7)")
