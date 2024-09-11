@@ -603,7 +603,7 @@ PDM objects can be created and initialized using::
     format=PDM_PCM.STEREO,
     left_gain=0,
     right_gain=0
-)
+    )
 
 2 modes of operation are supported:
  - blocking
