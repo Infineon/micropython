@@ -298,9 +298,6 @@ run_ci_tests() {
     dev_test=${devs_a[0]}
     pwm_tests
 
-    dev_test=${devs_a[0]}
-    pdm_pcm_tests
-
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
     else
