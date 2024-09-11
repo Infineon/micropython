@@ -38,7 +38,7 @@
 
 #define DEFAULT_LEFT_GAIN       0
 #define DEFAULT_RIGHT_GAIN      0
-#define MICROPY_HW_MAX_PDM_PCM  2
+#define MICROPY_HW_MAX_PDM_PCM  1
 
 #define AUDIO_SYS_CLOCK_24_576_000_HZ      24576000u /* (Ideally 24.576 MHz) For sample rates: 8 KHz / 16 KHz / 48 KHz */
 #define AUDIO_SYS_CLOCK_22_579_000_HZ      22579000u /* (Ideally 22.579 MHz) For sample rates: 22.05 KHz / 44.1 KHz */
