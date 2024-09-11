@@ -579,6 +579,109 @@ Constructor
     audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object
     num_read = audio_in.readinto(buf)# fill buffer with audio samples from I2S device
 
+PDM - PCM
+------------
+
+PDM/PCM is a asynchronous operation used to connect digital audio devices.
+At the physical level, a bus consists of 2 lines: CLK, DATA.
+
+PDM objects can be created and initialized using::
+
+    from machine import PDM_PCM
+    from machine import Pin
+
+    clk_pin  = Pin('P10_4')   
+    data_pin = Pin('P10_5')
+
+    pdm_pcm = PDM_PCM(
+    0,
+    sck=clk_pin,
+    data=data_pin,
+    sample_rate=8000,
+    decimation_rate=64,
+    bits=PDM_PCM.BITS_16,
+    format=PDM_PCM.STEREO,
+    left_gain=0,
+    right_gain=0
+)
+
+2 modes of operation are supported:
+ - blocking
+ - non-blocking
+
+
+Constructor
+-----------
+
+.. class:: PDM_PCM(id, *, clk, data, sample_rate, decimation_rate, bits, format, left_gain, right_gain)
+
+   Construct PDM_PCM object of the given id:
+
+   - ``id`` identifies a particular PDM_PCM bus; it is board and port specific and is ignored in our port
+
+   Keyword-only parameters that are supported on this port:
+
+     - ``clk`` is a pin object for the clock line
+     - ``data`` is a pin object for the data line
+     - ``sample_rate`` specifies audio sampling rate
+     - ``decimation_rate`` specifies PDM decimation rate
+     - ``bits`` specifies word length - 16, 18, 20, 24 being accepted values
+     - ``format`` specifies channel format - STEREO, MONO_LEFT or MONO_RIGHT
+     - ``left_gain`` is PGA in 0.5 dB increment
+     - ``right_gain`` is PGA in 0.5 dB increment
+
+Methods
+-------
+
+.. method:: PDM_PCM.init(clk, ...)
+
+  See constructor for argument descriptions
+
+.. method:: PDM_PCM.deinit()
+
+  Deinitialize PDM_PCM object
+
+.. method::  PDM_PCM.readinto(buf)
+
+.. method::  PDM_PCM.irq(handler)
+
+.. method::  PDM_PCM.gain(gain_left, gain_right)
+
+.. method:: PDM_PCM.start()
+
+.. method:: PDM_PCM.stop()
+
+Constants
+---------
+
+.. data:: PDM_PCM.STEREO
+
+   for initialising the PDM_PCM ``format`` to stereo
+
+.. data:: PDM_PCM.MONO_LEFT
+
+   for initialising the PDM_PCM ``format`` to mono-left
+
+.. data:: PDM_PCM.MONO_RIGHT
+
+   for initialising the PDM_PCM ``format`` to mono-right
+
+.. data:: PDM_PCM.BITS_16
+
+   for initialising the PDM_PCM ``bits`` to 16
+
+.. data:: PDM_PCM.BITS_18
+
+   for initialising the PDM_PCM ``bits`` to 18
+
+.. data:: PDM_PCM.BITS_20
+
+   for initialising the PDM_PCM ``bits`` to 20
+
+.. data:: PDM_PCM.BITS_24
+
+   for initialising the PDM_PCM ``bits`` to 24
+
 
 UART
 ----
