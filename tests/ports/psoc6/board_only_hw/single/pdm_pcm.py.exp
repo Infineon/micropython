@@ -1,1 +1,1 @@
-machine.PDM_PCM: PLL0 freq is changed from 24571429 to 24576000. This will affect all resources clock freq sourced by PLL0.
+machine.PDM_PCM: PLL0 freq is changed from 48000000 to 24576000. This will affect all resources clock freq sourced by PLL0.
