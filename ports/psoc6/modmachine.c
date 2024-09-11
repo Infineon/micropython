@@ -372,6 +372,7 @@ MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
     \
     /* Modules */ \
     { MP_ROM_QSTR(MP_QSTR_I2CSlave),            MP_ROM_PTR(&machine_i2c_slave_type) }, \
+    { MP_ROM_QSTR(MP_QSTR_PDM_PCM),             MP_ROM_PTR(&machine_pdm_pcm_type) }, \
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) }, \
     { MP_ROM_QSTR(MP_QSTR_RTC),                 MP_ROM_PTR(&machine_rtc_type) }, \
     \

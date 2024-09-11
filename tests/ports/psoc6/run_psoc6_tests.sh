@@ -38,6 +38,7 @@ usage() {
   echo "  uart              run uart tests"
   echo "  spi               run spi tests"
   echo "  i2s               run i2s tests"
+  echo "  pdm_pcm           run pdm_pcm tests"
   echo "  bitstream         run bitstream tests"
   echo "  watchdog          run watchdog tests"
   echo "  multi-instance    run multiple board instances tests"
@@ -236,6 +237,10 @@ i2s_tests() {
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
 }
 
+pdm_pcm_tests() {
+  run_tests "pdm_pcm" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/pdm_pcm.py"
+}
+
 wdt_tests() {
   run_tests "wdt" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/wdt.py"
   sleep 2
@@ -292,6 +297,9 @@ run_ci_tests() {
 
     dev_test=${devs_a[0]}
     pwm_tests
+
+    dev_test=${devs_a[0]}
+    pdm_pcm_tests
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
@@ -398,6 +406,9 @@ case ${test_suite} in
         ;;
     "i2s")
         i2s_tests
+        ;;
+    "pdm_pcm")
+        pdm_pcm_tests
         ;;
     "uart")
         uart_tests
