@@ -238,7 +238,7 @@ i2s_tests() {
 }
 
 pdm_pcm_tests() {
-  run_tests "pdm_pcm" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/pdm_pcm.py"
+  run_tests "pdm_pcm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/pdm_pcm.py"
 }
 
 wdt_tests() {
@@ -297,6 +297,9 @@ run_ci_tests() {
 
     dev_test=${devs_a[0]}
     pwm_tests
+
+    dev_test=${devs_a[0]}
+    pdm_pcm_tests
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 

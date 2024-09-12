@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2024 Infineon Technologies AG
+ * Copyright (c) 2024 Infineon Technologies AG
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
 #include "machine_pin_phy.h"
 #include "modmachine.h"
 #include "mplogger.h"
+
+#if MICROPY_PY_MACHINE_PDM_PCM
 
 #define pdm_pcm_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
@@ -64,11 +66,6 @@ typedef enum {
     BITS_24 = 24
 } pdm_pcm_word_length_t;
 
-typedef enum {
-    RX,
-    TX
-} pdm_pcm_op_mode_t;
-
 // To be compatible with extmod
 typedef enum {
     MONO_LEFT   = CYHAL_PDM_PCM_MODE_LEFT,
@@ -88,7 +85,6 @@ typedef struct _machine_pdm_pcm_obj_t {
     cyhal_pdm_pcm_t pdm_pcm_obj;
     uint32_t clk;
     uint32_t data;
-    uint16_t pdm_pcm_op_mode; // always RX
     io_mode_t io_mode;
     format_t format;
     uint8_t bits;
@@ -177,7 +173,7 @@ static mp_obj_t machine_pdm_pcm_make_new(const mp_obj_type_t *type, size_t n_pos
 
 // =======================================================================================
 // Private functions
-// Init clock
+
 void pdm_pcm_audio_clock_init(uint32_t audio_clock_freq_hz) {
     cyhal_clock_t pll_clock;
     cy_rslt_t result;
@@ -260,11 +256,7 @@ static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_
     return self;
 }
 
-// Init helper
 static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_val_t *args) {
-
-    // Only RX mode supported in psoc6
-    self->pdm_pcm_op_mode = RX;
 
     // Assign pins
     self->clk = pin_addr_by_name(args[ARG_clk].u_obj);
@@ -317,8 +309,6 @@ static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self) {
     MP_STATE_PORT(machine_pdm_pcm_obj[self->pdm_pcm_id]) = NULL;
 }
 
-
-
 static const mp_rom_map_elem_t machine_pdm_pcm_locals_dict_table[] = {
     // Methods
     { MP_ROM_QSTR(MP_QSTR_init),            MP_ROM_PTR(&machine_pdm_pcm_init_obj) },
@@ -353,3 +343,5 @@ MP_DEFINE_CONST_OBJ_TYPE(
     print, machine_pdm_pcm_print,
     locals_dict, &machine_pdm_pcm_locals_dict
     );
+
+#endif // MICROPY_PY_MACHINE_PDM_PCM
