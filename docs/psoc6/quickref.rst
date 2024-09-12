@@ -590,8 +590,8 @@ PDM objects can be created and initialized using::
     from machine import PDM_PCM
     from machine import Pin
 
-    clk_pin  = Pin('P10_4')   
-    data_pin = Pin('P10_5')
+    clk_pin = "P10_4"
+    data_pin = "P10_5"
 
     pdm_pcm = PDM_PCM(
     0,
@@ -646,10 +646,6 @@ Methods
 .. method::  PDM_PCM.irq(handler)
 
 .. method::  PDM_PCM.gain(gain_left, gain_right)
-
-.. method:: PDM_PCM.start()
-
-.. method:: PDM_PCM.stop()
 
 Constants
 ---------
