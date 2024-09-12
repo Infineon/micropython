@@ -186,7 +186,7 @@ void pdm_pcm_audio_clock_init(uint32_t audio_clock_freq_hz) {
     uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&pll_clock);
 
     if (audio_clock_freq_hz != pll_source_clock_freq_hz) {
-        mp_printf(&mp_plat_print, "machine.PDM_PCM: PLL0 freq is changed from %lu to %lu. This will affect all resources clock freq sourced by PLL0.\n", pll_source_clock_freq_hz, audio_clock_freq_hz);
+        mp_printf(&mp_plat_print, "machine.PDM_PCM: PLL0 freq is changed to %lu. This will affect all resources clock freq sourced by PLL0.\n", audio_clock_freq_hz);
         clock_set = false;
         pll_source_clock_freq_hz = audio_clock_freq_hz;
     }
