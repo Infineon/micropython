@@ -6,11 +6,9 @@ board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
     clk_pin = "P10_4"
     data_pin = "P10_5"
-
 elif "CY8CPROTO-063-BLE" in board:
     print("SKIP")
     raise SystemExit
-
 elif "CY8CKIT-062S2-AI" in board:
     clk_pin = "P10_4"
     data_pin = "P10_5"
