@@ -36,6 +36,7 @@
 #define MEM_ALIGNMENT                   (4)
 
 #define LWIP_RAW                        (1)
+#define NO_SYS                           0
 
 //
 // Enable IPV4 networking
@@ -146,8 +147,10 @@
  * TCP_SND_BUF: TCP sender buffer space (bytes).
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
-#define TCP_SND_BUF                     (4 * TCP_MSS)
-
+#define TCP_SND_BUF                     (12 * TCP_MSS)
+#define TCP_WND                         (10 * TCP_MSS)
+#define LWIP_WND_SCALE                  1
+#define TCP_RCV_SCALE                   2
 /**
  * TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least
  * as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work.
@@ -177,7 +180,7 @@
 #define DEFAULT_RAW_RECVMBOX_SIZE       (12)
 #define DEFAULT_UDP_RECVMBOX_SIZE       (12)
 #define DEFAULT_ACCEPTMBOX_SIZE         (8)
-
+#define TCP_OVERSIZE                    TCP_MSS
 /**
  * MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One
  * per active UDP "connection".
@@ -201,7 +204,7 @@
  * MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP segments.
  * (requires the LWIP_TCP option)
  */
-#define MEMP_NUM_TCP_SEG                27
+#define MEMP_NUM_TCP_SEG                (2 * TCP_SND_QUEUELEN)
 
 /**
  * MEMP_NUM_SYS_TIMEOUT: the number of simultaneously active timeouts.
@@ -211,7 +214,7 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE                  24
+#define PBUF_POOL_SIZE                  400
 
 /**
  * MEMP_NUM_NETBUF: the number of struct netbufs.
@@ -258,9 +261,11 @@
  */
 #define LWIP_NETIF_API                  1
 
+// #define TCP_LISTEN_BACKLOG              1
+
 #define LWIP_DNS                       (1)
 
-#define LWIP_NETIF_TX_SINGLE_PBUF      (1)
+#define LWIP_NETIF_TX_SINGLE_PBUF      (0)
 
 #define LWIP_RAND               rand
 
