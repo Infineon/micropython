@@ -170,7 +170,7 @@
 
 #if MICROPY_PY_NETWORK
 
-#define MICROPY_PY_SOCKET                       (1)
+#define MICROPY_PY_SOCKET                       (0)
 #define MICROPY_PY_WEBSOCKET                    (1)
 #define MICROPY_PY_WEBREPL                      (1)
 #define MICROPY_PY_OS_DUPTERM                   (1)
