@@ -151,6 +151,7 @@
 #define TCP_WND                         (10 * TCP_MSS)
 #define LWIP_WND_SCALE                  1
 #define TCP_RCV_SCALE                   2
+#define MEM_SIZE                        (16000)
 /**
  * TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least
  * as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work.
@@ -265,7 +266,7 @@
 
 #define LWIP_DNS                       (1)
 
-#define LWIP_NETIF_TX_SINGLE_PBUF      (0)
+#define LWIP_NETIF_TX_SINGLE_PBUF      (1)
 
 #define LWIP_RAND               rand
 
