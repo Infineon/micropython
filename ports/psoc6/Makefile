@@ -134,7 +134,7 @@ ifeq ($(MICROPY_PSOC6_LWIP),1)
 	netutils/netutils.c \
 	netutils/trace.c \
   )
-  CFLAGS += -DMICROPY_PY_LWIP=1
+  CFLAGS += -DMICROPY_PY_LWIP=0
 endif
 
 DRIVERS_SRC_C += $(addprefix drivers/,\
@@ -143,6 +143,7 @@ DRIVERS_SRC_C += $(addprefix drivers/,\
 
 MOD_SRC_C += \
 	modgc.c \
+	modsocket.c \
 	\
 	machine_i2c.c \
 	machine_pin_phy.c \
