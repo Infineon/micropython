@@ -33,30 +33,18 @@
 #include "py/mpconfig.h"
 #include "py/runtime.h"
 
+
 // MTB includes
 #include "cyhal.h"
 
 
 // port-specific includes
-#include "irq.h"
 
 #define MICROPY_BEGIN_ATOMIC_SECTION()     cyhal_system_critical_section_enter()
 #define MICROPY_END_ATOMIC_SECTION(state)  cyhal_system_critical_section_exit(state)
 
 // #define MICROPY_BEGIN_ATOMIC_SECTION()      (0)
 // #define MICROPY_END_ATOMIC_SECTION(state)   {(void)state;}
-
-// For regular code that wants to prevent "background tasks" from running.
-// These background tasks (LWIP) run in PENDSV context.
-#define MICROPY_PY_PENDSV_ENTER   uint32_t atomic_state = raise_irq_pri(IRQ_PRI_PENDSV);
-#define MICROPY_PY_PENDSV_REENTER atomic_state = raise_irq_pri(IRQ_PRI_PENDSV);
-#define MICROPY_PY_PENDSV_EXIT    restore_irq_pri(atomic_state);
-
-// Prevent the "lwIP task" from running.
-#define MICROPY_PY_LWIP_ENTER   MICROPY_PY_PENDSV_ENTER
-#define MICROPY_PY_LWIP_REENTER MICROPY_PY_PENDSV_REENTER
-#define MICROPY_PY_LWIP_EXIT    MICROPY_PY_PENDSV_EXIT
-
 
 #define MP_HAL_PIN_FMT   "%u"
 #define mp_hal_pin_obj_t uint
