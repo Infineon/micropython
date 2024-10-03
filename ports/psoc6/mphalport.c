@@ -72,6 +72,7 @@ void mp_hal_delay_us(mp_uint_t us) {
     cyhal_system_delay_us(us);
 }
 
+
 // Issues may arise if time is incremented only each second.
 // Would require proper ns count from epoch of clock the source (see also "extmod/vfs_lfs.c", function "lfs_get_mtime" and "mphalport.c", function "mp_hal_time_ns")
 uint64_t mp_hal_time_ns(void) {
