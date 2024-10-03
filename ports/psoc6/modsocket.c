@@ -1,16 +1,12 @@
 /*
  * This file is part of the MicroPython project, http://micropython.org/
  *
- * Development of the code in this file was sponsored by Microbric Pty Ltd
- * and Mnemote Pty Ltd
- *
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 Nick Moore @mnemote
+ * Copyright (c) 2022-2024 Infineon Technologies AG
  *
- * Based on extmod/modlwip.c
- * Copyright (c) 2013, 2014 Damien P. George
- * Copyright (c) 2015 Galen Hazelwood
+ * Based on ports/esp32/modsocket.c
+ * Copyright (c) 2016, 2017 Nick Moore @mnemote
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +79,6 @@ typedef struct _socket_obj_t {
     #endif
 } socket_obj_t;
 
-// static const char *TAG = "modsocket";
 
 void _socket_settimeout(socket_obj_t *sock, uint64_t timeout_ms);
 
@@ -156,62 +151,6 @@ static inline void check_for_exceptions(void) {
     mp_handle_pending(true);
 }
 
-#if MICROPY_HW_ENABLE_MDNS_QUERIES
-// This function mimics lwip_getaddrinfo, but makes an mDNS query
-static int mdns_getaddrinfo(const char *host_str, const char *port_str,
-    const struct addrinfo *hints, struct addrinfo **res) {
-    int host_len = strlen(host_str);
-    const int local_len = sizeof(MDNS_LOCAL_SUFFIX) - 1;
-    if (host_len <= local_len ||
-        strcasecmp(host_str + host_len - local_len, MDNS_LOCAL_SUFFIX) != 0) {
-        return 0;
-    }
-
-    // mDNS query
-    char host_no_local[host_len - local_len + 1];
-    memcpy(host_no_local, host_str, host_len - local_len);
-    host_no_local[host_len - local_len] = '\0';
-
-    esp_ip4_addr_t addr = {0};
-
-    esp_err_t err = mdns_query_a(host_no_local, MDNS_QUERY_TIMEOUT_MS, &addr);
-    if (err != ESP_OK) {
-        if (err == ESP_ERR_NOT_FOUND) {
-            *res = NULL;
-            return 0;
-        }
-        *res = NULL;
-        return err;
-    }
-
-    struct addrinfo *ai = memp_malloc(MEMP_NETDB);
-    if (ai == NULL) {
-        *res = NULL;
-        return EAI_MEMORY;
-    }
-    memset(ai, 0, sizeof(struct addrinfo) + sizeof(struct sockaddr_storage));
-
-    struct sockaddr_in *sa = (struct sockaddr_in *)((uint8_t *)ai + sizeof(struct addrinfo));
-    inet_addr_from_ip4addr(&sa->sin_addr, &addr);
-    sa->sin_family = AF_INET;
-    sa->sin_len = sizeof(struct sockaddr_in);
-    sa->sin_port = lwip_htons((u16_t)atoi(port_str));
-    ai->ai_family = AF_INET;
-    ai->ai_canonname = ((char *)sa + sizeof(struct sockaddr_storage));
-    memcpy(ai->ai_canonname, host_str, host_len + 1);
-    ai->ai_addrlen = sizeof(struct sockaddr_storage);
-    ai->ai_addr = (struct sockaddr *)sa;
-    ai->ai_socktype = SOCK_STREAM;
-    if (hints) {
-        ai->ai_socktype = hints->ai_socktype;
-        ai->ai_protocol = hints->ai_protocol;
-    }
-
-    *res = ai;
-    return 0;
-}
-#endif // MICROPY_HW_ENABLE_MDNS_QUERIES
-
 static void _getaddrinfo_inner(const mp_obj_t host, const mp_obj_t portx,
     const struct addrinfo *hints, struct addrinfo **res) {
     int retval = 0;
@@ -234,10 +173,6 @@ static void _getaddrinfo_inner(const mp_obj_t host, const mp_obj_t portx,
     }
 
     MP_THREAD_GIL_EXIT();
-
-    #if MICROPY_HW_ENABLE_MDNS_QUERIES
-    retval = mdns_getaddrinfo(host_str, port_str, hints, res);
-    #endif
 
     if (retval == 0 && *res == NULL) {
         // Normal query
@@ -288,7 +223,7 @@ static mp_obj_t socket_make_new(const mp_obj_type_t *type_in, size_t n_args, siz
 
     sock->fd = lwip_socket(sock->domain, sock->type, sock->proto);
     if (sock->fd < 0 && errno == ENFILE) {
-        // ESP32 LWIP has a hard socket limit, ENFILE is returned when this is
+        // LWIP has a hard socket limit, ENFILE is returned when this is
         // reached. Similar to the logic elsewhere for MemoryError, try running
         // GC before failing outright.
         gc_collect();
@@ -408,7 +343,7 @@ static mp_obj_t socket_connect(const mp_obj_t arg0, const mp_obj_t arg1) {
         // - Allows emulating a connect timeout, which is not supported by LWIP or
         //   required by POSIX but is normal behaviour for CPython.
         if (fcntl(self->fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-            // ESP_LOGE(TAG, "fcntl set failed %d", errno); // Unexpected internal failure
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("fcntl set failed %d"), errno);
             raise_err = errno;
         }
     }
@@ -425,7 +360,7 @@ static mp_obj_t socket_connect(const mp_obj_t arg0, const mp_obj_t arg1) {
         // Set the socket back to blocking. We can still pass it to select() in this state.
         int r = fcntl(self->fd, F_SETFL, flags);
         if (r != 0 && (raise_err == 0 || raise_err == EINPROGRESS)) {
-            // ESP_LOGE(TAG, "fcntl restore failed %d", errno); // Unexpected internal failure
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("fcntl restore failed %d"), errno);
             raise_err = errno;
         }
     }
@@ -978,7 +913,6 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_socket_getaddrinfo_obj, 2, 6, p
 static mp_obj_t psoc6_socket_initialize() {
     static int initialized = 0;
     if (!initialized) {
-        // ESP_LOGI(TAG, "Initializing");
         cy_network_init();
 
         initialized = 1;
