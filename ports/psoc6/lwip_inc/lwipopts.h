@@ -36,7 +36,7 @@
 #define MEM_ALIGNMENT                   (4)
 
 #define LWIP_RAW                        (1)
-#define NO_SYS                           0
+#define NO_SYS                          (0)
 
 //
 // Enable IPV4 networking
@@ -261,8 +261,6 @@
  * LWIP_NETIF_API==1: Support netif api (in netifapi.c)
  */
 #define LWIP_NETIF_API                  1
-
-// #define TCP_LISTEN_BACKLOG              1
 
 #define LWIP_DNS                       (1)
 
