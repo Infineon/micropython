@@ -99,4 +99,13 @@ static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_
 static void mp_machine_pdm_pcm_init(machine_pdm_pcm_obj_t *self);
 static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self);
 
+
+static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
+    { 0,  1, -1, -1, -1, -1, -1, -1 },  // Mono, 16-bits
+    { 0,  1,  2,  3, -1, -1, -1, -1 },  // Mono, 32-bits
+    { 0,  1, -1, -1,  2,  3, -1, -1 },  // Stereo, 16-bits
+    { 0,  1,  2,  3,  4,  5,  6,  7 },  // Stereo, 32-bits
+};
+int8_t get_frame_mapping_index(int8_t bits, format_t format);
+
 #endif // MICROPY_PY_MACHINE_PDM_PCM

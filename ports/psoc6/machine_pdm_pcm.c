@@ -39,6 +39,7 @@
 cyhal_clock_t pdm_pcm_audio_clock;
 
 #if MICROPY_PY_MACHINE_PDM_PCM_RING_BUF
+
 static void ringbuf_init(ring_buf_t *rbuf, uint8_t *buffer, size_t size) {
     rbuf->buffer = buffer;
     rbuf->size = size;
@@ -113,7 +114,6 @@ static uint32_t fill_appbuf_from_ringbuf(machine_pdm_pcm_obj_t *self, mp_buffer_
         }
         app_p += appbuf_sample_size_in_bytes;
     }
-exit:
     return num_bytes_copied_to_appbuf;
 }
 
@@ -339,6 +339,21 @@ static void pdm_pcm_start_rx(machine_pdm_pcm_obj_t *self) {
     pdm_pcm_assert_raise_val("PDM_PCM start failed with return code %lx !", result);
 }
 
+int8_t get_frame_mapping_index(int8_t bits, format_t format) {
+    if ((format == MONO_LEFT) | (format == MONO_RIGHT)) {
+        if (bits == 16) {
+            return 0;
+        } else { // 32 bits
+            return 1;
+        }
+    } else { // STEREO
+        if (bits == 16) {
+            return 2;
+        } else { // 32 bits
+            return 3;
+        }
+    }
+}
 // =======================================================================================
 // MPY bindings for PDM_PCM (ports/psoc6)
 
