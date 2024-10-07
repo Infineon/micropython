@@ -213,9 +213,35 @@ static mp_obj_t mp_machine_get_freq(void) {
     return MP_OBJ_NEW_SMALL_INT(system_get_cpu_freq());
 }
 
-static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
-    mp_raise_NotImplementedError(MP_ERROR_TEXT("Not implemented!!!\n"));
+void cm4_set_frequency() {
+    mp_printf(&mp_plat_print, "Here set the cm4 fz");
 }
+
+void audio_set_frequency() {
+    mp_printf(&mp_plat_print, "Here set the audio fz");
+}
+
+void peripheral_set_frequency() {
+    mp_printf(&mp_plat_print, "Here set the peripheral fz");
+}
+
+
+static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
+    mp_int_t freq = mp_obj_get_int(args[0]);
+    if (n_args == 1) {
+        cm4_set_frequency(freq);
+    } else if (n_args > 1) {
+        const char *freq_peri = mp_obj_str_get_str(args[1]);
+        if (strcmp(freq_peri, "Audio") == 0) {
+            audio_set_frequency(freq); // audio fz
+        } else if (strcmp(freq_peri, "Peripheral") == 0) {
+            peripheral_set_frequency(freq); // cm4 fz
+        } else {
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid frequency type %s"), freq_peri);
+        }
+    }
+}
+
 
 // Sleep Modes Not working. Might be because of the REPL always running in background. Need to evaluate
 static void mp_machine_lightsleep(size_t n_args, const mp_obj_t *args) {
