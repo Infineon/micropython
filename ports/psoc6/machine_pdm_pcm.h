@@ -98,7 +98,7 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
 static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_pcm_id);
 static void mp_machine_pdm_pcm_init(machine_pdm_pcm_obj_t *self);
 static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self);
-
+static void mp_machine_pdm_pcm_set_gain(machine_pdm_pcm_obj_t *self, int16_t left_gain, int16_t right_gain);
 
 static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
     { 0,  1, -1, -1, -1, -1, -1, -1 },  // Mono, 16-bits
