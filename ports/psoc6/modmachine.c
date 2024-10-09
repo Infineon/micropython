@@ -47,6 +47,10 @@
 #include "modpsoc6.h"
 #if MICROPY_PY_MACHINE
 
+#define clock_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
+}
+
 // enums to hold the MPY constants as given in guidelines
 enum {
     MACHINE_PWRON_RESET,
@@ -213,16 +217,156 @@ static mp_obj_t mp_machine_get_freq(void) {
     return MP_OBJ_NEW_SMALL_INT(system_get_cpu_freq());
 }
 
-void cm4_set_frequency() {
+void cm4_set_frequency(uint32_t freq) {
     mp_printf(&mp_plat_print, "Here set the cm4 fz");
+
+    cyhal_clock_t clock_fast;
+    cyhal_clock_t clock_slow;
+    cyhal_clock_t clock_pll;
+    cyhal_clock_t clock_hf0;
+    cyhal_clock_t clock_peri;
+
+
+    /* Initialize, take ownership of PLL0/PLL */
+    cyhal_clock_reserve(&clock_pll, &CYHAL_CLOCK_PLL[0]);
+
+
+    /* Set the PLL0/PLL frequency to PLL_CLOCK_HZ =150 MHZ*/
+    cy_rslt_t result = cyhal_clock_set_frequency(&clock_pll,  freq, NULL);
+    clock_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
+
+    /* If the PLL0/PLL clock is not already enabled, enable it */
+    if (!cyhal_clock_is_enabled(&clock_pll)) {
+        result = cyhal_clock_set_enabled(&clock_pll, true, true);
+        clock_assert_raise_val("PLL clock enable failed with error code: %lx", result);
+    }
+
+    // HF0
+    /* Initialize, take ownership of CLK_HF0 */
+    result = cyhal_clock_reserve(&clock_hf0, &CYHAL_CLOCK_HF[0]);
+    clock_assert_raise_val("HF0 clock reserve failed with error code: %lx", result);
+
+    /* Source the (CLK_HF0) from PLL0/PLL */
+    result = cyhal_clock_set_source(&clock_hf0, &clock_pll);
+    clock_assert_raise_val("HF0 clock source failed with error code: %lx", result);
+
+    /* Set the divider for (CLK_HF0) */
+    result = cyhal_clock_set_divider(&clock_hf0, 1);
+    clock_assert_raise_val("HF0 clock set divider failed with error code: %lx", result);
+
+    /*  (CLK_HF0) is not already enabled, enable it */
+    if (!cyhal_clock_is_enabled(&clock_hf0)) {
+        result = cyhal_clock_set_enabled(&clock_hf0, true, true);
+        clock_assert_raise_val("HF0 clock enable failed with error code: %lx", result);
+    }
+    // HF0
+
+    // Fast clock
+    result = cyhal_clock_reserve(&clock_fast, &CYHAL_CLOCK_FAST);
+    clock_assert_raise_val("Fast clock reserve failed with error code: %lx", result);
+
+
+    // result = cyhal_clock_set_source(&clock_fast, &clock_hf0);
+
+
+    result = cyhal_clock_set_divider(&clock_fast, 1);
+    clock_assert_raise_val("Fast clock set divider failed with error code: %lx", result);
+
+
+
+    if (!cyhal_clock_is_enabled(&clock_fast)) {
+        result = cyhal_clock_set_enabled(&clock_fast, true, true);
+        clock_assert_raise_val("Fast clock enable failed with error code: %lx", result);
+    }
+    // Fast clock
+
+    // Peri clock
+    result = cyhal_clock_reserve(&clock_peri, &CYHAL_CLOCK_PERI);
+    clock_assert_raise_val("Peri clock reserve failed with error code: %lx", result);
+
+    result = cyhal_clock_set_divider(&clock_peri, 2);
+
+    if (!cyhal_clock_is_enabled(&clock_peri)) {
+        result = cyhal_clock_set_enabled(&clock_peri, true, true);
+        clock_assert_raise_val("Peri clock enable failed with error code: %lx", result);
+    }
+    // peri clock
+
+
+    // slow
+    result = cyhal_clock_reserve(&clock_slow, &CYHAL_CLOCK_SLOW);
+    clock_assert_raise_val("Slow clock reserve failed with error code: %lx", result);
+
+    result = cyhal_clock_set_divider(&clock_slow, 1);
+    clock_assert_raise_val("Slow clock set divider failed with error code: %lx", result);
+
+    if (!cyhal_clock_is_enabled(&clock_slow)) {
+        result = cyhal_clock_set_enabled(&clock_slow, true, true);
+        clock_assert_raise_val("Slow clock enable failed with error code: %lx", result);
+    }
+    // slow
+
+    cyhal_clock_free(&clock_fast);
+    cyhal_clock_free(&clock_slow);
+    cyhal_clock_free(&clock_pll);
+    cyhal_clock_free(&clock_hf0);
+    cyhal_clock_free(&clock_peri);
 }
 
-void audio_set_frequency() {
-    mp_printf(&mp_plat_print, "Here set the audio fz");
+void audio_i2s_set_frequency(uint32_t freq) {
+    mp_printf(&mp_plat_print, "Here set the i2s audio fz");
+    cyhal_clock_t clock_pll;
+    cyhal_clock_t audio_clock;
+    cy_rslt_t result;
+
+    static bool clock_set = false;
+
+    result = cyhal_clock_reserve(&clock_pll, &CYHAL_CLOCK_PLL[0]);
+    clock_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
+
+    uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&clock_pll);
+
+    if (freq != pll_source_clock_freq_hz) {
+        mp_printf(&mp_plat_print, "machine.I2S: PLL0 freq is changed from %lu to %lu. This will affect all resources clock freq sourced by PLL0.\n", pll_source_clock_freq_hz, freq);
+        clock_set = false;
+        pll_source_clock_freq_hz = freq;
+    }
+
+    if (!clock_set) {
+        result = cyhal_clock_set_frequency(&clock_pll,  pll_source_clock_freq_hz, NULL);
+        clock_assert_raise_val("Set PLL clock frequency failed with error code: %lx", result);
+        if (!cyhal_clock_is_enabled(&clock_pll)) {
+            result = cyhal_clock_set_enabled(&clock_pll, true, true);
+            clock_assert_raise_val("PLL clock enable failed with error code: %lx", result);
+        }
+
+        result = cyhal_clock_reserve(&audio_clock, &CYHAL_CLOCK_HF[1]);
+        clock_assert_raise_val("HF1 clock reserve failed with error code: %lx", result);
+        result = cyhal_clock_set_source(&audio_clock, &clock_pll);
+        clock_assert_raise_val("HF1 clock sourcing failed with error code: %lx", result);
+        result = cyhal_clock_set_divider(&audio_clock, 2);
+        clock_assert_raise_val("HF1 clock set divider failed with error code: %lx", result);
+        if (!cyhal_clock_is_enabled(&audio_clock)) {
+            result = cyhal_clock_set_enabled(&audio_clock, true, true);
+            clock_assert_raise_val("HF1 clock enable failed with error code: %lx", result);
+        }
+        cyhal_clock_free(&audio_clock);
+
+        clock_set = true;
+    }
+
+    cyhal_clock_free(&clock_pll);
+
+    cyhal_system_delay_ms(1);
+
 }
 
-void peripheral_set_frequency() {
+void peripheral_set_frequency(uint32_t freq) {
     mp_printf(&mp_plat_print, "Here set the peripheral fz");
+}
+
+void audio_pdm_set_frequency(uint32_t freq) {
+    mp_printf(&mp_plat_print, "Here set the pdm audio fz");
 }
 
 
@@ -232,10 +376,12 @@ static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
         cm4_set_frequency(freq);
     } else if (n_args > 1) {
         const char *freq_peri = mp_obj_str_get_str(args[1]);
-        if (strcmp(freq_peri, "Audio") == 0) {
-            audio_set_frequency(freq); // audio fz
+        if (strcmp(freq_peri, "Audio_i2s") == 0) {
+            audio_i2s_set_frequency(freq); // i2s audio fz
         } else if (strcmp(freq_peri, "Peripheral") == 0) {
-            peripheral_set_frequency(freq); // cm4 fz
+            peripheral_set_frequency(freq); // peripheral fz
+        } else if (strcmp(freq_peri, "Audio_pdm") == 0) {
+            audio_pdm_set_frequency(freq); // pdm audio fz
         } else {
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid frequency type %s"), freq_peri);
         }
