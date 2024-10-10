@@ -1,4 +1,5 @@
 import binascii, time
+import random
 
 try:
     import network
@@ -6,8 +7,7 @@ except ImportError:
     print("SKIP")
     raise SystemExit
 
-channel_new = 5
-ssid_new = "mpy-test-conf-wlan"
+channel_new = random.randint(1, 5)
 pass_new = "alicessecret"
 sec_new = network.WLAN.WPA2
 
@@ -26,8 +26,14 @@ def instance0():
     # get config()
     ap_if.config(channel=channel_new)
     print("ap config get channel: ", ap_if.config("channel") == channel_new)
+
+    # Generate "random" SSID to avoid test conflicts
+    time_stamp = time.time()
+    ssid_new = "mpy-test-" + str(time_stamp)
+    multitest.globals(ssid_gen=ssid_new)
     ap_if.config(ssid=ssid_new)
     print("ap config get ssid: ", ap_if.config("ssid") == ssid_new)
+
     ap_if.config(security=sec_new, key=pass_new)
     print("ap config get security: ", ap_if.config("security") == sec_new)
     try:
@@ -67,7 +73,7 @@ def instance1():
     print("sta instance created")
 
     # connect()
-    sta_if.connect(ssid_new, pass_new)
+    sta_if.connect(ssid_gen, pass_new)
     print("sta attempt connection to ap")
 
     # active()
@@ -78,7 +84,7 @@ def instance1():
 
     # config()
     print("sta assoc ap channel config: ", sta_if.config("channel") == channel_new)
-    print("sta assoc ap ssid config: ", sta_if.config("ssid") == ssid_new)
+    print("sta assoc ap ssid config: ", sta_if.config("ssid") == ssid_gen)
     print("sta assoc ap security config: ", sta_if.config("security") == sec_new)
 
     try:
