@@ -7,7 +7,7 @@ except ImportError:
     raise SystemExit
 
 channel_new = 5
-ssid_new = "mpy-test-conf-wlan"
+ssid_new = "mpy-test-" + str(time.time())
 pass_new = "alicessecret"
 sec_new = network.WLAN.WPA2
 
