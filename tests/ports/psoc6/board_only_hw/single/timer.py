@@ -1,3 +1,4 @@
+import os
 from machine import Timer
 import time
 
@@ -76,3 +77,10 @@ if __name__ == "__main__":
     test_periodic()
     print("*****Multiple Timers Execution*****")
     test_multiple_timers()
+
+    # TODO: Timer tests need to be refined.
+    # The current implementation is not reliable.
+    # After this tests CY8CPROTO-063-BLE board is not able to the subsequent test.
+    # Occasionally, the other board also fail.
+    # This workaround works for now.
+    time.sleep(5)
