@@ -11,6 +11,10 @@
 #define SIZEOF_DMA_BUFFER_IN_BYTES         (1024 * sizeof(uint32_t))
 #define PDM_PCM_RX_FRAME_SIZE_IN_BYTES     (8)
 
+#define NON_BLOCKING_RATE_MULTIPLIER       (4)
+#define SIZEOF_NON_BLOCKING_COPY_IN_BYTES  (SIZEOF_DMA_BUFFER * NON_BLOCKING_RATE_MULTIPLIER)
+
+
 #define pdm_pcm_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
 }
@@ -83,7 +87,7 @@ typedef struct _machine_pdm_pcm_obj_t {
     uint8_t decimation_rate;
     int16_t left_gain;
     int16_t right_gain;
-    int32_t ibuf;
+    int32_t ibuf;   // ToDo: Does user needs to calculate this in PDM?
     mp_obj_t callback_for_non_blocking;
     uint32_t dma_active_buffer[SIZEOF_DMA_BUFFER];
     uint32_t dma_processing_buffer[SIZEOF_DMA_BUFFER];
@@ -99,6 +103,8 @@ static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_
 static void mp_machine_pdm_pcm_init(machine_pdm_pcm_obj_t *self);
 static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self);
 static void mp_machine_pdm_pcm_set_gain(machine_pdm_pcm_obj_t *self, int16_t left_gain, int16_t right_gain);
+static void mp_machine_pdm_pcm_irq_update(machine_pdm_pcm_obj_t *self);
+
 
 static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
     { 0,  1, -1, -1, -1, -1, -1, -1 },  // Mono, 16-bits

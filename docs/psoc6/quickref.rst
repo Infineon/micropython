@@ -633,9 +633,9 @@ Constructor
 Methods
 -------
 
-.. method:: PDM_PCM.init(clk, ...)
+.. method:: PDM_PCM.init()
 
-  See constructor for argument descriptions
+  Starts the PDM_PCM hardware block and conversion operation.
 
 .. method:: PDM_PCM.deinit()
 
@@ -643,9 +643,21 @@ Methods
 
 .. method::  PDM_PCM.readinto(buf)
 
+    Read audio samples into the buffer specified by ``buf``. ``buf`` must support the buffer protocol, such as bytearray or array.
+    For Stereo format, left channel sample precedes right channel sample. For Mono-left format,
+    the left channel sample data is used and for Mono-right format, right channel data is used.
+    Returns number of bytes read
+
 .. method::  PDM_PCM.irq(handler)
 
-.. method::  PDM_PCM.gain(gain_left, gain_right)
+    Set the callback.``handler`` is called when ``buf`` becomes full (``readinto`` method).
+    Setting a callback changes the ``readinto`` method to non-blocking operation.
+  ``handler`` is called in the context of the MicroPython scheduler.
+
+.. method::  PDM_PCM.gain(left_gain, right_gain)
+    
+    Set the gain for single or both microphones. When either of the gain value is not passed, 
+    previously set value or default value of 0dB is set.
 
 Constants
 ---------
