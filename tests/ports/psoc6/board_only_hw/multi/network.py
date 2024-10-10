@@ -7,7 +7,6 @@ except ImportError:
     raise SystemExit
 
 channel_new = 1
-ssid_default = "mpy-psoc6-wlan"
 
 
 # Access Point
@@ -17,7 +16,12 @@ def instance0():
 
     ap_if = network.WLAN(network.AP_IF)
     print("ap instance created")
-    ap_if.config(channel=channel_new)
+
+    # Generate "random" SSID to avoid test conflicts
+    time_stamp = time.time()
+    ssid_new = "mpy-psoc6-" + str(time_stamp)
+    multitest.globals(ssid_gen=ssid_new)
+    ap_if.config(channel=channel_new, ssid=ssid_new)
 
     # active()
     print("ap initially not active: ", ap_if.active() == False)
@@ -62,11 +66,13 @@ def instance1():
 
     # scan()
     wlan_nets = sta_if.scan()
-    test_ap_net = [net for net in wlan_nets if net[0] == b"mpy-psoc6-wlan"]
+    # The returned ssid is a bytes object
+    bytes_ssid = bytes(ssid_gen, "utf-8")
+    test_ap_net = [net for net in wlan_nets if net[0] == bytes_ssid]
     print("sta scan finds ap wlan: ", test_ap_net != [])
 
-    wlan_ssid_filter = sta_if.scan(ssid="mpy-psoc6-wlan")
-    test_ap_net = [net for net in wlan_ssid_filter if net[0] == b"mpy-psoc6-wlan"]
+    wlan_ssid_filter = sta_if.scan(ssid=ssid_gen)
+    test_ap_net = [net for net in wlan_ssid_filter if net[0] == bytes_ssid]
     print("sta scan finds ap wlan (ssid filter): ", test_ap_net != [])
 
     # print('ap_mac: ', binascii.hexlify(ap_mac, ':'))
@@ -79,7 +85,7 @@ def instance1():
     print("sta is not (yet) connected: ", sta_if.isconnected() == False)
 
     # connect()
-    sta_if.connect(ssid_default, "mpy_PSOC6_w3lc0me!")
+    sta_if.connect(ssid_gen, "mpy_PSOC6_w3lc0me!")
     print("sta attempt connection to ap")
 
     # active()
@@ -100,6 +106,6 @@ def instance1():
     print("sta is disconnected: ", sta_if.active() == False)
 
     print("sta attempt connection to ap (with bssid)")
-    sta_if.connect(ssid_default, "mpy_PSOC6_w3lc0me!", bssid=ap_mac)
+    sta_if.connect(ssid_gen, "mpy_PSOC6_w3lc0me!", bssid=ap_mac)
 
     print("sta is active: ", sta_if.active() == True)
