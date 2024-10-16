@@ -1,4 +1,4 @@
-[![Unix CI badge](https://github.com/micropython/micropython/actions/workflows/ports_unix.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![STM32 CI badge](https://github.com/micropython/micropython/actions/workflows/ports_stm32.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Docs CI badge](https://github.com/micropython/micropython/actions/workflows/docs.yml/badge.svg)](https://docs.micropython.org/) [![codecov](https://codecov.io/gh/micropython/micropython/branch/master/graph/badge.svg?token=I92PfD05sD)](https://codecov.io/gh/micropython/micropython)
+[![PSoC6 CI badge](https://github.com/Infineon/micropython/actions/workflows/ports_psoc6.yml/badge.svg)](https://github.com/Infineon/micropython/actions?query=branch%3Aports-psoc6-main+event%3Apush) [![Docs CI badge](https://readthedocs.org/projects/ifx-micropython/badge/?version=latest)](https://ifx-micropython.readthedocs.io/en/latest/psoc6/quickref.html) [![codecov](https://codecov.io/gh/micropython/micropython/branch/master/graph/badge.svg?token=I92PfD05sD)](https://codecov.io/gh/micropython/micropython)
 
 The MicroPython project
 =======================
@@ -39,19 +39,15 @@ See the [online documentation (Infineon PSoC6 port ReadTheDocs fork)](https://if
 references and information about using MicroPython and information about how
 it is implemented.
 
-We use [GitHub Discussions](https://github.com/micropython/micropython/discussions)
-as our forum, and [Discord](https://discord.gg/RB8HZSAExQ) for chat. These
-are great places to ask questions and advice from the community or to discuss your
+We use [GitHub Discussions (Infineon PSoC6 fork)](https://github.com/Infineon/micropython/discussions)
+as our forum. This
+is a great place to ask questions and advice from the community or to discuss your
 MicroPython-based projects.
 
-For bugs and feature requests, please [raise an issue](https://github.com/micropython/micropython/issues/new/choose)
+For bugs and feature requests, please [raise an issue (Infineon PSoC6 fork)](https://github.com/Infineon/micropython/issues/new/choose)
 and follow the templates there.
 
-For information about the [MicroPython pyboard](https://store.micropython.org/pyb-features),
-the officially supported board from the
-[original Kickstarter campaign](https://www.kickstarter.com/projects/214379695/micro-python-python-for-microcontrollers),
-see the [schematics and pinouts](http://github.com/micropython/pyboard) and
-[documentation](https://docs.micropython.org/en/latest/pyboard/quickref.html).
+For information about the MicroPython PSoC supported boards see the [documentation (Infineon PSoC6 port ReadTheDocs fork)](https://ifx-micropython.readthedocs.io/en/latest/psoc6/general.html#supported-boards).
 
 Contributing
 ------------
