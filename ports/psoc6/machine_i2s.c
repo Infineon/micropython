@@ -29,6 +29,7 @@
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "machine_pin_phy.h"
+#include "modmachine.h"
 
 #define i2s_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
@@ -103,50 +104,6 @@ static int8_t get_frame_mapping_index(int8_t bits, format_t format) {
     }
 }
 
-void i2s_audio_clock_init(uint32_t audio_clock_freq_hz) {
-    cyhal_clock_t clock_pll;
-    cy_rslt_t result;
-
-    static bool clock_set = false;
-
-    result = cyhal_clock_reserve(&clock_pll, &CYHAL_CLOCK_PLL[0]);
-    i2s_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
-
-    uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&clock_pll);
-
-    if (audio_clock_freq_hz != pll_source_clock_freq_hz) {
-        mp_printf(&mp_plat_print, "machine.I2S: PLL0 freq is changed from %lu to %lu. This will affect all resources clock freq sourced by PLL0.\n", pll_source_clock_freq_hz, audio_clock_freq_hz);
-        clock_set = false;
-        pll_source_clock_freq_hz = audio_clock_freq_hz;
-    }
-
-    if (!clock_set) {
-        result = cyhal_clock_set_frequency(&clock_pll,  pll_source_clock_freq_hz, NULL);
-        i2s_assert_raise_val("Set PLL clock frequency failed with error code: %lx", result);
-        if (!cyhal_clock_is_enabled(&clock_pll)) {
-            result = cyhal_clock_set_enabled(&clock_pll, true, true);
-            i2s_assert_raise_val("PLL clock enable failed with error code: %lx", result);
-        }
-
-        result = cyhal_clock_reserve(&audio_clock, &CYHAL_CLOCK_HF[1]);
-        i2s_assert_raise_val("HF1 clock reserve failed with error code: %lx", result);
-        result = cyhal_clock_set_source(&audio_clock, &clock_pll);
-        i2s_assert_raise_val("HF1 clock sourcing failed with error code: %lx", result);
-        result = cyhal_clock_set_divider(&audio_clock, 2);
-        i2s_assert_raise_val("HF1 clock set divider failed with error code: %lx", result);
-        if (!cyhal_clock_is_enabled(&audio_clock)) {
-            result = cyhal_clock_set_enabled(&audio_clock, true, true);
-            i2s_assert_raise_val("HF1 clock enable failed with error code: %lx", result);
-        }
-        cyhal_clock_free(&audio_clock);
-
-        clock_set = true;
-    }
-
-    cyhal_clock_free(&clock_pll);
-
-    cyhal_system_delay_ms(1);
-}
 
 static inline bool i2s_dma_is_tx_complete(cyhal_i2s_event_t event) {
     return 0u != (event & CYHAL_I2S_ASYNC_TX_COMPLETE);
@@ -366,21 +323,6 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
         mp_raise_ValueError(MP_ERROR_TEXT("invalid format"));
     }
 
-    // is valid clock freq?
-    uint32_t audio_clock_freq_hz;
-    uint32_t rate = args[ARG_rate].u_int;
-    if (rate == 8000 ||
-        rate == 16000 ||
-        rate == 32000 ||
-        rate == 48000) {
-        audio_clock_freq_hz = AUDIO_SYS_CLOCK_98_304_000_HZ;
-    } else if (rate == 22050 ||
-               rate == 44100) {
-        audio_clock_freq_hz = AUDIO_SYS_CLOCK_90_300_000_HZ;
-    } else {
-        mp_raise_ValueError(MP_ERROR_TEXT("rate not supported"));
-    }
-
     // is valid buf size ?
     int32_t ring_buffer_len = args[ARG_ibuf].u_int;
     if (ring_buffer_len < 0) {
@@ -394,14 +336,16 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
     self->bits = i2s_bits;
     self->channel_resolution_bits = i2s_bits_resolution;
     self->format = i2s_format;
-    self->rate = rate;
+    self->rate = args[ARG_rate].u_int;
     self->ibuf = ring_buffer_len;
     self->callback_for_non_blocking = MP_OBJ_NULL;
     self->io_mode = BLOCKING;
     self->ring_buffer_storage = m_new(uint8_t, ring_buffer_len);
 
     ringbuf_init(&self->ring_buffer, self->ring_buffer_storage, ring_buffer_len);
-    i2s_audio_clock_init(audio_clock_freq_hz);
+    if (!clock_set_i2s) {
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("I2S clock not set. Set the clock before initialising I2S"));
+    }
     i2s_init(self, &audio_clock);
     i2s_dma_init(self);
 }
