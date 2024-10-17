@@ -4,6 +4,7 @@ import binascii
 import time
 import array
 import struct
+import machine
 
 # Allocate pin based on board
 board = os.uname().machine
@@ -120,6 +121,10 @@ wait_signal_init()
 for _format in test_formats:
     for _bits in test_bits:
         for _rate in test_rates:
+            if _rate == 22050 or _rate == 44100:
+                machine.freq(machine.AUDIO_I2S_90_MHZ)
+            else:
+                machine.freq(machine.AUDIO_I2S_98_MHZ)
             audio_out = I2S(
                 0,
                 sck=sck_tx_pin,
