@@ -4,6 +4,7 @@ import binascii
 import time
 import array
 import struct
+import machine
 
 # Allocate pin based on board
 board = os.uname().machine
@@ -110,6 +111,10 @@ exp_seq = make_expected_sequence()
 for _format in test_formats:
     for _bits in test_bits:
         for _rate in test_rates:
+            if _rate == 22050 or _rate == 44100:
+                machine.freq(machine.AUDIO_I2S_90_MHZ)
+            else:
+                machine.freq(machine.AUDIO_I2S_98_MHZ)
             audio_in = I2S(
                 0,
                 sck=sck_rx_pin,
@@ -157,6 +162,7 @@ def rx_complete_irq(obj):
     rx_done = True
 
 
+machine.freq(machine.AUDIO_I2S_98_MHZ)
 audio_in = I2S(
     0,
     sck=sck_rx_pin,
