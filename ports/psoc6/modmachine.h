@@ -72,4 +72,9 @@ void machine_init(void);
 void machine_deinit(void);
 mp_obj_t system_reset_cause(void);
 
+extern void audio_i2s_set_frequency(uint32_t audio_clock_freq_hz);
+extern cyhal_clock_t audio_clock;
+extern bool clock_set_i2s;
+extern bool clock_set_pdm;
+
 #endif // MICROPY_INCLUDED_PSOC6_MODMACHINE_H
