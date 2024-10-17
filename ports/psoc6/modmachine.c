@@ -222,7 +222,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
 
 static mp_obj_t mp_machine_get_freq(void) {
-    mp_printf(&mp_plat_print, "Core M4 frequency\n");
+    // mp_printf(&mp_plat_print, "Core M4 frequency\n");
     return MP_OBJ_NEW_SMALL_INT(system_get_cpu_freq());
 }
 
