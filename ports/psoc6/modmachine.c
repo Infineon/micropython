@@ -63,12 +63,17 @@ enum {
 
 // enums to hold the frequency constants
 enum clock_freq_type {
-    AUDIO_I2S,
-    AUDIO_PDM,
-    CM4
+    AUDIO_I2S_98_MHZ =  98000000,
+    AUDIO_I2S_90_MHZ = 90000000,
+    AUDIO_PDM_24_576_000_HZ = 24576000,
+    AUDIO_PDM_22_579_000_HZ = 22579000,
+    CM4,
+    CM4_FLL
 };
 
 uint32_t reset_cause;
+bool clock_set_i2s = false;
+bool clock_set_pdm = false;
 
 // function to return 64-bit silicon ID of given PSoC microcontroller
 // A combined 64-bit unique ID. [63:57] - DIE_YEAR [56:56] - DIE_MINOR [55:48] - DIE_SORT [47:40] - DIE_Y [39:32] - DIE_X [31:24] - DIE_WAFER [23:16] - DIE_LOT[2] [15: 8] - DIE_LOT[1] [ 7: 0] - DIE_LOT[0]
@@ -222,7 +227,6 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
 
 static mp_obj_t mp_machine_get_freq(void) {
-    mp_printf(&mp_plat_print, "Core M4 frequency\n");
     return MP_OBJ_NEW_SMALL_INT(system_get_cpu_freq());
 }
 
@@ -325,22 +329,117 @@ void cm4_set_frequency(uint32_t freq) {
 
 }
 
+void cm4_fll_set_frequency(uint32_t freq) {
+    cyhal_clock_t clock_fast;
+    cyhal_clock_t clock_slow;
+    cyhal_clock_t clock_fll;
+    cyhal_clock_t clock_hf0;
+    cyhal_clock_t clock_peri;
+
+    // deinitialize retarget-io before changing the clock frequency
+    cy_retarget_io_deinit();
+
+    /* Initialize, take ownership of PLL0/PLL */
+    cyhal_clock_reserve(&clock_fll, &CYHAL_CLOCK_FLL);
+
+    /* Set the PLL0/PLL frequency to PLL_CLOCK_HZ =150 MHZ*/
+    cy_rslt_t result = cyhal_clock_set_frequency(&clock_fll,  freq, NULL);
+    clock_assert_raise_val("FLL clock reserve failed with error code: %lx", result);
+
+    /* If the PLL0/PLL clock is not already enabled, enable it */
+    if (!cyhal_clock_is_enabled(&clock_fll)) {
+        result = cyhal_clock_set_enabled(&clock_fll, true, true);
+        clock_assert_raise_val("FLL clock enable failed with error code: %lx", result);
+    }
+
+    // HF0
+    /* Initialize, take ownership of CLK_HF0 */
+    result = cyhal_clock_reserve(&clock_hf0, &CYHAL_CLOCK_HF[0]);
+    clock_assert_raise_val("HF0 clock reserve failed with error code: %lx", result);
+
+    /* Source the (CLK_HF0) from PLL0/PLL */
+    result = cyhal_clock_set_source(&clock_hf0, &clock_fll);
+    clock_assert_raise_val("HF0 clock source failed with error code: %lx", result);
+
+    /* Set the divider for (CLK_HF0) */
+    result = cyhal_clock_set_divider(&clock_hf0, 1);
+    clock_assert_raise_val("HF0 clock set divider failed with error code: %lx", result);
+
+    /*  (CLK_HF0) is not already enabled, enable it */
+    if (!cyhal_clock_is_enabled(&clock_hf0)) {
+        result = cyhal_clock_set_enabled(&clock_hf0, true, true);
+        clock_assert_raise_val("HF0 clock enable failed with error code: %lx", result);
+    }
+    // HF0
+
+    // Fast clock
+    result = cyhal_clock_reserve(&clock_fast, &CYHAL_CLOCK_FAST);
+    clock_assert_raise_val("Fast clock reserve failed with error code: %lx", result);
+
+    result = cyhal_clock_set_divider(&clock_fast, 1);
+    clock_assert_raise_val("Fast clock set divider failed with error code: %lx", result);
+
+
+
+    if (!cyhal_clock_is_enabled(&clock_fast)) {
+        result = cyhal_clock_set_enabled(&clock_fast, true, true);
+        clock_assert_raise_val("Fast clock enable failed with error code: %lx", result);
+    }
+    // Fast clock
+
+    // Peri clock
+    result = cyhal_clock_reserve(&clock_peri, &CYHAL_CLOCK_PERI);
+    clock_assert_raise_val("Peri clock reserve failed with error code: %lx", result);
+
+    result = cyhal_clock_set_divider(&clock_peri, 2);
+
+    if (!cyhal_clock_is_enabled(&clock_peri)) {
+        result = cyhal_clock_set_enabled(&clock_peri, true, true);
+        clock_assert_raise_val("Peri clock enable failed with error code: %lx", result);
+    }
+    // peri clock
+
+
+    // slow clock
+    result = cyhal_clock_reserve(&clock_slow, &CYHAL_CLOCK_SLOW);
+    clock_assert_raise_val("Slow clock reserve failed with error code: %lx", result);
+
+    result = cyhal_clock_set_divider(&clock_slow, 1);
+    clock_assert_raise_val("Slow clock set divider failed with error code: %lx", result);
+
+    if (!cyhal_clock_is_enabled(&clock_slow)) {
+        result = cyhal_clock_set_enabled(&clock_slow, true, true);
+        clock_assert_raise_val("Slow clock enable failed with error code: %lx", result);
+    }
+    // slow clock
+
+    cyhal_clock_free(&clock_fast);
+    cyhal_clock_free(&clock_slow);
+    cyhal_clock_free(&clock_fll);
+    cyhal_clock_free(&clock_hf0);
+    cyhal_clock_free(&clock_peri);
+
+    // Initialize retarget-io to use the debug UART port
+    result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
+    if (result != CY_RSLT_SUCCESS) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
+    }
+}
+
 void audio_i2s_set_frequency(uint32_t freq) {
 
     if (freq != 98000000 && freq != 90000000) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid PLL0 frequency %lu"), freq);
     }
     cyhal_clock_t clock_pll;
-    cyhal_clock_t audio_clock;
     cy_rslt_t result;
 
-    static bool clock_set_i2s = false;
+    clock_set_i2s = false;
 
     result = cyhal_clock_reserve(&clock_pll, &CYHAL_CLOCK_PLL[0]);
     clock_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
 
     uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&clock_pll);
-
     if (freq != pll_source_clock_freq_hz) {
         mp_printf(&mp_plat_print, "machine.I2S: PLL0 freq is changed from %lu to %lu. This will affect all resources clock freq sourced by PLL0.\n", pll_source_clock_freq_hz, freq);
         clock_set_i2s = false;
@@ -426,22 +525,28 @@ void audio_pdm_set_frequency(uint32_t freq) {
 
 
 static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
-    mp_int_t freq = mp_obj_get_int(args[0]);
-    if (n_args == 1) {
-        cm4_set_frequency(freq); // core m4 fz
-    } else if (n_args > 1) {
-        enum clock_freq_type freq_peri = mp_obj_get_int(args[1]); // Assuming the enum values are used as integers
-        switch (freq_peri) {
-            case AUDIO_I2S:
-                audio_i2s_set_frequency(freq); // i2s audio fz
-                break;
-            case AUDIO_PDM:
-                audio_pdm_set_frequency(freq); // pdm audio fz
-                break;
-            default:
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid frequency type %d"), freq_peri);
-                break;
-        }
+    enum clock_freq_type freq_peri = mp_obj_get_int(args[0]); // Assuming the enum values are used as integers
+    switch (freq_peri) {
+        case AUDIO_I2S_90_MHZ:
+            audio_i2s_set_frequency(freq_peri);     // i2s audio fz
+            break;
+        case AUDIO_I2S_98_MHZ:
+            audio_i2s_set_frequency(freq_peri);     // i2s audio fz
+            break;
+        case AUDIO_PDM_22_579_000_HZ:
+            audio_pdm_set_frequency(freq_peri);     // pdm audio fz
+            break;
+        case AUDIO_PDM_24_576_000_HZ:
+            audio_pdm_set_frequency(freq_peri);     // pdm audio fz
+            break;
+        case CM4_FLL:
+            cm4_fll_set_frequency(mp_obj_get_int(args[1]));     // core m4 fz sourced by FLL
+            break;
+        case CM4:
+            cm4_set_frequency(mp_obj_get_int(args[1]));     // core m4 fz sourced by PLL(default condition)
+        default:
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid frequency type %lu"), freq_peri);
+            break;
     }
 }
 
@@ -598,9 +703,12 @@ MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
     { MP_ROM_QSTR(MP_QSTR_DEEPSLEEP_RESET),     MP_ROM_INT(MACHINE_DEEPSLEEP_RESET) }, \
     { MP_ROM_QSTR(MP_QSTR_SOFT_RESET),          MP_ROM_INT(MACHINE_SOFT_RESET) }, \
     { MP_ROM_QSTR(MP_QSTR_PWRON_RESET),         MP_ROM_INT(MACHINE_PWRON_RESET) }, \
-    { MP_ROM_QSTR(MP_QSTR_AUDIO_I2S),           MP_ROM_INT(AUDIO_I2S) }, \
-    { MP_ROM_QSTR(MP_QSTR_AUDIO_PDM),           MP_ROM_INT(AUDIO_PDM) }, \
+    { MP_ROM_QSTR(MP_QSTR_AUDIO_I2S_98_MHZ),    MP_ROM_INT(AUDIO_I2S_98_MHZ) }, \
+    { MP_ROM_QSTR(MP_QSTR_AUDIO_I2S_90_MHZ),    MP_ROM_INT(AUDIO_I2S_90_MHZ) }, \
+    { MP_ROM_QSTR(MP_QSTR_AUDIO_PDM_24_576_000_HZ),    MP_ROM_INT(AUDIO_PDM_24_576_000_HZ) }, \
+    { MP_ROM_QSTR(MP_QSTR_AUDIO_PDM_22_579_000_HZ),    MP_ROM_INT(AUDIO_PDM_22_579_000_HZ) }, \
     { MP_ROM_QSTR(MP_QSTR_CM4),                 MP_ROM_INT(CM4) }, \
+    { MP_ROM_QSTR(MP_QSTR_CM4_FLL),             MP_ROM_INT(CM4_FLL) }, \
     \
     /* Modules */ \
     { MP_ROM_QSTR(MP_QSTR_I2CSlave),            MP_ROM_PTR(&machine_i2c_slave_type) }, \
