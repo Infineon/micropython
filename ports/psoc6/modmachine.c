@@ -331,7 +331,6 @@ void audio_i2s_set_frequency(uint32_t freq) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid PLL0 frequency %lu"), freq);
     }
     cyhal_clock_t clock_pll;
-    cyhal_clock_t audio_clock;
     cy_rslt_t result;
 
     static bool clock_set_i2s = false;
