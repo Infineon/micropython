@@ -39,12 +39,19 @@
 // MTB includes
 #include "cybsp.h"
 #include "cyhal.h"
+#include "cy_retarget_io.h"
 #include "cy_pdl.h"
 
 // port-specific includes
 #include "modmachine.h"
 #include "mplogger.h"
 #include "modpsoc6.h"
+
+// FreeRTOS header file
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+
 #if MICROPY_PY_MACHINE
 
 // enums to hold the MPY constants as given in guidelines
@@ -217,8 +224,279 @@ static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
     mp_raise_NotImplementedError(MP_ERROR_TEXT("Not implemented!!!\n"));
 }
 
+
+
+/////////////////////////////////
+
+
+/* Constants to define LONG and SHORT presses on User Button (x10 = ms) */
+#define QUICK_PRESS_COUNT       2u      /* 20 ms < press < 200 ms */
+#define SHORT_PRESS_COUNT       20u     /* 200 ms < press < 2 sec */
+#define LONG_PRESS_COUNT        200u    /* press > 2 sec */
+
+#define CLOCK_50_MHZ            50000000u
+#define CLOCK_100_MHZ           100000000u
+
+/* Glitch delays */
+#define SHORT_GLITCH_DELAY_MS   10u     /* in ms */
+#define LONG_GLITCH_DELAY_MS    100u    /* in ms */
+
+/* User button press delay*/
+#define USER_BTN_PRESS_DELAY    10u     /* in ms */
+
+uint8_t selected_event;
+
+typedef enum
+{
+    SWITCH_NO_EVENT     = 0u,
+    SWITCH_QUICK_PRESS  = 1u,
+    SWITCH_SHORT_PRESS  = 2u,
+    SWITCH_LONG_PRESS   = 3u,
+} en_switch_event_t;
+
+en_switch_event_t get_switch_event(void) {
+    en_switch_event_t event = SWITCH_NO_EVENT;
+    uint32_t pressCount = 0;
+
+    /* Check if User button is pressed */
+    while (cyhal_gpio_read(CYBSP_USER_BTN) == CYBSP_BTN_PRESSED) {
+        /* Wait for 10 ms */
+        cyhal_system_delay_ms(USER_BTN_PRESS_DELAY);
+
+        /* Increment counter. Each count represents 10 ms */
+        pressCount++;
+    }
+
+    /* Check for how long the button was pressed */
+    if (pressCount > LONG_PRESS_COUNT) {
+        event = SWITCH_LONG_PRESS;
+    } else if (pressCount > SHORT_PRESS_COUNT) {
+        event = SWITCH_SHORT_PRESS;
+    } else if (pressCount > QUICK_PRESS_COUNT) {
+        event = SWITCH_QUICK_PRESS;
+    }
+
+    /* Add a delay to avoid glitches */
+    cyhal_system_delay_ms(SHORT_GLITCH_DELAY_MS);
+
+    return event;
+}
+
+extern TaskHandle_t mpy_task_handle;
+cyhal_clock_t system_clock;
+
+
+bool clk_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg) {
+    (void)arg;
+
+    if (mode == CYHAL_SYSPM_AFTER_TRANSITION) {
+        switch (state)
+        {
+            case CYHAL_SYSPM_CB_SYSTEM_NORMAL:
+                /* Set the system clock to 100 MHz */
+                // cyhal_clock_set_frequency(&system_clock, CLOCK_100_MHZ, NULL);
+                break;
+
+            case CYHAL_SYSPM_CB_CPU_SLEEP: {
+                BaseType_t xYieldRequired = pdFALSE;
+
+                cyhal_syspm_unlock_deepsleep();
+
+                xYieldRequired = xTaskResumeFromISR(mpy_task_handle);
+
+                portYIELD_FROM_ISR(xYieldRequired);
+            }
+            break;
+
+            case CYHAL_SYSPM_CB_CPU_DEEPSLEEP: {
+                BaseType_t xYieldRequired = pdFALSE;
+                xYieldRequired = xTaskResumeFromISR(mpy_task_handle);
+                portYIELD_FROM_ISR(xYieldRequired);
+            }
+            break;
+
+            case CYHAL_SYSPM_CB_SYSTEM_LOW:
+                // /* Set the System Clock to 50 MHz */
+                // cyhal_clock_set_frequency(&system_clock, CLOCK_50_MHZ, NULL);
+                break;
+
+            default:
+                break;
+        }
+        // if (state == CYHAL_SYSPM_CB_SYSTEM_NORMAL)
+        // {
+        //     /* Set the system clock to 100 MHz */
+        //     cyhal_clock_set_frequency(&system_clock, CLOCK_100_MHZ, NULL);
+        // }
+        // else if (state == CYHAL_SYSPM_CB_CPU_SLEEP)
+        // {
+        //         BaseType_t xYieldRequired = pdFALSE;
+        //              xYieldRequired = xTaskResumeFromISR( mpy_task_handle );
+        //              portYIELD_FROM_ISR( xYieldRequired );
+        // } else if (state == CYHAL_SYSPM_CB_CPU_DEEPSLEEP) {
+        //         BaseType_t xYieldRequired = pdFALSE;
+        //              xYieldRequired = xTaskResumeFromISR( mpy_task_handle );
+        //              portYIELD_FROM_ISR( xYieldRequired );
+        // }
+    } else if (mode == CYHAL_SYSPM_BEFORE_TRANSITION) {
+        switch (state)
+        {
+            case CYHAL_SYSPM_CB_SYSTEM_LOW:
+                /* Set the System Clock to 50 MHz */
+                // mp_printf(&mp_plat_print, "bef low\n");
+                // cyhal_clock_set_frequency(&system_clock, CLOCK_50_MHZ, NULL);
+                break;
+
+
+            case CYHAL_SYSPM_CB_CPU_SLEEP:
+                cyhal_syspm_lock_deepsleep();
+                break;
+
+            case CYHAL_SYSPM_CB_CPU_DEEPSLEEP:
+            // cyhal_syspm_unlock_deepsleep();
+            // vTaskSuspend(mpy_task_handle);
+            default:
+                break;
+        }
+        // if (state == CYHAL_SYSPM_CB_SYSTEM_LOW)
+        // {
+        //     /* Set the System Clock to 50 MHz */
+        //     cyhal_clock_set_frequency(&system_clock, CLOCK_50_MHZ, NULL);
+        // }
+    }
+
+    return true;
+}
+// CYHAL_SYSPM_CB_SYSTEM_NORMAL |
+// CYHAL_SYSPM_CB_SYSTEM_LOW),     /* Power States supported */
+
+cyhal_syspm_callback_data_t clk_callback = {clk_power_callback,             /* Callback function */
+                                            (cyhal_syspm_callback_state_t)
+                                            (CYHAL_SYSPM_CB_CPU_SLEEP |
+                                                CYHAL_SYSPM_CB_CPU_DEEPSLEEP),
+                                            (cyhal_syspm_callback_mode_t)
+                                            (CYHAL_SYSPM_CHECK_READY |
+                                                CYHAL_SYSPM_CHECK_FAIL),    /* Modes to ignore */
+                                            NULL,                           /* Callback Argument */
+                                            NULL};
+
+//////////////////////////////////
 // Sleep Modes Not working. Might be because of the REPL always running in background. Need to evaluate
 static void mp_machine_lightsleep(size_t n_args, const mp_obj_t *args) {
+    // cyhal_clock_t system_clock;
+
+    cyhal_clock_reserve(&system_clock, &CYHAL_CLOCK_FLL);
+
+// If the clock is not already enabled, enable it
+    if (!cyhal_clock_is_enabled(&system_clock)) {
+        // result =
+        cyhal_clock_set_enabled(&system_clock, true, true);
+    }
+
+    cyhal_syspm_register_callback(&clk_callback);
+
+    if (n_args != 0) {
+        selected_event = mp_obj_get_int(args[0]);
+        mp_printf(&mp_plat_print, "Selected event %lx !\n", selected_event);
+
+        __disable_irq();
+        // switch (get_switch_event())
+        switch (selected_event)
+        {
+            // NORMAL POWER MODE
+            case 1:
+                /* Switch to System Normal Power state */
+                mp_printf(&mp_plat_print, "n\n");
+                cyhal_syspm_set_system_state(CYHAL_SYSPM_SYSTEM_NORMAL);
+                cyhal_system_delay_ms(200);
+                cyhal_clock_set_frequency(&system_clock, CLOCK_100_MHZ, NULL);
+                break;
+
+            // LOW POWER MODE
+            case 2:
+
+                // cy_retarget_io_deinit();
+                // cyhal_system_delay_ms(200);
+                /* Switch to System Low Power state */
+                cyhal_clock_set_frequency(&system_clock, CLOCK_50_MHZ, NULL);
+
+                cyhal_system_delay_ms(300);
+                // mp_printf(&mp_plat_print, "l\n");
+                // uint32_t freq = cyhal_clock_get_frequency(&system_clock);
+                // mp_printf(&mp_plat_print, "Freq: %lx\n", freq);
+                // cyhal_system_delay_ms(1000);
+                // cyhal_syspm_lock_deepsleep();
+                cyhal_syspm_set_system_state(CYHAL_SYSPM_SYSTEM_LOW);
+                // cyhal_syspm_deepsleep();
+                // vTaskSuspend(NULL);
+                break;
+
+            // SLEEP MODE
+            case 3:
+                // mp_printf(&mp_plat_print, "b\n");
+                /* Go to sleep */
+                cyhal_syspm_lock_deepsleep();
+                // cyhal_syspm_set_system_state(CYHAL_SYSPM_SYSTEM_LOW);
+                cyhal_syspm_sleep();
+
+                /* Wait a bit to avoid glitches from the button press */
+                // cyhal_system_delay_ms(LONG_GLITCH_DELAY_MS);
+                vTaskSuspend(mpy_task_handle);
+
+                break;
+
+            // DEEPSLEEP MODE
+            case 4:
+                // mp_printf(&mp_plat_print, "c\n");
+                /* Go to deep sleep */
+                // cyhal_syspm_unlock_deepsleep();
+                cyhal_syspm_deepsleep();
+
+                /* Wait a bit to avoid glitches from the button press */
+                // cyhal_system_delay_ms(LONG_GLITCH_DELAY_MS);
+                vTaskSuspend(mpy_task_handle);
+
+                break;
+
+            default: {
+                cyhal_lptimer_t obj;
+                uint32_t actual_ms;
+                cyhal_syspm_tickless_sleep(&obj, selected_event, &actual_ms);
+            }
+            break;
+
+                //     case SWITCH_QUICK_PRESS:
+
+                //         /* Check if the device is in System Low Power state */
+                //         if (cyhal_syspm_get_system_state() == CYHAL_SYSPM_SYSTEM_LOW)
+                //         {
+
+                //         }
+                //         else
+                //         {
+
+                //         }
+                //         break;
+
+                //     case SWITCH_SHORT_PRESS:
+
+                //         break;
+
+                //     case SWITCH_LONG_PRESS:
+
+                //         break;
+
+                // default:
+                //     break;
+        }
+        __enable_irq();
+
+        cyhal_clock_free(&system_clock);
+    }
+
+
+
+
     // cy_rslt_t result;
     // if (n_args != 0) {
     //     uint32_t expiry = mp_obj_get_int(args[0]);
@@ -234,7 +512,7 @@ static void mp_machine_lightsleep(size_t n_args, const mp_obj_t *args) {
     //         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Light sleeep failed %lx !"), result);
     //     }
     // }
-    mp_raise_NotImplementedError(MP_ERROR_TEXT("Not implemented!!!\n"));
+    // mp_raise_NotImplementedError(MP_ERROR_TEXT("Not implemented!!!\n"));
 }
 
 NORETURN static void mp_machine_deepsleep(size_t n_args, const mp_obj_t *args) {
@@ -343,7 +621,7 @@ static mp_obj_t machine_rng(void) {
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_rng_obj, machine_rng);
 
-#ifdef MICROPY_PY_SD_CARD
+#if MICROPY_PY_SD_CARD
 #define MICROPY_PY_MACHINE_SD_CARD_ENTRY { MP_ROM_QSTR(MP_QSTR_SDCard),              MP_ROM_PTR(&machine_sdcard_type) },
 #else
 #define MICROPY_PY_MACHINE_SD_CARD_ENTRY
