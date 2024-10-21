@@ -39,7 +39,7 @@
 
 #define MICROPY_PY_MACHINE_SPI_SLAVE            (1)
 
-#define MICROPY_PY_SD_CARD (1)
+#define MICROPY_PY_SD_CARD (0)
 #if (MICROPY_PY_SD_CARD)
 #define MAX_SDHC_SLOT                           (2)
 #endif
