@@ -441,7 +441,6 @@ void audio_i2s_set_frequency(uint32_t freq) {
 
     uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&clock_pll);
     if (freq != pll_source_clock_freq_hz) {
-        mp_printf(&mp_plat_print, "machine.I2S: PLL0 freq is changed from %lu to %lu. This will affect all resources clock freq sourced by PLL0.\n", pll_source_clock_freq_hz, freq);
         clock_set_i2s = false;
         pll_source_clock_freq_hz = freq;
     }
@@ -492,7 +491,6 @@ void audio_pdm_set_frequency(uint32_t freq) {
     uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&pll_clock);
 
     if (freq != pll_source_clock_freq_hz) {
-        mp_printf(&mp_plat_print, "machine.PDM_PCM: PLL0 freq is changed to %lu. This will affect all resources clock freq sourced by PLL0.\n", freq);
         clock_set_pdm = false;
         pll_source_clock_freq_hz = freq;
     }
