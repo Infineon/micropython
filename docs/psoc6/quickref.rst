@@ -42,7 +42,13 @@ The :mod:`machine` module::
 
     import machine
 
-    machine.freq()          # get the current frequency of the CPU
+    machine.freq()                          # get the current frequency of the Core M4
+    machine.freq(CM4, freq)                 # set the frequency of the Core M4 sourced by PLL to freq. Value of freq can be upto 150 MHz
+    machine.freq(CM4_FLL, freq)             # set the frequency of the Core M4 sourced by FLL to freq. Value of freq can be upto 48 MHz
+    machine.freq(AUDIO_I2S_98_MHZ)          # set the frequency of the I2S clock to 98 MHz
+    machine.freq(AUDIO_I2S_90_MHZ)          # set the frequency of the I2S clock to 90 MHz
+    machine.freq(AUDIO_PDM_24_576_000_HZ)   # set the frequency of the I2S clock to 24576000 HZ
+    machine.freq(AUDIO_PDM_22_579_200_HZ)   # set the frequency of the I2S clock to 22579200 HZ
 
 Delay and timing
 ----------------
@@ -548,6 +554,13 @@ See :ref:`machine.I2S <machine.I2S>`.
 
 The following specialization applies to this port:
 
+Before using the I2S bus, the I2S clock frequency needs to be set. The I2S clock frequency can be set to 98 MHz or 90 MHz depending upon the sample rate. The I2S clock frequency can be set using the following function:
+
+::
+
+    machine.freq(AUDIO_I2S_98_MHZ) # set the frequency of the I2S clock to 98 MHz. For sample rates: 8KHz / 16 KHz / 32 KHz / 48 KHz 
+    machine.freq(AUDIO_I2S_90_MHZ) # set the frequency of the I2S clock to 90 MHz. For sample rates: 22.05 KHz / 44.1 KHz 
+
 Constructor
 ^^^^^^^^^^^^
 
@@ -571,6 +584,7 @@ Constructor
     from machine import I2S, Pin
     import array
     buf=bytearray(10) #Initialise buffer with required values for transmission & as empty buffer for reception
+    machine.freq(AUDIO_I2S_90_MHZ) #set the frequency of the I2S clock to 90 MHz.
 
     audio_out = I2S(0, sck="P13_1", ws="P13_2", sd="P13_3", mode=I2S.TX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) #create I2S object
     num_written = audio_out.write(buf) # write buffer of audio samples to I2S device 
