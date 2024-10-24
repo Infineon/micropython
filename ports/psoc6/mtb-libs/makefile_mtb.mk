@@ -49,6 +49,8 @@ mtb_config_deps:
 	$(info Configuring ModusToolbox dependencies ...)
 	$(info mtb_deps_dir  : $(MTB_LIBS_DIR)/deps/$(MTB_DEPS_DIRS)/)
 	$(Q) $(foreach DIR, $(MTB_DEPS_DIRS), $(shell cp -r $(MTB_LIBS_DIR)/deps/$(DIR)/. $(MTB_LIBS_DIR)/deps))
+	$(info mtb_bsp_deps_dir : Updating dependencies for $(BOARD) ...)
+	$(Q) bash $(MTB_LIBS_DIR)/mtb_bsp_set_deps_ver.sh $(BOARD)
 
 mtb_get_libs: mtb_config_deps
 	$(info )
