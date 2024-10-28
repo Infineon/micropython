@@ -35,9 +35,6 @@
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
 }
 
-#define AUDIO_SYS_CLOCK_98_304_000_HZ    98000000u   /* (Ideally 98.304 MHz) For sample rates: 8KHz / 16 KHz / 32 KHz / 48 KHz in Hz  */
-#define AUDIO_SYS_CLOCK_90_300_000_HZ    90000000u   /* (Ideally 90.3168 MHz) For sample rates: 22.05 KHz / 44.1 KHz */
-
 cyhal_clock_t audio_clock;
 
 // DMA ping-pong buffer size was empirically determined.  It is a tradeoff between:
@@ -323,6 +320,25 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
         mp_raise_ValueError(MP_ERROR_TEXT("invalid format"));
     }
 
+    // uint32_t audio_clock_freq_hz;
+    uint32_t rate = args[ARG_rate].u_int;
+
+    if (rate == 8000 ||
+        rate == 16000 ||
+        rate == 32000 ||
+        rate == 48000) {
+        if (PLL0_freq != AUDIO_I2S_98_MHZ) {
+            mp_raise_ValueError(MP_ERROR_TEXT("Invalid clock frequency set for the sample rate/ I2S Clock not set . Set the right clock before initialising I2S"));
+        }
+    } else if (rate == 22050 ||
+               rate == 44100) {
+        if (PLL0_freq != AUDIO_I2S_90_MHZ) {
+            mp_raise_ValueError(MP_ERROR_TEXT("Invalid clock frequency set for the sample rate/ I2S Clock not set. Set the right clock before initialising I2S"));
+        }
+    } else {
+        mp_raise_ValueError(MP_ERROR_TEXT("rate not supported"));
+    }
+
     // is valid buf size ?
     int32_t ring_buffer_len = args[ARG_ibuf].u_int;
     if (ring_buffer_len < 0) {
@@ -343,9 +359,6 @@ static void mp_machine_i2s_init_helper(machine_i2s_obj_t *self, mp_arg_val_t *ar
     self->ring_buffer_storage = m_new(uint8_t, ring_buffer_len);
 
     ringbuf_init(&self->ring_buffer, self->ring_buffer_storage, ring_buffer_len);
-    if (!clock_set_i2s) {
-        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("I2S clock not set. Set the clock before initialising I2S"));
-    }
     i2s_init(self, &audio_clock);
     i2s_dma_init(self);
 }
