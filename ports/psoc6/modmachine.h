@@ -77,4 +77,16 @@ extern cyhal_clock_t audio_clock;
 extern bool clock_set_i2s;
 extern bool clock_set_pdm;
 
+// enums to hold the frequency constants
+enum clock_freq_type {
+    AUDIO_I2S_98_MHZ =  98000000,
+    AUDIO_I2S_90_MHZ = 90000000,
+    AUDIO_PDM_24_576_000_HZ = 24576000,
+    AUDIO_PDM_22_579_000_HZ = 22579000,
+    CM4,
+    CM4_FLL
+};
+
+extern enum clock_freq_type PLL0_freq;
+
 #endif // MICROPY_INCLUDED_PSOC6_MODMACHINE_H
