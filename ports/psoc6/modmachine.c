@@ -61,19 +61,9 @@ enum {
     MACHINE_SOFT_RESET
 };
 
-// enums to hold the frequency constants
-enum clock_freq_type {
-    AUDIO_I2S_98_MHZ =  98000000,
-    AUDIO_I2S_90_MHZ = 90000000,
-    AUDIO_PDM_24_576_000_HZ = 24576000,
-    AUDIO_PDM_22_579_000_HZ = 22579000,
-    CM4,
-    CM4_FLL
-};
-
 uint32_t reset_cause;
-bool clock_set_i2s = false;
-bool clock_set_pdm = false;
+enum clock_freq_type freq_peri;
+enum clock_freq_type PLL0_freq;
 
 // function to return 64-bit silicon ID of given PSoC microcontroller
 // A combined 64-bit unique ID. [63:57] - DIE_YEAR [56:56] - DIE_MINOR [55:48] - DIE_SORT [47:40] - DIE_Y [39:32] - DIE_X [31:24] - DIE_WAFER [23:16] - DIE_LOT[2] [15: 8] - DIE_LOT[1] [ 7: 0] - DIE_LOT[0]
@@ -339,14 +329,14 @@ void cm4_fll_set_frequency(uint32_t freq) {
     // deinitialize retarget-io before changing the clock frequency
     cy_retarget_io_deinit();
 
-    /* Initialize, take ownership of PLL0/PLL */
+    /* Initialize, take ownership of FLL */
     cyhal_clock_reserve(&clock_fll, &CYHAL_CLOCK_FLL);
 
-    /* Set the PLL0/PLL frequency to PLL_CLOCK_HZ =150 MHZ*/
+    /* Set the FLL frequency */
     cy_rslt_t result = cyhal_clock_set_frequency(&clock_fll,  freq, NULL);
     clock_assert_raise_val("FLL clock reserve failed with error code: %lx", result);
 
-    /* If the PLL0/PLL clock is not already enabled, enable it */
+    /* If the FLL clock is not already enabled, enable it */
     if (!cyhal_clock_is_enabled(&clock_fll)) {
         result = cyhal_clock_set_enabled(&clock_fll, true, true);
         clock_assert_raise_val("FLL clock enable failed with error code: %lx", result);
@@ -357,7 +347,7 @@ void cm4_fll_set_frequency(uint32_t freq) {
     result = cyhal_clock_reserve(&clock_hf0, &CYHAL_CLOCK_HF[0]);
     clock_assert_raise_val("HF0 clock reserve failed with error code: %lx", result);
 
-    /* Source the (CLK_HF0) from PLL0/PLL */
+    /* Source the (CLK_HF0) from FLL */
     result = cyhal_clock_set_source(&clock_hf0, &clock_fll);
     clock_assert_raise_val("HF0 clock source failed with error code: %lx", result);
 
@@ -434,7 +424,7 @@ void audio_i2s_set_frequency(uint32_t freq) {
     cyhal_clock_t clock_pll;
     cy_rslt_t result;
 
-    clock_set_i2s = false;
+    static bool clock_set_i2s = false;
 
     result = cyhal_clock_reserve(&clock_pll, &CYHAL_CLOCK_PLL[0]);
     clock_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
@@ -523,25 +513,31 @@ void audio_pdm_set_frequency(uint32_t freq) {
 
 
 static void mp_machine_set_freq(size_t n_args, const mp_obj_t *args) {
-    enum clock_freq_type freq_peri = mp_obj_get_int(args[0]); // Assuming the enum values are used as integers
+    freq_peri = mp_obj_get_int(args[0]); // Assuming the enum values are used as integers
     switch (freq_peri) {
         case AUDIO_I2S_90_MHZ:
+            PLL0_freq = AUDIO_I2S_90_MHZ;
             audio_i2s_set_frequency(freq_peri);     // i2s audio fz
             break;
         case AUDIO_I2S_98_MHZ:
+            PLL0_freq = AUDIO_I2S_98_MHZ;
             audio_i2s_set_frequency(freq_peri);     // i2s audio fz
             break;
         case AUDIO_PDM_22_579_000_HZ:
+            PLL0_freq = AUDIO_PDM_22_579_000_HZ;
             audio_pdm_set_frequency(freq_peri);     // pdm audio fz
             break;
         case AUDIO_PDM_24_576_000_HZ:
+            PLL0_freq = AUDIO_PDM_24_576_000_HZ;
             audio_pdm_set_frequency(freq_peri);     // pdm audio fz
             break;
         case CM4_FLL:
             cm4_fll_set_frequency(mp_obj_get_int(args[1]));     // core m4 fz sourced by FLL
             break;
         case CM4:
+            PLL0_freq = CM4;
             cm4_set_frequency(mp_obj_get_int(args[1]));     // core m4 fz sourced by PLL(default condition)
+            break;
         default:
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid frequency type %lu"), freq_peri);
             break;
