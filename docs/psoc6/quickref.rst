@@ -579,8 +579,8 @@ Constructor
     audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object
     num_read = audio_in.readinto(buf)# fill buffer with audio samples from I2S device
 
-PDM - PCM
-------------
+PDM - PCM bus
+--------------
 
 PDM/PCM is a asynchronous operation used to connect digital audio devices.
 At the physical level, a bus consists of 2 lines: CLK, DATA.
@@ -611,7 +611,7 @@ PDM objects can be created and initialized using::
 
 
 Constructor
------------
+^^^^^^^^^^^^
 
 .. class:: PDM_PCM(id, *, clk, data, sample_rate, decimation_rate, bits, format, left_gain, right_gain)
 
@@ -631,7 +631,7 @@ Constructor
      - ``right_gain`` is PGA in 0.5 dB increment
 
 Methods
--------
+^^^^^^^^
 
 .. method:: PDM_PCM.init()
 

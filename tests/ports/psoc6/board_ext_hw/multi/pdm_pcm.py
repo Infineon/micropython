@@ -13,6 +13,9 @@ elif "CY8CKIT-062S2-AI" in board:
     clk_pin = "P10_4"
     data_pin = "P10_5"
 
+rx_buf = bytearray([0] * 4096)
+
+print("PDM_PCM Tests")
 pdm_pcm = PDM_PCM(
     0,
     sck=clk_pin,
@@ -24,5 +27,12 @@ pdm_pcm = PDM_PCM(
     left_gain=0,
     right_gain=0,
 )
+
+pdm_pcm.init()
+
+# Read PCM data
+num_read = pdm_pcm.readinto(rx_buf)
+print("num bytes read: ", num_read)
+print("Read buff values: ", rx_buf)
 
 pdm_pcm.deinit()

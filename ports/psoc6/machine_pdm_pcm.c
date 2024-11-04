@@ -32,88 +32,48 @@
 #include "machine_pin_phy.h"
 #include "modmachine.h"
 #include "mplogger.h"
-
 #if MICROPY_PY_MACHINE_PDM_PCM
 #include "machine_pdm_pcm.h"
 
 cyhal_clock_t pdm_pcm_audio_clock;
 
-#if MICROPY_PY_MACHINE_PDM_PCM_RING_BUF
-
-static void ringbuf_init(ring_buf_t *rbuf, uint8_t *buffer, size_t size) {
-    rbuf->buffer = buffer;
-    rbuf->size = size;
-    rbuf->head = 0;
-    rbuf->tail = 0;
-}
-
-static bool ringbuf_push(ring_buf_t *rbuf, uint8_t data) {
-    size_t next_tail = (rbuf->tail + 1) % rbuf->size;
-
-    if (next_tail != rbuf->head) {
-        rbuf->buffer[rbuf->tail] = data;
-        rbuf->tail = next_tail;
-        return true;
-    }
-    // full
-    return false;
-}
-
-static bool ringbuf_pop(ring_buf_t *rbuf, uint8_t *data) {
-    if (rbuf->head == rbuf->tail) {
-        // empty
-        return false;
-    }
-    *data = rbuf->buffer[rbuf->head];
-    rbuf->head = (rbuf->head + 1) % rbuf->size;
-    return true;
-}
-
-static size_t ringbuf_available_data(ring_buf_t *rbuf) {
-    return (rbuf->tail - rbuf->head + rbuf->size) % rbuf->size;
-}
-
-static size_t ringbuf_available_space(ring_buf_t *rbuf) {
-    return rbuf->size - ringbuf_available_data(rbuf) - 1;
-}
 
 static uint32_t fill_appbuf_from_ringbuf(machine_pdm_pcm_obj_t *self, mp_buffer_info_t *appbuf) {
-    printf("fill_appbuf_from_ringbuf \r\n");
     uint32_t num_bytes_copied_to_appbuf = 0;
     uint8_t *app_p = (uint8_t *)appbuf->buf;
     uint8_t appbuf_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1); // !J: Why only 16 or 32?
     uint32_t num_bytes_needed_from_ringbuf = appbuf->len * (PDM_PCM_RX_FRAME_SIZE_IN_BYTES / appbuf_sample_size_in_bytes);
     uint8_t discard_byte;
-    mp_printf(&mp_plat_print, "num_bytes_needed_from_ringbuf: %d \r\n", num_bytes_needed_from_ringbuf);
+    // mp_printf(&mp_plat_print, "num_bytes_needed_from_ringbuf: %d \r\n", num_bytes_needed_from_ringbuf);
     while (num_bytes_needed_from_ringbuf) {
 
         uint8_t f_index = get_frame_mapping_index(self->bits, self->format);
-        mp_printf(&mp_plat_print, "f_index: %d \r\n", f_index);
+        // mp_printf(&mp_plat_print, "f_index: %d \r\n", f_index);
 
         for (uint8_t i = 0; i < PDM_PCM_RX_FRAME_SIZE_IN_BYTES; i++) {
             int8_t r_to_a_mapping = pdm_pcm_frame_map[f_index][i];
             if (r_to_a_mapping != -1) {
-                mp_printf(&mp_plat_print, "r_to_a_mapping: %d \r\n", r_to_a_mapping);
+                // mp_printf(&mp_plat_print, "r_to_a_mapping: %d \r\n", r_to_a_mapping);
                 if (self->io_mode == BLOCKING) {
                     // poll the ringbuf until a sample becomes available,  copy into appbuf using the mapping transform
                     while (ringbuf_pop(&self->ring_buffer, app_p + r_to_a_mapping) == false) {
                         ;
                     }
-                    printf("Sample available \r\n");
-                    mp_printf(&mp_plat_print, "app_p + r_to_a_mapping: %d \r\n", app_p + r_to_a_mapping);
+                    // printf("Sample available \r\n");
+                    // mp_printf(&mp_plat_print, "app_p + r_to_a_mapping: %d \r\n", app_p + r_to_a_mapping);
                     num_bytes_copied_to_appbuf++;
                 } else {
                     return 0;  // should never get here (non-blocking mode does not use this function)
                 }
             } else { // r_a_mapping == -1
-                mp_printf(&mp_plat_print, "r_to_a_mapping: %d \r\n", r_to_a_mapping);
+                // mp_printf(&mp_plat_print, "r_to_a_mapping: %d \r\n", r_to_a_mapping);
                 // discard unused byte from ring buffer
                 if (self->io_mode == BLOCKING) {
                     // poll the ringbuf until a sample becomes available
                     while (ringbuf_pop(&self->ring_buffer, &discard_byte) == false) {
-                        printf("ringbuf_pop in unused byte \r\n");
+                        // printf("ringbuf_pop in unused byte \r\n");
                     }
-                    mp_printf(&mp_plat_print, "discard_byte: %d \r\n", discard_byte);
+                    // mp_printf(&mp_plat_print, "discard_byte: %d \r\n", discard_byte);
                 } else {
                     return 0;  // should never get here (non-blocking mode does not use this function)
                 }
@@ -162,14 +122,11 @@ static void fill_appbuf_from_ringbuf_non_blocking(machine_pdm_pcm_obj_t *self) {
         }
     }
 }
-
-#endif // MICROPY_PY_MACHINE_PDM_PCM_RING_BUF
-
 /*========================================================================================================================*/
 // PDM_PCM higher level MPY functions (extmod/machine_pdm_pcm.c)
 
 MP_NOINLINE static void machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    printf("machine_pdm_pcm_init_helper \r\n");
+    mplogger_print("machine_pdm_pcm_init_helper \r\n");
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_sck,             MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
         { MP_QSTR_data,            MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
@@ -210,7 +167,7 @@ static void machine_pdm_pcm_print(const mp_print_t *print, mp_obj_t self_in, mp_
 
 // PDM_PCM(...) Constructor
 static mp_obj_t machine_pdm_pcm_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *args) {
-    printf("machine_pdm_pcm_make_new \r\n");
+    mplogger_print("machine_pdm_pcm_make_new \r\n");
     mp_arg_check_num(n_pos_args, n_kw_args, 1, MP_OBJ_FUN_ARGS_MAX, true);
     mp_int_t pdm_pcm_id = mp_obj_get_int(args[0]);
 
@@ -225,7 +182,7 @@ static mp_obj_t machine_pdm_pcm_make_new(const mp_obj_type_t *type, size_t n_pos
 
 // PDM_PCM.init(...)
 static mp_obj_t machine_pdm_pcm_init(mp_obj_t self_in) {
-    printf("machine_pdm_pcm_init \r\n");
+    mplogger_print("machine_pdm_pcm_init \r\n");
     machine_pdm_pcm_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_machine_pdm_pcm_init(self);
     return mp_const_none;
@@ -234,7 +191,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(machine_pdm_pcm_init_obj, machine_pdm_pcm_init)
 
 // PDM_PCM.deinit()
 static mp_obj_t machine_pdm_pcm_deinit(mp_obj_t self_in) {
-    printf("machine_pdm_pcm_deinit \r\n");
+    mplogger_print("machine_pdm_pcm_deinit \r\n");
     machine_pdm_pcm_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_machine_pdm_pcm_deinit(self);
     return mp_const_none;
@@ -243,7 +200,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1(machine_pdm_pcm_deinit_obj, machine_pdm_pcm_dei
 
 // PDM_PCM.set_gain()
 static mp_obj_t machine_pdm_pcm_set_gain(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    printf("machine_pdm_pcm_set_gain \r\n");
+    mplogger_print("machine_pdm_pcm_set_gain \r\n");
 
     enum { ARG_left_gain, ARG_right_gain};
     static const mp_arg_t allowed_args[] = {
@@ -294,25 +251,87 @@ static MP_DEFINE_CONST_FUN_OBJ_2(machine_pdm_pcm_irq_obj, machine_pdm_pcm_irq);
 // Port Private functions for DMA support (ports/psoc6)
 
 static inline void _dma_buff_init(machine_pdm_pcm_obj_t *self) {
-    printf("_dma_buff_init \r\n");
-    for (uint32_t i = 0; i < SIZEOF_DMA_BUFFER; i++) {
+    memset(self->dma_active_buffer, 0, SIZEOF_DMA_BUFFER * sizeof(self->dma_active_buffer[0]));
+    memset(self->dma_processing_buffer, 0, SIZEOF_DMA_BUFFER * sizeof(self->dma_processing_buffer[0]));
+
+    /*for (uint32_t i = 0; i < SIZEOF_DMA_BUFFER; i++) {
         self->dma_active_buffer[i] = 0;
         self->dma_processing_buffer[i] = 0;
-    }
+    }*/
 
     self->dma_active_buf_p = self->dma_active_buffer;
     self->dma_processing_buf_p = self->dma_processing_buffer;
 }
 
 static inline void _dma_swap_active_dmabuf(machine_pdm_pcm_obj_t *self) {
-    printf("_dma_swap_active_dmabuf \r\n");
     uint32_t *temp = self->dma_active_buf_p;
     self->dma_active_buf_p = self->dma_processing_buf_p;
     self->dma_processing_buf_p = temp;
 }
 
 static void _dma_copy_from_dmabuf_to_ringbuf(machine_pdm_pcm_obj_t *self) {
-    printf("_dma_copy_from_dmabuf_to_ringbuf \r\n");
+    uint8_t dma_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
+    uint8_t *dma_buff_p = (uint8_t *)self->dma_processing_buf_p;
+    uint32_t num_bytes_needed_from_ringbuf = SIZEOF_HALF_DMA_BUFFER_IN_BYTES * (PDM_PCM_RX_FRAME_SIZE_IN_BYTES / dma_sample_size_in_bytes);
+
+    // when space exists, copy samples into ring buffer
+    if (ringbuf_available_space(&self->ring_buffer) >= num_bytes_needed_from_ringbuf) {
+        uint8_t f_index = get_frame_mapping_index(self->bits, self->format);
+        uint32_t i = 0;
+        while (i < SIZEOF_HALF_DMA_BUFFER_IN_BYTES) {
+            for (uint8_t j = 0; j < PDM_PCM_RX_FRAME_SIZE_IN_BYTES; j++) {
+                int8_t r_to_a_mapping = pdm_pcm_frame_map[f_index][j];
+                if (r_to_a_mapping != -1) {
+                    ringbuf_push(&self->ring_buffer, dma_buff_p[i]);
+                    i++;
+                } else { // r_a_mapping == -1
+                    ringbuf_push(&self->ring_buffer, -1);
+                }
+            }
+        }
+    }
+}
+
+/*static void _dma_copy_from_dmabuf_to_ringbuf(machine_pdm_pcm_obj_t *self) {
+    //uint8_t dma_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
+    uint8_t *dma_buff_p = (uint8_t *)self->dma_processing_buf_p;
+    uint32_t num_bytes_needed_in_ringbuf = SIZEOF_DMA_BUFFER;
+
+    // Check if space exists, copy samples into ring buffer
+    if (ringbuf_available_space(&self->ring_buffer) >= num_bytes_needed_in_ringbuf) {
+        for (uint32_t i = 0; i < SIZEOF_DMA_BUFFER; i++) {
+            bool status = ringbuf_push(&self->ring_buffer, dma_buff_p[i]);
+            if (!status) {
+                mp_raise_msg(&mp_type_Exception, "Ring buffer is full\r\n");
+            }
+        }
+    }
+    else {
+        mp_raise_msg(&mp_type_Exception, "Ring buffer is full\r\n");
+    }
+}*/
+
+/*static void _dma_copy_from_dmabuf_to_ringbuf(machine_pdm_pcm_obj_t *self) {
+    //uint8_t dma_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
+    uint8_t *dma_buff_p = (uint8_t *)self->dma_processing_buf_p;
+    uint32_t num_bytes_needed_in_ringbuf = SIZEOF_DMA_BUFFER;
+
+    // Check if space exists, copy samples into ring buffer
+    if (ringbuf_available_space(&self->ring_buffer) >= num_bytes_needed_in_ringbuf) {
+        for (uint32_t i = 0; i < SIZEOF_DMA_BUFFER; i++) {
+            bool status = ringbuf_push(&self->ring_buffer, dma_buff_p[i]);
+            if (!status) {
+                mp_raise_msg(&mp_type_Exception, "Ring buffer is full\r\n");
+            }
+        }
+    }
+    else {
+        mp_raise_msg(&mp_type_Exception, "Ring buffer is full\r\n");
+    }
+}*/
+
+/*static void _dma_copy_from_dmabuf_to_ringbuf(machine_pdm_pcm_obj_t *self) {
+    mplogger_print("_dma_copy_from_dmabuf_to_ringbuf \r\n");
     uint8_t dma_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
     uint8_t *dma_buff_p = (uint8_t *)self->dma_processing_buf_p;
     uint32_t num_bytes_needed_from_ringbuf = SIZEOF_DMA_BUFFER_IN_BYTES * (PDM_PCM_RX_FRAME_SIZE_IN_BYTES / dma_sample_size_in_bytes);
@@ -333,14 +352,21 @@ static void _dma_copy_from_dmabuf_to_ringbuf(machine_pdm_pcm_obj_t *self) {
             }
         }
     }
-}
+}*/
 
 // =======================================================================================
 // PDM_PCM low-level abstracted functions (ports/psoc6)
-
+uint8_t pdm_pcm_get_word_byte_size(machine_pdm_pcm_obj_t *self) {
+    uint8_t res_bits = self->bits;
+    if (res_bits == 16) {
+        return 2;
+    } else {
+        return 4;
+    }
+}
 // Init hardware block
 static void pdm_pcm_init(machine_pdm_pcm_obj_t *self, cyhal_clock_t *clock) {
-    printf("pdm_pcm_init \r\n");
+    mplogger_print("pdm_pcm_init \r\n");
     cyhal_pdm_pcm_cfg_t config =
     {
         .sample_rate = self->sample_rate,
@@ -358,7 +384,7 @@ static void pdm_pcm_init(machine_pdm_pcm_obj_t *self, cyhal_clock_t *clock) {
 
 // Initialize audio clock
 void pdm_pcm_audio_clock_init(uint32_t audio_clock_freq_hz) {
-    printf("pdm_pcm_audio_clock_init \r\n");
+    mplogger_print("pdm_pcm_audio_clock_init \r\n");
     cyhal_clock_t pll_clock;
     cy_rslt_t result;
 
@@ -402,16 +428,20 @@ void pdm_pcm_audio_clock_init(uint32_t audio_clock_freq_hz) {
 
 // Set PDM_PCM async mode to DMA
 static void pdm_pcm_set_async_mode_dma(machine_pdm_pcm_obj_t *self) {
-    printf("pdm_pcm_set_async_mode_dma \r\n");
+    mplogger_print("pdm_pcm_set_async_mode_dma \r\n");
     cy_rslt_t result = cyhal_pdm_pcm_set_async_mode(&self->pdm_pcm_obj, CYHAL_ASYNC_DMA, CYHAL_DMA_PRIORITY_DEFAULT);
     pdm_pcm_assert_raise_val("PDM_PCM set DMA mode failed with return code %lx !", result);
 }
 
 // Read from PDM_PCM buf to provisioned DMA buffer
 static void pdm_pcm_read_rxbuf(machine_pdm_pcm_obj_t *self) {
-    printf("pdm_pcm_read_rxbuf \r\n");
+    // mplogger_print("pdm_pcm_read_rxbuf \r\n");
+    uint16_t dma_half_buff_word_size = SIZEOF_HALF_DMA_BUFFER_IN_BYTES / pdm_pcm_get_word_byte_size(self);
     // ToDo: Check the value of dma_buff_word_size and adapt for PDM-PCM
-    cy_rslt_t result = cyhal_pdm_pcm_read_async(&self->pdm_pcm_obj, self->dma_active_buf_p, SIZEOF_DMA_BUFFER);
+    while (cyhal_pdm_pcm_is_pending(&self->pdm_pcm_obj)) {
+        ;
+    }
+    cy_rslt_t result = cyhal_pdm_pcm_read_async(&self->pdm_pcm_obj, self->dma_active_buf_p, dma_half_buff_word_size);
     pdm_pcm_assert_raise_val("PDM_PCM DMA read failed with return code %lx !", result);
 }
 
@@ -424,11 +454,11 @@ static void pdm_pcm_rx_init(machine_pdm_pcm_obj_t *self) {
 // IRQ Handler
 static void pdm_pcm_irq_handler(void *arg, cyhal_pdm_pcm_event_t event) {
     machine_pdm_pcm_obj_t *self = (machine_pdm_pcm_obj_t *)arg;
-
     if (0u != (event & CYHAL_PDM_PCM_ASYNC_COMPLETE)) {
         _dma_swap_active_dmabuf(self);
         pdm_pcm_read_rxbuf(self);
         _dma_copy_from_dmabuf_to_ringbuf(self);
+        cyhal_gpio_toggle(CYBSP_USER_LED);
 
         if ((self->io_mode == NON_BLOCKING) && (self->non_blocking_descriptor.copy_in_progress)) {
             fill_appbuf_from_ringbuf_non_blocking(self);
@@ -438,7 +468,7 @@ static void pdm_pcm_irq_handler(void *arg, cyhal_pdm_pcm_event_t event) {
 
 // Configure PDM_PCM IRQ
 static void pdm_pcm_irq_configure(machine_pdm_pcm_obj_t *self) {
-    printf("pdm_pcm_irq_configure \r\n");
+    mplogger_print("pdm_pcm_irq_configure \r\n");
     cyhal_pdm_pcm_register_callback(&self->pdm_pcm_obj, &pdm_pcm_irq_handler, self);
     cyhal_pdm_pcm_enable_event(&self->pdm_pcm_obj, CYHAL_PDM_PCM_ASYNC_COMPLETE, CYHAL_ISR_PRIORITY_DEFAULT, true);
 }
@@ -458,12 +488,14 @@ int8_t get_frame_mapping_index(int8_t bits, format_t format) {
         }
     }
 }
+
+
 // =======================================================================================
 // MPY bindings for PDM_PCM (ports/psoc6)
 
 // constructor()
 static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_pcm_id) {
-    printf("mp_machine_pdm_pcm_make_new_instance \r\n");
+    mplogger_print("mp_machine_pdm_pcm_make_new_instance \r\n");
     (void)pdm_pcm_id;
     machine_pdm_pcm_obj_t *self = NULL;
     for (uint8_t i = 0; i < MICROPY_HW_MAX_PDM_PCM; i++) {
@@ -482,7 +514,7 @@ static machine_pdm_pcm_obj_t *mp_machine_pdm_pcm_make_new_instance(mp_int_t pdm_
 
 // init.helper()
 static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_val_t *args) {
-    printf("mp_machine_pdm_pcm_init_helper \r\n");
+    mplogger_print("mp_machine_pdm_pcm_init_helper \r\n");
     // Assign pins
     self->clk = pin_addr_by_name(args[ARG_clk].u_obj);
     self->data = pin_addr_by_name(args[ARG_data].u_obj);
@@ -526,16 +558,17 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
     }
 
     // !ToDo: Check the value of ibuf and if needs to be set by user
-    int32_t ring_buffer_len = 20000; // !J: How can user calculate this? Easier if we set internally?
+    int32_t ring_buffer_len = 40000;
     if (ring_buffer_len < 0) {
         mp_raise_ValueError(MP_ERROR_TEXT("invalid ibuf"));
     }
     self->ibuf = ring_buffer_len;
     self->callback_for_non_blocking = MP_OBJ_NULL;
     self->io_mode = BLOCKING;
-    self->ring_buffer_storage = m_new(uint8_t, ring_buffer_len);
+    // self->ring_buffer_storage = m_new(uint8_t, ring_buffer_len);
+    // ringbuf_init(&self->ring_buffer, self->ring_buffer_storage, ring_buffer_len);
 
-    ringbuf_init(&self->ring_buffer, self->ring_buffer_storage, ring_buffer_len);
+    ringbuf_init(&self->ring_buffer, 2, ring_buffer_len);
     pdm_pcm_audio_clock_init(audio_clock_freq_hz);
     pdm_pcm_init(self, &pdm_pcm_audio_clock);
     pdm_pcm_irq_configure(self);
@@ -545,13 +578,15 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
 
 // init()
 static void mp_machine_pdm_pcm_init(machine_pdm_pcm_obj_t *self) {
-    printf("mp_machine_pdm_pcm_init \r\n");
+    mplogger_print("mp_machine_pdm_pcm_init \r\n");
     pdm_pcm_rx_init(self);
+    cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, true);
+    cyhal_gpio_write(CYBSP_USER_LED, 1);
 }
 
 // deinit()
 static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self) {
-    printf("mp_machine_pdm_pcm_deinit \r\n");
+    mplogger_print("mp_machine_pdm_pcm_deinit \r\n");
     cyhal_pdm_pcm_stop(&self->pdm_pcm_obj);
     cyhal_pdm_pcm_free(&self->pdm_pcm_obj);
     MP_STATE_PORT(machine_pdm_pcm_obj[self->pdm_pcm_id]) = NULL;
@@ -559,7 +594,7 @@ static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self) {
 
 // set_gain()
 static void mp_machine_pdm_pcm_set_gain(machine_pdm_pcm_obj_t *self, int16_t left_gain, int16_t right_gain) {
-    printf("mp_machine_pdm_pcm_set_gain \r\n");
+    mplogger_print("mp_machine_pdm_pcm_set_gain \r\n");
     mp_printf(&mp_plat_print, "machine.PDM_PCM: Setting left mic gain to %d and right mic gain to %d\n", self->left_gain, self->right_gain);
     cy_rslt_t result = cyhal_pdm_pcm_set_gain(&self->pdm_pcm_obj, self->left_gain, self->right_gain);
     pdm_pcm_assert_raise_val("PDM_PCM set gain failed with return code %lx !", result);
@@ -572,24 +607,17 @@ static void mp_machine_pdm_pcm_irq_update(machine_pdm_pcm_obj_t *self) {
 // Implementation for stream protocol (ports/psoc6)
 
 static mp_uint_t machine_pdm_pcm_stream_read(mp_obj_t self_in, void *buf_in, mp_uint_t size, int *errcode) {
-    printf("machine_pdm_pcm_stream_read \r\n");
     machine_pdm_pcm_obj_t *self = MP_OBJ_TO_PTR(self_in);
 
     uint8_t appbuf_sample_size_in_bytes = (self->bits / 8) * (self->format == STEREO ? 2: 1);
-    printf("appbuf_sample_size_in_bytes: %d \r\n", appbuf_sample_size_in_bytes);
-    printf("size: %d \r\n", size);
-    printf("size by appbuf_sample_size_in_bytes: %d \r\n", size % appbuf_sample_size_in_bytes);
-    // uint8_t appbuf_sample_size_in_bytes = (self->bits + 7) /8; // round up to higher limit. Consider 20 bits and 18 bits case.
     if (size % appbuf_sample_size_in_bytes != 0) { // size should be multiple of sample size
-        printf("Error here! \r\n");
+        mplogger_print("Error here! \r\n");
         *errcode = MP_EINVAL;
         return MP_STREAM_ERROR;
     }
-
     if (size == 0) {
         return 0;
     }
-
     if (self->io_mode == BLOCKING) { // blocking mode
         mp_buffer_info_t appbuf;
         appbuf.buf = (void *)buf_in; // To store read bits

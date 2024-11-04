@@ -1,5 +1,7 @@
 #if MICROPY_PY_MACHINE_PDM_PCM
 
+#include "ringbuf.h"
+
 #define MICROPY_HW_MAX_PDM_PCM              1
 #define DEFAULT_LEFT_GAIN                   0
 #define DEFAULT_RIGHT_GAIN                  0
@@ -7,12 +9,14 @@
 #define AUDIO_SYS_CLOCK_24_576_000_HZ      24576000u /* (Ideally 24.576 MHz) For sample rates: 8 KHz / 16 KHz / 48 KHz */
 #define AUDIO_SYS_CLOCK_22_579_000_HZ      22579000u /* (Ideally 22.579 MHz) For sample rates: 22.05 KHz / 44.1 KHz */
 
-#define SIZEOF_DMA_BUFFER                  (1024)
-#define SIZEOF_DMA_BUFFER_IN_BYTES         (1024 * sizeof(uint32_t))
+#define SIZEOF_DMA_BUFFER                  (128)
+#define SIZEOF_HALF_DMA_BUFFER             (SIZEOF_DMA_BUFFER / 2)
+#define SIZEOF_DMA_BUFFER_IN_BYTES         (SIZEOF_DMA_BUFFER * sizeof(uint32_t))
+#define SIZEOF_HALF_DMA_BUFFER_IN_BYTES    (SIZEOF_DMA_BUFFER_IN_BYTES / 2)
 #define PDM_PCM_RX_FRAME_SIZE_IN_BYTES     (8)
 
 #define NON_BLOCKING_RATE_MULTIPLIER       (4)
-#define SIZEOF_NON_BLOCKING_COPY_IN_BYTES  (SIZEOF_DMA_BUFFER * NON_BLOCKING_RATE_MULTIPLIER)
+#define SIZEOF_NON_BLOCKING_COPY_IN_BYTES  (SIZEOF_HALF_DMA_BUFFER * NON_BLOCKING_RATE_MULTIPLIER)
 
 
 #define pdm_pcm_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
@@ -49,25 +53,6 @@ typedef enum {
     NON_BLOCKING,
 } io_mode_t;
 
-#if MICROPY_PY_MACHINE_PDM_PCM_RING_BUF
-
-typedef struct _ring_buf_t {
-    uint8_t *buffer;
-    size_t head;
-    size_t tail;
-    size_t size;
-} ring_buf_t;
-
-static void ringbuf_init(ring_buf_t *rbuf, uint8_t *buffer, size_t size);
-static bool ringbuf_push(ring_buf_t *rbuf, uint8_t data);
-static bool ringbuf_pop(ring_buf_t *rbuf, uint8_t *data);
-static size_t ringbuf_available_data(ring_buf_t *rbuf);
-static size_t ringbuf_available_space(ring_buf_t *rbuf);
-// static void fill_appbuf_from_ringbuf_non_blocking(machine_pdm_pcm_obj_t *self);
-
-#endif // MICROPY_PY_MACHINE_PDM_PCM_RING_BUF
-
-
 typedef struct _non_blocking_descriptor_t {
     mp_buffer_info_t appbuf;
     uint32_t index;
@@ -94,7 +79,7 @@ typedef struct _machine_pdm_pcm_obj_t {
     uint32_t *dma_active_buf_p;
     uint32_t *dma_processing_buf_p;
     ring_buf_t ring_buffer;
-    uint8_t *ring_buffer_storage;
+    // uint8_t *ring_buffer_storage;
     non_blocking_descriptor_t non_blocking_descriptor; // For non-blocking mode
 } machine_pdm_pcm_obj_t;
 
