@@ -144,7 +144,7 @@ run_tests() {
   test_dir_flag="-d"
   case ${tests} in *.py)  test_dir_flag="";; esac
 
-  ./run-tests.py --target psoc6 --device ${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
+  ./run-tests.py -t port:${test_dev} ${test_dir_flag} ${tests} ${excluded_tests}
 
   exit_code=$?
 
