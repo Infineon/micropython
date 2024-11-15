@@ -669,7 +669,7 @@ Methods
 
     Set the callback.``handler`` is called when ``buf`` becomes full (``readinto`` method).
     Setting a callback changes the ``readinto`` method to non-blocking operation.
-  ``handler`` is called in the context of the MicroPython scheduler.
+    ``handler`` is called in the context of the MicroPython scheduler.
 
 .. method::  PDM_PCM.gain(left_gain, right_gain)
     
