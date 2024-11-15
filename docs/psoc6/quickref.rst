@@ -593,6 +593,120 @@ Constructor
     audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object
     num_read = audio_in.readinto(buf)# fill buffer with audio samples from I2S device
 
+PDM - PCM bus
+--------------
+
+PDM/PCM is a asynchronous operation used to connect digital audio devices.
+At the physical level, a bus consists of 2 lines: CLK, DATA.
+
+PDM objects can be created and initialized using::
+
+    from machine import PDM_PCM
+    from machine import Pin
+
+    clk_pin = "P10_4"
+    data_pin = "P10_5"
+
+    pdm_pcm = PDM_PCM(
+    0,
+    sck=clk_pin,
+    data=data_pin,
+    sample_rate=8000,
+    decimation_rate=64,
+    bits=PDM_PCM.BITS_16,
+    format=PDM_PCM.MONO_LEFT,
+    left_gain=0,
+    right_gain=0
+    )
+
+2 modes of operation are supported:
+ - blocking
+ - non-blocking
+
+
+Constructor
+^^^^^^^^^^^^
+
+.. class:: PDM_PCM(id, *, clk, data, sample_rate, decimation_rate, bits, format, left_gain, right_gain)
+
+   Construct PDM_PCM object of the given id:
+
+   - ``id`` identifies a particular PDM_PCM bus; it is board and port specific and is ignored in our port
+
+   Keyword-only parameters that are supported on this port:
+
+     - ``clk`` is a pin object for the clock line
+     - ``data`` is a pin object for the data line
+     - ``sample_rate`` specifies audio sampling rate
+     - ``decimation_rate`` specifies PDM decimation rate
+     - ``bits`` specifies word length - 16, 18, 20, 24 being accepted values
+     - ``format`` specifies channel format - STEREO, MONO_LEFT or MONO_RIGHT
+     - ``left_gain`` is PGA in 0.5 dB increment
+     - ``right_gain`` is PGA in 0.5 dB increment
+
+Methods
+^^^^^^^^
+
+.. method:: PDM_PCM.init()
+    Starts the PDM_PCM hardware block and conversion operation.
+
+.. note::
+    Once the block is started, about 35-45 samples are internally discarded to set the protocol. The actual data should be recorded after a sec to avoid any losses.
+
+.. method:: PDM_PCM.deinit()
+
+  Stops the PDM_PCM hardware block deinitializes PDM_PCM object
+
+.. method::  PDM_PCM.readinto(buf)
+
+    Read audio samples into the buffer specified by ``buf``. ``buf`` must support the buffer protocol, such as bytearray or array.
+    For Stereo format, left channel sample precedes right channel sample. For Mono-left format,
+    the left channel sample data is used and for Mono-right format, right channel data is used. Ensure that ``buf`` size should be multiple of sample size.
+    Sample size can be calculated as (PCM_bits/8) * (format_size); where format_size is 2(stereo mode) and 1(mono mode).
+    Returns number of bytes read
+
+.. method::  PDM_PCM.irq(handler)
+
+    Set the callback.``handler`` is called when ``buf`` becomes full (``readinto`` method).
+    Setting a callback changes the ``readinto`` method to non-blocking operation.
+  ``handler`` is called in the context of the MicroPython scheduler.
+
+.. method::  PDM_PCM.gain(left_gain, right_gain)
+    
+    Set the gain for single or both microphones. When either of the gain value is not passed, 
+    previously set value or default value of 0dB is set.
+
+Constants
+---------
+
+.. data:: PDM_PCM.STEREO
+
+   for initialising the PDM_PCM ``format`` to stereo
+
+.. data:: PDM_PCM.MONO_LEFT
+
+   for initialising the PDM_PCM ``format`` to mono-left
+
+.. data:: PDM_PCM.MONO_RIGHT
+
+   for initialising the PDM_PCM ``format`` to mono-right
+
+.. data:: PDM_PCM.BITS_16
+
+   for initialising the PDM_PCM ``bits`` to 16
+
+.. data:: PDM_PCM.BITS_18
+
+   for initialising the PDM_PCM ``bits`` to 18
+
+.. data:: PDM_PCM.BITS_20
+
+   for initialising the PDM_PCM ``bits`` to 20
+
+.. data:: PDM_PCM.BITS_24
+
+   for initialising the PDM_PCM ``bits`` to 24
+
 
 UART
 ----
