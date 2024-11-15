@@ -545,8 +545,6 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
 static void mp_machine_pdm_pcm_init(machine_pdm_pcm_obj_t *self) {
     mplogger_print("mp_machine_pdm_pcm_init \r\n");
     pdm_pcm_rx_init(self);
-    cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, true);
-    cyhal_gpio_write(CYBSP_USER_LED, 1);
 }
 
 // deinit()
