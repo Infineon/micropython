@@ -600,7 +600,7 @@ PDM objects can be created and initialized using::
     sample_rate=8000,
     decimation_rate=64,
     bits=PDM_PCM.BITS_16,
-    format=PDM_PCM.STEREO,
+    format=PDM_PCM.MONO_LEFT,
     left_gain=0,
     right_gain=0
     )
@@ -637,15 +637,19 @@ Methods
 
   Starts the PDM_PCM hardware block and conversion operation.
 
+.. note::
+    Once the block is started, about 35-45 samples are internally discarded to set the protocol. The actual data should be recorded after a sec to avoid any losses.
+
 .. method:: PDM_PCM.deinit()
 
-  Deinitialize PDM_PCM object
+  Stops the PDM_PCM hardware block deinitializes PDM_PCM object
 
 .. method::  PDM_PCM.readinto(buf)
 
     Read audio samples into the buffer specified by ``buf``. ``buf`` must support the buffer protocol, such as bytearray or array.
     For Stereo format, left channel sample precedes right channel sample. For Mono-left format,
-    the left channel sample data is used and for Mono-right format, right channel data is used.
+    the left channel sample data is used and for Mono-right format, right channel data is used. Ensure that ``buf`` size should be multiple of sample size.
+    Sample size can be calculated as (PCM_bits/8) * (format_size); where format_size is 2(stereo mode) and 1(mono mode).
     Returns number of bytes read
 
 .. method::  PDM_PCM.irq(handler)

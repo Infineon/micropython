@@ -72,14 +72,13 @@ typedef struct _machine_pdm_pcm_obj_t {
     uint8_t decimation_rate;
     int16_t left_gain;
     int16_t right_gain;
-    int32_t ibuf;   // ToDo: Does user needs to calculate this in PDM?
+    int32_t ibuf;   // Private variable
     mp_obj_t callback_for_non_blocking;
     uint32_t dma_active_buffer[SIZEOF_DMA_BUFFER];
     uint32_t dma_processing_buffer[SIZEOF_DMA_BUFFER];
     uint32_t *dma_active_buf_p;
     uint32_t *dma_processing_buf_p;
     ring_buf_t ring_buffer;
-    // uint8_t *ring_buffer_storage;
     non_blocking_descriptor_t non_blocking_descriptor; // For non-blocking mode
 } machine_pdm_pcm_obj_t;
 
@@ -90,13 +89,15 @@ static void mp_machine_pdm_pcm_deinit(machine_pdm_pcm_obj_t *self);
 static void mp_machine_pdm_pcm_set_gain(machine_pdm_pcm_obj_t *self, int16_t left_gain, int16_t right_gain);
 static void mp_machine_pdm_pcm_irq_update(machine_pdm_pcm_obj_t *self);
 
-
-static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
-    { 0,  1, -1, -1, -1, -1, -1, -1 },  // Mono, 16-bits
-    { 0,  1,  2,  3, -1, -1, -1, -1 },  // Mono, 32-bits
-    { 0,  1, -1, -1,  2,  3, -1, -1 },  // Stereo, 16-bits
-    { 0,  1,  2,  3,  4,  5,  6,  7 },  // Stereo, 32-bits
-};
 int8_t get_frame_mapping_index(int8_t bits, format_t format);
+
+// Should change to MONO_LEFT and MONO_RIGHT when right mic works
+static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
+    { 0,  1, -1, -1, -1, -1, -1, -1 },   // Mono, 16-bits
+    { 0,  1,  2, -1, -1, -1, -1, -1 },   // Mono, >16-bits
+    { 0,  1, -1, -1,  2,  3, -1, -1 },   // Stereo, 16-bits
+    { 0,  1,  2, -1,  3,  4,  5, -1 },   // Stereo, >16-bits
+};
+
 
 #endif // MICROPY_PY_MACHINE_PDM_PCM
