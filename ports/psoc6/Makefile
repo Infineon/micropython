@@ -153,6 +153,7 @@ MOD_SRC_C += \
 	machine_adc.c \
 	machine_adcblock.c \
 	machine_bitstream.c\
+	machine_pdm_pcm.c\
 	\
 	modpsoc6.c \
 	psoc6_fatfs.c \
