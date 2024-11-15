@@ -43,6 +43,7 @@ extern const mp_obj_type_t machine_timer_type;
 extern const mp_obj_type_t machine_adc_type;
 extern const mp_obj_type_t machine_wdt_type;
 extern const mp_obj_type_t machine_adcblock_type;
+extern const mp_obj_type_t machine_pdm_pcm_type;
 extern const mp_obj_type_t machine_i2s_type;
 // extern const mp_obj_type_t machine_uart_type;
 #ifdef MICROPY_PY_SD_CARD
