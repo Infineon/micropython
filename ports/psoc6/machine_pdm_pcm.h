@@ -106,7 +106,7 @@ static void mp_machine_pdm_pcm_irq_update(machine_pdm_pcm_obj_t *self);
 
 int8_t get_frame_mapping_index(int8_t bits, format_t format);
 
-// Should change to MONO_LEFT and MONO_RIGHT when right mic works
+// Only 16 bit mono and stereo modes tested
 static const int8_t pdm_pcm_frame_map[4][PDM_PCM_RX_FRAME_SIZE_IN_BYTES] = {
     { 0,  1, -1, -1, -1, -1, -1, -1 },   // Mono, 16-bits
     { 0,  1,  2, -1, -1, -1, -1, -1 },   // Mono, >16-bits
