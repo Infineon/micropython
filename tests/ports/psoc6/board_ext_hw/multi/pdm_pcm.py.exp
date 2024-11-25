@@ -1,1 +1,18 @@
-machine.PDM_PCM: PLL0 freq is changed to 24576000. This will affect all resources clock freq sourced by PLL0.
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 8000 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 8000 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 8000 : True
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 16000 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 16000 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 16000 : True
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 32000 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 32000 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 32000 : True
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 48000 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 48000 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 48000 : True
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 22050 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 22050 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 22050 : True
+data high received for mode = 0, bits = PDM_PCM.BITS_16, rate = 44100 : True
+data high received for mode = 1, bits = PDM_PCM.BITS_16, rate = 44100 : True
+data high received for mode = 2, bits = PDM_PCM.BITS_16, rate = 44100 : True
