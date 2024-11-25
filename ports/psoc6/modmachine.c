@@ -469,7 +469,6 @@ void audio_pdm_set_frequency(uint32_t freq) {
     if (freq != 24576000 && freq != 22579000) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Invalid PLL0 frequency %lu"), freq);
     }
-    cyhal_clock_t pdm_pcm_audio_clock;
     cyhal_clock_t pll_clock;
     cy_rslt_t result;
 
