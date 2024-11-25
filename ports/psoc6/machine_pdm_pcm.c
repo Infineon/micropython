@@ -82,7 +82,7 @@ size_t ringbuf_available_space(ring_buf_t *rbuf) {
 static uint32_t fill_appbuf_from_ringbuf(machine_pdm_pcm_obj_t *self, mp_buffer_info_t *appbuf) {
     uint32_t num_bytes_copied_to_appbuf = 0;
     uint8_t *app_p = (uint8_t *)appbuf->buf;
-    uint8_t appbuf_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
+    uint8_t appbuf_sample_size_in_bytes = (self->bits == 16? 2 : 3) * (self->format == STEREO ? 2: 1);
     uint32_t num_bytes_needed_from_ringbuf = appbuf->len * (PDM_PCM_RX_FRAME_SIZE_IN_BYTES / appbuf_sample_size_in_bytes);
     uint8_t discard_byte;
     while (num_bytes_needed_from_ringbuf) {
@@ -123,7 +123,7 @@ static void fill_appbuf_from_ringbuf_non_blocking(machine_pdm_pcm_obj_t *self) {
     uint32_t num_bytes_copied_to_appbuf = 0;
     uint8_t *app_p = &(((uint8_t *)self->non_blocking_descriptor.appbuf.buf)[self->non_blocking_descriptor.index]);
 
-    uint8_t appbuf_sample_size_in_bytes = (self->bits == 16? 2 : 4) * (self->format == STEREO ? 2: 1);
+    uint8_t appbuf_sample_size_in_bytes = (self->bits == 16? 2 : 3) * (self->format == STEREO ? 2: 1);
     uint32_t num_bytes_remaining_to_copy_to_appbuf = self->non_blocking_descriptor.appbuf.len - self->non_blocking_descriptor.index;
     uint32_t num_bytes_remaining_to_copy_from_ring_buffer = num_bytes_remaining_to_copy_to_appbuf *
         (PDM_PCM_RX_FRAME_SIZE_IN_BYTES / appbuf_sample_size_in_bytes);
@@ -330,7 +330,7 @@ uint8_t pdm_pcm_get_word_byte_size(machine_pdm_pcm_obj_t *self) {
     if (res_bits == 16) {
         return 2;
     } else {
-        return 4;
+        return 3;
     }
 }
 
@@ -427,7 +427,6 @@ static void pdm_pcm_irq_handler(void *arg, cyhal_pdm_pcm_event_t event) {
         _dma_swap_active_dmabuf(self);
         pdm_pcm_read_rxbuf(self);
         _dma_copy_from_dmabuf_to_ringbuf(self);
-
         if ((self->io_mode == NON_BLOCKING) && (self->non_blocking_descriptor.copy_in_progress)) {
             fill_appbuf_from_ringbuf_non_blocking(self);
         }
@@ -445,16 +444,13 @@ int8_t get_frame_mapping_index(int8_t bits, format_t format) {
     if ((format == MONO_LEFT) | (format == MONO_RIGHT)) {
         if (bits == 16) {
             return 0;
-        } else { // >16 bits
-            return 1;
         }
     } else { // STEREO
         if (bits == 16) {
             return 2;
-        } else { // >16 bits
-            return 3;
         }
     }
+    return -1;
 }
 
 // =======================================================================================
@@ -511,21 +507,7 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
     self->sample_rate = args[ARG_sample_rate].u_int;
     self->decimation_rate = args[ARG_decimation_rate].u_int;
 
-    // Set clock values
-    uint32_t audio_clock_freq_hz;
-    uint32_t rate = args[ARG_sample_rate].u_int;
-    if (rate == 8000 ||
-        rate == 16000 ||
-        rate == 48000) {
-        audio_clock_freq_hz = AUDIO_SYS_CLOCK_24_576_000_HZ;
-    } else if (rate == 22050 ||
-               rate == 44100) {
-        audio_clock_freq_hz = AUDIO_SYS_CLOCK_22_579_000_HZ;
-    } else {
-        mp_raise_ValueError(MP_ERROR_TEXT("rate not supported"));
-    }
-
-    int32_t ring_buffer_len = 20000; // 2048
+    int32_t ring_buffer_len = 20000;
     if (ring_buffer_len < 0) {
         mp_raise_ValueError(MP_ERROR_TEXT("invalid ibuf"));
     }
@@ -534,7 +516,7 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
     self->io_mode = BLOCKING;
 
     ringbuf_init(&self->ring_buffer, ring_buffer_len);
-    pdm_pcm_audio_clock_init(audio_clock_freq_hz);
+    // pdm_pcm_audio_clock_init(audio_clock_freq_hz);
     pdm_pcm_init(self, &pdm_pcm_audio_clock);
     pdm_pcm_irq_configure(self);
     pdm_pcm_set_async_mode_dma(self);
@@ -570,17 +552,6 @@ static void mp_machine_pdm_pcm_irq_update(machine_pdm_pcm_obj_t *self) {
 
 // =======================================================================================
 // Implementation for stream protocol (ports/psoc6)
-void read_appbuf_value(uint8_t value, mp_buffer_info_t appbuf) {
-    if (value == 1) {
-        mp_printf(&mp_plat_print, "\nAppbuf Before : ");
-    } else {
-        mp_printf(&mp_plat_print, "\nAppbuf After : ");
-    }
-    for (uint32_t i = 0; i < appbuf.len; i++) {
-        mp_printf(&mp_plat_print, "0x%x ", ((uint8_t *)appbuf.buf)[i]);
-    }
-}
-
 static mp_uint_t machine_pdm_pcm_stream_read(mp_obj_t self_in, void *buf_in, mp_uint_t size, int *errcode) {
     machine_pdm_pcm_obj_t *self = MP_OBJ_TO_PTR(self_in);
 
@@ -589,7 +560,7 @@ static mp_uint_t machine_pdm_pcm_stream_read(mp_obj_t self_in, void *buf_in, mp_
         *errcode = MP_EINVAL;
         return MP_STREAM_ERROR;
     }
-    if (size == 0) {
+    if ((size == 0) | (size == 1)) {
         return 0;
     }
 
@@ -638,9 +609,6 @@ static const mp_rom_map_elem_t machine_pdm_pcm_locals_dict_table[] = {
     // Constants
     // Word lengths
     { MP_ROM_QSTR(MP_QSTR_BITS_16),          MP_ROM_INT(BITS_16) },
-    { MP_ROM_QSTR(MP_QSTR_BITS_18),          MP_ROM_INT(BITS_18) },
-    { MP_ROM_QSTR(MP_QSTR_BITS_20),          MP_ROM_INT(BITS_20) },
-    { MP_ROM_QSTR(MP_QSTR_BITS_24),          MP_ROM_INT(BITS_24) },
 
     // Modes
     { MP_ROM_QSTR(MP_QSTR_STEREO),          MP_ROM_INT(STEREO) },
