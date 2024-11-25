@@ -648,6 +648,7 @@ Methods
 ^^^^^^^^
 
 .. method:: PDM_PCM.init()
+    
     Starts the PDM_PCM hardware block and conversion operation.
 
 .. note::
@@ -694,18 +695,6 @@ Constants
 .. data:: PDM_PCM.BITS_16
 
    for initialising the PDM_PCM ``bits`` to 16
-
-.. data:: PDM_PCM.BITS_18
-
-   for initialising the PDM_PCM ``bits`` to 18
-
-.. data:: PDM_PCM.BITS_20
-
-   for initialising the PDM_PCM ``bits`` to 20
-
-.. data:: PDM_PCM.BITS_24
-
-   for initialising the PDM_PCM ``bits`` to 24
 
 
 UART
