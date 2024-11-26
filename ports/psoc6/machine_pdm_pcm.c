@@ -515,7 +515,7 @@ static mp_uint_t machine_pdm_pcm_stream_read(mp_obj_t self_in, void *buf_in, mp_
         *errcode = MP_EINVAL;
         return MP_STREAM_ERROR;
     }
-    if ((size == 0) | (size == 1)) {
+    if (size == 0) {
         return 0;
     }
 
