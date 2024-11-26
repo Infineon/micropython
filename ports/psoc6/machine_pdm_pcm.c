@@ -352,50 +352,6 @@ static void pdm_pcm_init(machine_pdm_pcm_obj_t *self, cyhal_clock_t *clock) {
     pdm_pcm_assert_raise_val("PDM_PCM initialisation failed with return code %lx !", result);
 }
 
-// Initialize audio clock
-void pdm_pcm_audio_clock_init(uint32_t audio_clock_freq_hz) {
-    mplogger_print("pdm_pcm_audio_clock_init \r\n");
-    cyhal_clock_t pll_clock;
-    cy_rslt_t result;
-
-    static bool clock_set = false;
-
-    result = cyhal_clock_reserve(&pll_clock, &CYHAL_CLOCK_PLL[0]);
-    pdm_pcm_assert_raise_val("PLL clock reserve failed with error code: %lx", result);
-
-    uint32_t pll_source_clock_freq_hz = cyhal_clock_get_frequency(&pll_clock);
-
-    if (audio_clock_freq_hz != pll_source_clock_freq_hz) {
-        mp_printf(&mp_plat_print, "machine.PDM_PCM: PLL0 freq is changed to %lu. This will affect all resources clock freq sourced by PLL0.\n", audio_clock_freq_hz);
-        clock_set = false;
-        pll_source_clock_freq_hz = audio_clock_freq_hz;
-    }
-
-    if (!clock_set) {
-        result = cyhal_clock_set_frequency(&pll_clock,  pll_source_clock_freq_hz, NULL);
-        pdm_pcm_assert_raise_val("Set PLL clock frequency failed with error code: %lx", result);
-        if (!cyhal_clock_is_enabled(&pll_clock)) {
-            result = cyhal_clock_set_enabled(&pll_clock, true, true);
-            pdm_pcm_assert_raise_val("PLL clock enable failed with error code: %lx", result);
-        }
-
-        result = cyhal_clock_reserve(&pdm_pcm_audio_clock, &CYHAL_CLOCK_HF[1]);
-        pdm_pcm_assert_raise_val("HF1 clock reserve failed with error code: %lx", result);
-        result = cyhal_clock_set_source(&pdm_pcm_audio_clock, &pll_clock);
-        pdm_pcm_assert_raise_val("HF1 clock sourcing failed with error code: %lx", result);
-
-        result = cyhal_clock_set_enabled(&pdm_pcm_audio_clock, true, true);
-        pdm_pcm_assert_raise_val("HF1 clock enable failed with error code: %lx", result);
-
-        cyhal_clock_free(&pdm_pcm_audio_clock); // Check the impact while read function
-
-        clock_set = true;
-    }
-
-    cyhal_clock_free(&pll_clock);
-    cyhal_system_delay_ms(1);
-}
-
 // Set PDM_PCM async mode to DMA
 static void pdm_pcm_set_async_mode_dma(machine_pdm_pcm_obj_t *self) {
     mplogger_print("pdm_pcm_set_async_mode_dma \r\n");
@@ -516,7 +472,6 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
     self->io_mode = BLOCKING;
 
     ringbuf_init(&self->ring_buffer, ring_buffer_len);
-    // pdm_pcm_audio_clock_init(audio_clock_freq_hz);
     pdm_pcm_init(self, &pdm_pcm_audio_clock);
     pdm_pcm_irq_configure(self);
     pdm_pcm_set_async_mode_dma(self);
