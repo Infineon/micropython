@@ -272,9 +272,12 @@ run_ci_tests() {
     devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml))
 
     # TODO: This mess needs to be solved in a future script rework using yml files to define the compatible boards requirements
-    board_version=0.5.0
     if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
       board_version=0.1.0
+    elif [ "${board}" == "CY8CPROTO-062-4343W" ]; then
+      board_version=0.6.0
+    elif [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      board_version=0.5.0
     fi
 
     devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.a))
