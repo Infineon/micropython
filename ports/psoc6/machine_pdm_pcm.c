@@ -461,7 +461,27 @@ static void mp_machine_pdm_pcm_init_helper(machine_pdm_pcm_obj_t *self, mp_arg_v
 
     // Set sampling and decimation rates (as given by user)
     self->sample_rate = args[ARG_sample_rate].u_int;
+
+    if (self->sample_rate == 8000 ||
+        self->sample_rate == 16000 ||
+        self->sample_rate == 32000 ||
+        self->sample_rate == 48000) {
+        if (PLL0_freq != AUDIO_PDM_24_576_000_HZ) {
+            mp_raise_ValueError(MP_ERROR_TEXT("Invalid clock frequency set for the sample rate/ PDM_PCM Clock not set . Set the right clock before initialising PDM_PCM"));
+        }
+    } else if (self->sample_rate == 22050 ||
+               self->sample_rate == 44100) {
+        if (PLL0_freq != AUDIO_PDM_22_579_000_HZ) {
+            mp_raise_ValueError(MP_ERROR_TEXT("Invalid clock frequency set for the sample rate/ PDM_PCM Clock not set. Set the right clock before initialising PDM_PCM"));
+        }
+    } else {
+        mp_raise_ValueError(MP_ERROR_TEXT("rate not supported"));
+    }
+
     self->decimation_rate = args[ARG_decimation_rate].u_int;
+    if (self->decimation_rate < 0) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid decimation rate"));
+    }
 
     int32_t ring_buffer_len = 20000;
     if (ring_buffer_len < 0) {
