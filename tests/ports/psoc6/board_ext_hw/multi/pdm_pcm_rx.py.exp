@@ -1,3 +1,4 @@
+*** PDM_PCM tests - RX ***
 1. blocking read implementation 
 *** Test for data high ***
 data received for mode = 0, bits = PDM_PCM.BITS_16, rate = 8000 : True
