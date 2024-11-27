@@ -5,7 +5,6 @@ import time
 
 # Allocate pin based on board
 board = os.uname().machine
-print("Board selected: ", board)
 if "CY8CPROTO-062-4343W" in board:
     clk_pin = "P10_4"
     data_pin = "P10_5"
