@@ -1,11 +1,11 @@
 import os
-from machine import PDM_PCM, Pin
 import machine
+from machine import PDM_PCM, Pin
 import time
 
 # Allocate pin based on board
 board = os.uname().machine
-if "CY8CPROTO-062-4343W" in board:
+if "CY8CPROTO-062-4343W with PSoC62" in board:
     clk_pin = "P10_4"
     data_pin = "P10_5"
     send_signal_to_tx_pin = "P10_3"
@@ -16,16 +16,16 @@ elif "CY8CKIT-062S2-AI" in board:
     print("SKIP")
     raise SystemExit
 
+print("*** PDM_PCM tests - RX ***")
+
+send_signal = Pin(send_signal_to_tx_pin, mode=Pin.OUT, pull=Pin.PULL_DOWN, value=False)
+send_signal.value(0)
+
 
 def generate_exp_seq(data):
     exp_seq = bytearray(data * 64)
     return exp_seq
 
-
-print("*** PDM_PCM tests - RX ***")
-
-send_signal = Pin(send_signal_to_tx_pin, mode=Pin.OUT, pull=Pin.PULL_DOWN, value=False)
-send_signal.value(0)
 
 print("1. blocking read implementation ")
 
