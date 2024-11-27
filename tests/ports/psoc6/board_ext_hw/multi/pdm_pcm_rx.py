@@ -3,7 +3,6 @@ from machine import PDM_PCM, Pin
 import machine
 import time
 
-print("*** PDM_PCM tests - RX ***")
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
@@ -22,6 +21,8 @@ def generate_exp_seq(data):
     exp_seq = bytearray(data * 64)
     return exp_seq
 
+
+print("*** PDM_PCM tests - RX ***")
 
 send_signal = Pin(send_signal_to_tx_pin, mode=Pin.OUT, pull=Pin.PULL_DOWN, value=False)
 send_signal.value(0)
