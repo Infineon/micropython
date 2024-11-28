@@ -19,7 +19,6 @@ elif "CY8CKIT-062S2-AI" in board:
 print("*** PDM_PCM tests - RX ***")
 
 send_signal = Pin(send_signal_to_tx_pin, mode=Pin.OUT, pull=Pin.PULL_DOWN, value=False)
-send_signal.value(0)
 
 
 def generate_exp_seq(data):
@@ -37,6 +36,7 @@ iterations = 100
 rounds = 2
 
 for m in range(rounds):
+    send_signal.value(0)
     exp_seq = generate_exp_seq(exp_data[m])
     if m == 0:
         print("*** Test for data high ***")
@@ -94,7 +94,7 @@ def rx_complete_irq(obj):
     rx_done = True
 
 
-machine.freq(machine.AUDIO_PDM_24_576_000_HZ)
+machine.freq(machine.AUDIO_PDM_22_579_000_HZ)
 pdm_pcm = PDM_PCM(
     0,
     sck=clk_pin,
