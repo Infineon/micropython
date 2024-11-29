@@ -678,7 +678,7 @@ Methods
     previously set value or default value of 0dB is set.
 
 Constants
----------
+^^^^^^^^^^
 
 .. data:: PDM_PCM.STEREO
 
