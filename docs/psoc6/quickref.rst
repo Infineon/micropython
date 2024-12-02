@@ -599,13 +599,29 @@ PDM - PCM bus
 PDM/PCM is a asynchronous operation used to connect digital audio devices.
 At the physical level, a bus consists of 2 lines: CLK, DATA.
 
-PDM objects can be created and initialized using::
+.. warning:: 
+    This is not part of the core MicroPython libraries. Therefore, not mapping any existing machine class API and neither supported by other ports.
+
+
+The following specialization applies for configuring PDM-PCM bus in this port:
+
+Before using the PDM-PCM bus, the clock frequency needs to be set. The PDM-PCM clock frequency can be set to 24.576 MHz or 22.579 MHz depending upon the sample rate. In order to set the frequency, use the following function:
+
+::
+
+    machine.freq(AUDIO_PDM_24_576_000_HZ) # set the frequency of the clock to 24.576 MHz. For sample rates:  8 / 16 / 48 kHz 
+    machine.freq(AUDIO_PDM_22_579_000_HZ) # set the frequency of the clock to 22.579 MHz. For sample rates: 22.05 / 44.1 KHz 
+
+
+PDM-PCM objects can be created and initialized using::
 
     from machine import PDM_PCM
     from machine import Pin
 
     clk_pin = "P10_4"
     data_pin = "P10_5"
+
+    machine.freq(AUDIO_PDM_24_576_000_HZ)
 
     pdm_pcm = PDM_PCM(
     0,
@@ -637,7 +653,7 @@ Constructor
 
      - ``clk`` is a pin object for the clock line
      - ``data`` is a pin object for the data line
-     - ``sample_rate`` specifies audio sampling rate
+     - ``sample_rate`` specifies audio sampling rate. It can be set to 8 / 16 / 48 KHz for which the clock frequency should be set to 24.576 MHz or to 22.05 / 44.1 KHz while clock should be set to 22.579 MHz.
      - ``decimation_rate`` specifies PDM decimation rate
      - ``bits`` specifies word length - 16, 18, 20, 24 being accepted values
      - ``format`` specifies channel format - STEREO, MONO_LEFT or MONO_RIGHT
