@@ -15,13 +15,24 @@ Currently the existing sample model files are generated for [Human Activity Reco
 
 ## Installation
 
-Please check for the pre-requisites mentioned [here](https://github.com/Infineon/micropython/tree/ports-psoc6-main/ports/psoc6#pre-requisites).
+### Dependencies
+
+- WSL (Windows Subsystem Layer)
+- USBIPD
+- ModusToolbox (version 3.0)
+- MicroPython project with psoc6 port enabled 
+
+The development environment for the project is [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Please follow the steps in link to get WSL ready. Additionally [usbip](https://learn.microsoft.com/en-us/windows/wsl/connect-usb) installation should be done to allow accessing psoc device within WSL.
+
+Please ensure to follow the pre-requisites mentioned [here](https://github.com/Infineon/micropython/tree/ports-psoc6-main/ports/psoc6#pre-requisites) and get the required installation.
+
+By now, all the required installations should be working.
 
 ## Usage
 
 Follow the steps below to generate micropython bindings for your imagimob generated model.
 
-1. The imagimob micropytthon integration is available in imai-mp-integration, so checkout to that branch after cloning this repository.
+1. Clone the repository and switch to ports-psoc6-main branch.
 
         git clone https://github.com/Infineon/micropython.git
 
@@ -32,6 +43,12 @@ Follow the steps below to generate micropython bindings for your imagimob genera
         cd ports/psoc6
 
         make mtb_init BOARD=<board-name>
+
+   where board-name is your target device. Currently following boards are supported:
+   
+        - CY8CKIT-062S2-AI
+        - CY8CPROTO-062-4343W
+        - CY8CPROTO-063-BLE
 
 3. Retrieve submodules:
 
