@@ -64,7 +64,7 @@ ifeq ($(MICROPY_PSOC6_LWIP),1)
 endif
 
 LD               = arm-none-eabi-gcc
-CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
+CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF -Wno-error=float-conversion
 
 # std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
