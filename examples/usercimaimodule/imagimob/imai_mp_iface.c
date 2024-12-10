@@ -34,7 +34,6 @@ static mp_obj_t dequeue(mp_obj_t data_out_obj) {
     if (result == 0) {
         return MP_OBJ_NEW_SMALL_INT(result);
     } else if (result == -1) {
-        mp_printf(&mp_plat_print, "No data is currently available\n");
         return MP_OBJ_NEW_SMALL_INT(result);
     } else if (result == -2) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("Internal memory allocation error"), result);
