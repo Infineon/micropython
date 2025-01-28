@@ -5,7 +5,7 @@ MPY_DIR = ../../..
 MOD = deepcraft
 
 # Source files (.c or .py)
-SRC = model.c dc_mp_iface.c
+SRC = dc_mp_iface.c model_1.c
 
 # Architecture to build for (x86, x64, armv7m, xtensa, xtensawin, rv32imc)
 ARCH = armv7emsp
