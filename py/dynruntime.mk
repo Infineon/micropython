@@ -129,10 +129,10 @@ LIBGCC_PATH := $(realpath $(shell $(CROSS)gcc $(CFLAGS) --print-libgcc-file-name
 LIBM_PATH := $(realpath $(shell $(CROSS)gcc $(CFLAGS) --print-file-name=libm.a))
 #LIBC_PATH := $(realpath $(shell $(CROSS)gcc $(CFLAGS) --print-file-name=libc_nano.a))
 # Include all .a files in a specific directory
-#LIBRARY_DIR := /home/nikhita/ModusToolbox/tools_3.0/gcc/arm-none-eabi/lib/thumb/v7e-m+fp/hard/
-#ALL_A_FILES := $(wildcard $(LIBRARY_DIR)/*.a)
+LIBRARY_DIR := /home/nikhita/ModusToolbox/tools_3.0/gcc/arm-none-eabi/lib/thumb/v7e-m+fp/hard/
+ALL_A_FILES := $(wildcard $(LIBRARY_DIR)/*.a)
 
-MPY_LD_FLAGS += $(addprefix -l, $(LIBGCC_PATH) $(LIBM_PATH))
+MPY_LD_FLAGS += $(addprefix -l, $(LIBGCC_PATH) $(LIBM_PATH) $(ALL_A_FILES))
 LDFLAGS += --specs=nano.specs -u _printf_float -u _scanf_float
 endif
 

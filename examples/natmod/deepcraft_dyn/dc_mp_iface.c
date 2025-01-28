@@ -2,16 +2,16 @@
 
 #include "py/dynruntime.h"
 
-#if !defined(__linux__)
+/*#if !defined(__linux__)
 void *memcpy(void *dst, const void *src, size_t n) {
     return mp_fun_table.memmove_(dst, src, n);
 }
 void *memset(void *s, int c, size_t n) {
     return mp_fun_table.memset_(s, c, n);
 }
-#endif
+#endif*/
 
-int native_errno=0;
+/*int native_errno=0;
 #if defined(__linux__)
 int *__errno_location (void)
 #else
@@ -19,7 +19,7 @@ int *__errno (void)
 #endif
 {
     return &native_errno;
-}
+}*/
 
 mp_obj_full_type_t dcmodel_type;
 
@@ -41,9 +41,6 @@ mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *a
 
     mp_store_global(MP_QSTR___name__, MP_OBJ_NEW_QSTR(MP_QSTR_deepcraft));
     mp_store_global(MP_QSTR_DEEPCRAFT, MP_OBJ_FROM_PTR(&dcmodel_type));
-    /*mp_store_global(MP_QSTR_RAW, MP_OBJ_NEW_SMALL_INT(DEFLATEIO_FORMAT_RAW));
-    mp_store_global(MP_QSTR_ZLIB, MP_OBJ_NEW_SMALL_INT(DEFLATEIO_FORMAT_ZLIB));
-    mp_store_global(MP_QSTR_GZIP, MP_OBJ_NEW_SMALL_INT(DEFLATEIO_FORMAT_GZIP));*/
 
     MP_DYNRUNTIME_INIT_EXIT
 }
