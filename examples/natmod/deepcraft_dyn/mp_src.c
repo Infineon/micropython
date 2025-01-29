@@ -4,7 +4,7 @@
 #include <string.h>
 
 static mp_obj_t init(void){
-    assign();
+    //assign();
     IMAI_init();
     return mp_const_none;
 }
