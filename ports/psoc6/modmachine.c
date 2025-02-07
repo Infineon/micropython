@@ -129,7 +129,7 @@ void machine_deinit(void) {
     mod_pin_deinit();
     mod_adcblock_deinit();
     mod_i2c_deinit();
-    mod_pwm_deinit();
+    machine_pwm_deinit_all();
     mod_spi_deinit();
     mod_rtc_deinit();
     mod_timer_deinit();

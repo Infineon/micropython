@@ -56,7 +56,7 @@ void mod_pin_deinit(void);
 void mod_adc_deinit(void);
 void mod_adcblock_deinit(void);
 void mod_i2c_deinit(void);
-void mod_pwm_deinit(void);
+void machine_pwm_deinit_all(void);
 void mod_rtc_deinit(void);
 void mod_spi_deinit(void);
 void mod_timer_deinit(void);
