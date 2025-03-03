@@ -35,10 +35,13 @@
 #include "cy_retarget_io.h"
 #include "cyhal.h"
 
+#define PSOC_EN_RTOS 0
 // FreeRTOS header file
+#if PSOC_EN_RTOS
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
+#endif
 
 
 // micropython includes
@@ -88,7 +91,9 @@ extern void network_deinit(void);
 
 void mpy_task(void *arg);
 
+#if PSOC_EN_RTOS
 TaskHandle_t mpy_task_handle;
+#endif
 
 boot_mode_t check_boot_mode(void) {
     boot_mode_t boot_mode;
@@ -136,9 +141,12 @@ int main(int argc, char **argv) {
         mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
 
+    #if PSOC_EN_RTOS
     xTaskCreate(mpy_task, "MicroPython task", MPY_TASK_STACK_SIZE, NULL, MPY_TASK_PRIORITY, &mpy_task_handle);
     vTaskStartScheduler();
-
+    #else
+    mpy_task(NULL);
+    #endif
     // Should never get here
     CY_ASSERT(0);
     return 0;
@@ -147,7 +155,7 @@ int main(int argc, char **argv) {
 void mpy_task(void *arg) {
     #if MICROPY_ENABLE_GC
     mp_stack_set_top(&__StackTop);
-    // mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
+    mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
     mp_stack_set_limit((mp_uint_t)&__StackLimit);
     gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
     #endif

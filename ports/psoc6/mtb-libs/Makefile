@@ -87,7 +87,7 @@ VERBOSE=
 # ... then code in directories named COMPONENT_foo and COMPONENT_bar will be
 # added to the build
 #
-COMPONENTS+=FREERTOS
+COMPONENTS+=
 
 ifeq ($(MICROPY_PY_NETWORK),1)
 COMPONENTS+= LWIP
@@ -106,7 +106,7 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 SOURCES=
 
-DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF CY_RTOS_AWARE
+DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF 
 
 
 ifeq ($(MICROPY_PY_NETWORK),1)
@@ -169,7 +169,7 @@ LDFLAGS=
 LDLIBS=
 
 # Path to the linker script to use (if empty, use the default linker script).
-LINKER_SCRIPT=
+LINKER_SCRIPT=mpy-cm4.ld
 
 # Custom pre-build commands to run.
 PREBUILD=

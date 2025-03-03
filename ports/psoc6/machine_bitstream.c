@@ -26,8 +26,8 @@
 
 #include "py/mpconfig.h"
 #include "py/mphal.h"
-#include "FreeRTOS.h"
-#include "task.h"
+// #include "FreeRTOS.h"
+// #include "task.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "extmod/modmachine.h"

@@ -58,9 +58,10 @@
 
 
 
+
 #define MICROPY_MEM_STATS                       (1)
 #define MICROPY_MALLOC_USES_ALLOCATED_SIZE      (1)
-#define MICROPY_TRACKED_ALLOC                   (MICROPY_SSL_MBEDTLS)
+// #define MICROPY_TRACKED_ALLOC                   (MICROPY_SSL_MBEDTLS)
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
 
 // MicroPython emitters
@@ -123,7 +124,7 @@
 #define MICROPY_PY_MACHINE_I2C                  (1)
 #define MICROPY_PY_MACHINE_I2C_SLAVE            (1)
 #define MICROPY_PY_MACHINE_SOFTI2C              (1)
-#define MICROPY_PY_MACHINE_BITSTREAM            (1)
+#define MICROPY_PY_MACHINE_BITSTREAM            (0)
 #define MICROPY_PY_MACHINE_WDT                  (1)
 #define MICROPY_PY_MACHINE_WDT_INCLUDEFILE      "ports/psoc6/machine_wdt.c"
 
