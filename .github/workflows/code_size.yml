@@ -16,6 +16,7 @@ on:
       - 'ports/samd/**'
       - 'ports/stm32/**'
       - 'ports/unix/**'
+      - 'ports/psoc6/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
