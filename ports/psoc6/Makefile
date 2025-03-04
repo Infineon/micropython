@@ -220,7 +220,7 @@ MPY_CROSS_FLAGS += -march=armv7m
 
 build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
-all: build
+all: mtb_init build
 
 clean: mtb_clean
 
