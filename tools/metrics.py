@@ -45,7 +45,7 @@ Other commands:
 
 import collections, sys, re, subprocess
 
-MAKE_FLAGS = ["-j3", "CFLAGS_EXTRA=-DNDEBUG"]
+MAKE_FLAGS = []  # ["-j3", "CFLAGS_EXTRA=-DNDEBUG"]
 
 
 class PortData:
@@ -58,20 +58,21 @@ class PortData:
 
 
 port_data = {
-    "b": PortData("bare-arm", "bare-arm", "build/firmware.elf"),
-    "m": PortData("minimal x86", "minimal", "build/firmware.elf"),
-    "u": PortData("unix x64", "unix", "build-standard/micropython"),
-    "n": PortData("unix nanbox", "unix", "build-nanbox/micropython", "VARIANT=nanbox"),
-    "s": PortData("stm32", "stm32", "build-PYBV10/firmware.elf", "BOARD=PYBV10"),
-    "c": PortData("cc3200", "cc3200", "build/WIPY/release/application.axf", "BTARGET=application"),
-    "8": PortData("esp8266", "esp8266", "build-ESP8266_GENERIC/firmware.elf"),
-    "3": PortData("esp32", "esp32", "build-ESP32_GENERIC/micropython.elf"),
-    "x": PortData("mimxrt", "mimxrt", "build-TEENSY40/firmware.elf"),
-    "e": PortData("renesas-ra", "renesas-ra", "build-EK_RA6M2/firmware.elf"),
-    "r": PortData("nrf", "nrf", "build-PCA10040/firmware.elf"),
-    "p": PortData("rp2", "rp2", "build-RPI_PICO_W/firmware.elf", "BOARD=RPI_PICO_W"),
-    "d": PortData("samd", "samd", "build-ADAFRUIT_ITSYBITSY_M4_EXPRESS/firmware.elf"),
-    "v": PortData("qemu rv32", "qemu", "build-VIRT_RV32/firmware.elf", "BOARD=VIRT_RV32"),
+    "i": PortData("psoc6", "psoc6", "build/firmware.elf", "BOARD=CY8CPROTO-062-4343W"),
+    # "b": PortData("bare-arm", "bare-arm", "build/firmware.elf"),
+    # "m": PortData("minimal x86", "minimal", "build/firmware.elf"),
+    # "u": PortData("unix x64", "unix", "build-standard/micropython"),
+    # "n": PortData("unix nanbox", "unix", "build-nanbox/micropython", "VARIANT=nanbox"),
+    # "s": PortData("stm32", "stm32", "build-PYBV10/firmware.elf", "BOARD=PYBV10"),
+    # "c": PortData("cc3200", "cc3200", "build/WIPY/release/application.axf", "BTARGET=application"),
+    # "8": PortData("esp8266", "esp8266", "build-ESP8266_GENERIC/firmware.elf"),
+    # "3": PortData("esp32", "esp32", "build-ESP32_GENERIC/micropython.elf"),
+    # "x": PortData("mimxrt", "mimxrt", "build-TEENSY40/firmware.elf"),
+    # "e": PortData("renesas-ra", "renesas-ra", "build-EK_RA6M2/firmware.elf"),
+    # "r": PortData("nrf", "nrf", "build-PCA10040/firmware.elf"),
+    # "p": PortData("rp2", "rp2", "build-RPI_PICO_W/firmware.elf", "BOARD=RPI_PICO_W"),
+    # "d": PortData("samd", "samd", "build-ADAFRUIT_ITSYBITSY_M4_EXPRESS/firmware.elf"),
+    # "v": PortData("qemu rv32", "qemu", "build-VIRT_RV32/firmware.elf", "BOARD=VIRT_RV32"),
 }
 
 
