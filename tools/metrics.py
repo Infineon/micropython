@@ -45,7 +45,7 @@ Other commands:
 
 import collections, sys, re, subprocess
 
-MAKE_FLAGS = []  # ["-j3", "CFLAGS_EXTRA=-DNDEBUG"]
+MAKE_FLAGS = ["-j3", "CFLAGS_EXTRA=-DNDEBUG"]
 
 
 class PortData:
@@ -58,7 +58,9 @@ class PortData:
 
 
 port_data = {
-    "i": PortData("psoc6", "psoc6/", "build/firmware.elf", ["build_code_size", "BOARD=CY8CPROTO-062-4343W"]),
+    "i": PortData(
+        "psoc6", "psoc6/", "build/firmware.elf", ["build_code_size", "BOARD=CY8CPROTO-062-4343W"]
+    ),
     "b": PortData("bare-arm", "bare-arm", "build/firmware.elf"),
     "m": PortData("minimal x86", "minimal", "build/firmware.elf"),
     "u": PortData("unix x64", "unix", "build-standard/micropython"),
@@ -84,7 +86,6 @@ def syscmd(*args):
             a2.append(a)
         elif a:
             a2.extend(a)
-    print("Executing command:", " ".join(a2))
     subprocess.check_call(a2)
 
 

@@ -11,7 +11,6 @@ endif
 # Get active board from mtb-lib previous runs
 # The board is set only after make mtb_init 
 # has been run. 
-$(info BOARD : $(BOARD))
 ifeq ($(BOARD),)
     ifeq ($(ACTIVE_BOARD),)
         $(error ModusToolbox not initialized. Run "make mtb_init BOARD=<target-board>" to configure the environment. )
@@ -220,7 +219,6 @@ include mtb-libs/makefile_mtb.mk
 MPY_CROSS_FLAGS += -march=armv7m
 
 build_code_size: 
-$(info MAKECMDGOALS: $(MAKECMDGOALS))
 ifeq ($(filter clean,$(MAKECMDGOALS)),clean)
 build_code_size: clean
 else
