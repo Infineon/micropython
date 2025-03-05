@@ -223,6 +223,7 @@ ifeq ($(filter clean,$(MAKECMDGOALS)),clean)
 build_code_size: clean
 else
 build_code_size: mtb_init all
+	$(shell source tools/psoc6/dev-setup.sh)
 endif
 
 build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
