@@ -64,6 +64,7 @@ function ci_code_size_setup {
     ci_gcc_riscv_setup
 }
 
+
 function ci_code_size_build {
     # check the following ports for the change in their code size
     PORTS_TO_CHECK=ibmusxpdv
