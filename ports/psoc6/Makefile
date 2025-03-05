@@ -11,6 +11,7 @@ endif
 # Get active board from mtb-lib previous runs
 # The board is set only after make mtb_init 
 # has been run. 
+$(info BOARD : $(BOARD))
 ifeq ($(BOARD),)
     ifeq ($(ACTIVE_BOARD),)
         $(error ModusToolbox not initialized. Run "make mtb_init BOARD=<target-board>" to configure the environment. )
@@ -218,9 +219,17 @@ include mtb-libs/makefile_mtb.mk
 
 MPY_CROSS_FLAGS += -march=armv7m
 
+build_code_size: 
+$(info MAKECMDGOALS: $(MAKECMDGOALS))
+ifeq ($(filter clean,$(MAKECMDGOALS)),clean)
+build_code_size: clean
+else
+build_code_size: mtb_init all
+endif
+
 build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
-all: mtb_init build
+all: build
 
 clean: mtb_clean
 
@@ -309,7 +318,7 @@ help:
 	$(info - mtb_set_bsp             Set the board as active in the ModusToolbox project. ) 
 
 
-.PHONY: build test test_multi program_multi help
+.PHONY: build test test_multi program_multi help build_code_size
 
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
