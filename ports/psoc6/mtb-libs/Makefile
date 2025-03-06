@@ -87,7 +87,9 @@ VERBOSE=
 # ... then code in directories named COMPONENT_foo and COMPONENT_bar will be
 # added to the build
 #
+ifeq ($(PSOC_EN_RTOS),1)
 COMPONENTS+=FREERTOS
+endif
 
 ifeq ($(MICROPY_PY_NETWORK),1)
 COMPONENTS+= LWIP
@@ -106,8 +108,11 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 SOURCES=
 
-DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF CY_RTOS_AWARE
+DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF 
 
+ifeq ($(PSOC_EN_RTOS),1)
+DEFINES+=CY_RTOS_AWARE
+endif
 
 ifeq ($(MICROPY_PY_NETWORK),1)
 DEFINES+= CYBSP_WIFI_CAPABLE WHD_PRINT_DISABLE
