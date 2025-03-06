@@ -59,7 +59,7 @@ class PortData:
 
 port_data = {
     "i": PortData(
-        "psoc6", "psoc6/", "build/firmware.elf", ["build_code_size", "BOARD=CY8CPROTO-062-4343W"]
+        "psoc6", "psoc6", "build/firmware.elf", ["build_code_size", "BOARD=CY8CPROTO-062-4343W"]
     ),
     "b": PortData("bare-arm", "bare-arm", "build/firmware.elf"),
     "m": PortData("minimal x86", "minimal", "build/firmware.elf"),
