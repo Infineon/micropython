@@ -26,11 +26,14 @@
 
 #include "py/mpconfig.h"
 #include "py/mphal.h"
-#include "FreeRTOS.h"
-#include "task.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "extmod/modmachine.h"
+
+#if PSOC_EN_RTOS
+#include "FreeRTOS.h"
+#include "task.h"
+#endif
 
 #if MICROPY_PY_MACHINE_BITSTREAM
 
@@ -72,7 +75,9 @@ void machine_bitstream_high_low(mp_hal_pin_obj_t pin, uint32_t *timing_ns, const
         timing_ns[i] = fcpu_mhz * timing_ns[i] / 1000;
     }
 
+    #if PSOC_EN_RTOS
     taskENTER_CRITICAL();          // FreeRTOS function for critical section
+    #endif
 
     switch (range)
     {
@@ -247,7 +252,9 @@ void machine_bitstream_high_low(mp_hal_pin_obj_t pin, uint32_t *timing_ns, const
             }
             break;
     }
+    #if PSOC_EN_RTOS
     taskEXIT_CRITICAL();
+    #endif
 }
 
 #endif // MICROPY_PY_MACHINE_BITSTREAM

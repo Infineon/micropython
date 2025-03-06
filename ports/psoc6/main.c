@@ -35,12 +35,6 @@
 #include "cy_retarget_io.h"
 #include "cyhal.h"
 
-// FreeRTOS header file
-#include <FreeRTOS.h>
-#include <task.h>
-#include <queue.h>
-
-
 // micropython includes
 #include "genhdr/mpversion.h"
 #include "py/gc.h"
@@ -67,8 +61,17 @@
 // port-specific includes
 #include "mplogger.h"
 
+#if PSOC_EN_RTOS
+// FreeRTOS header file
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+
 #define MPY_TASK_STACK_SIZE                    (4096u)
 #define MPY_TASK_PRIORITY                      (3u)
+
+TaskHandle_t mpy_task_handle;
+#endif
 
 typedef enum {
     BOOT_MODE_NORMAL,
@@ -88,7 +91,6 @@ extern void network_deinit(void);
 
 void mpy_task(void *arg);
 
-TaskHandle_t mpy_task_handle;
 
 boot_mode_t check_boot_mode(void) {
     boot_mode_t boot_mode;
@@ -136,8 +138,12 @@ int main(int argc, char **argv) {
         mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
 
+    #if PSOC_EN_RTOS
     xTaskCreate(mpy_task, "MicroPython task", MPY_TASK_STACK_SIZE, NULL, MPY_TASK_PRIORITY, &mpy_task_handle);
     vTaskStartScheduler();
+    #else
+    mpy_task(NULL);
+    #endif
 
     // Should never get here
     CY_ASSERT(0);

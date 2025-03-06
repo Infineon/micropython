@@ -32,10 +32,12 @@
 
 #define MICROPY_GC_HEAP_SIZE                    (256 * 1024) // 256 KB
 
+#if MICROPY_PY_NETWORK
 #define MICROPY_PY_HASHLIB                      (1)
 #define MICROPY_PY_HASHLIB_MD5                  (1)
 #define MICROPY_PY_HASHLIB_SHA1                 (1)
 #define MICROPY_PY_HASHLIB_SHA256               (1)
+#endif
 
 #define MICROPY_PY_MACHINE_SPI_SLAVE            (1)
 
