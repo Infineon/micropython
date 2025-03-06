@@ -31,6 +31,7 @@
 #include "shared/runtime/interrupt_char.h"
 #include "mpconfigboard.h"
 
+#define PSOC_EN_RTOS                            (0)
 // Control over Python builtins
 #define MICROPY_PY_IO_BUFFEREDWRITER            (1)
 #define MICROPY_PY_SELECT                       (1)
