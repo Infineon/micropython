@@ -121,6 +121,12 @@ else
 $(error architecture '$(ARCH)' not supported)
 endif
 
+ifeq ($(LINK_RUNTIME),1)
+LIBGCC_PATH := $(realpath $(shell $(CROSS)gcc $(CFLAGS) --print-libgcc-file-name))
+LIBM_PATH := $(realpath $(shell $(CROSS)gcc $(CFLAGS) --print-file-name=libm.a))
+MPY_LD_FLAGS += $(addprefix -l, $(LIBGCC_PATH) $(LIBM_PATH))
+endif
+
 MICROPY_FLOAT_IMPL_UPPER = $(shell echo $(MICROPY_FLOAT_IMPL) | tr '[:lower:]' '[:upper:]')
 CFLAGS += -DMICROPY_FLOAT_IMPL=MICROPY_FLOAT_IMPL_$(MICROPY_FLOAT_IMPL_UPPER)
 
@@ -165,7 +171,7 @@ $(BUILD)/%.mpy: %.py
 # Build native .mpy from object files
 $(BUILD)/$(MOD).native.mpy: $(SRC_O)
 	$(ECHO) "LINK $<"
-	$(Q)$(MPY_LD) --arch $(ARCH) --qstrs $(CONFIG_H) -o $@ $^
+	$(Q)$(MPY_LD) --arch $(ARCH) --qstrs $(CONFIG_H) $(MPY_LD_FLAGS) -o $@ $^
 
 # Build final .mpy from all intermediate .mpy files
 $(MOD).mpy: $(BUILD)/$(MOD).native.mpy $(SRC_MPY)
