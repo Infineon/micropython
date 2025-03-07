@@ -30,7 +30,7 @@
 
 #define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT     "CY8C-062S2-AI"
 
-#define MICROPY_GC_HEAP_SIZE                    (256 * 1024) // 256 KB
+#define MICROPY_GC_HEAP_SIZE                    (800 * 1024) // 800 KB
 
 #if MICROPY_PY_NETWORK
 #define MICROPY_PY_HASHLIB                      (1)
