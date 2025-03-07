@@ -174,7 +174,7 @@ LDFLAGS=
 LDLIBS=
 
 # Path to the linker script to use (if empty, use the default linker script).
-LINKER_SCRIPT=
+LINKER_SCRIPT=mpy-psoc.ld
 
 # Custom pre-build commands to run.
 PREBUILD=

@@ -1,0 +1,17 @@
+# Location of top-level MicroPython directory
+MPY_DIR = ../../..
+
+# Name of module
+MOD = deepcraft_model
+
+# Source files (.c or .py)
+SRC = dc_mp_iface.c model.c
+
+# Architecture to build for (x86, x64, armv7m, xtensa, xtensawin, rv32imc)
+ARCH = armv7emsp
+
+# Link with libm.a and libgcc.a from the toolchain
+LINK_RUNTIME = 1
+
+# Include to get the rules for compiling and linking the module
+include $(MPY_DIR)/py/dynruntime.mk
