@@ -16,6 +16,7 @@ test_script_dir = "./ports/psoc6/mp_custom"
 curr_dir = os.getcwd()
 print(f"Current directory: {curr_dir}")
 
+
 # List of mpremote commands
 mpr_connect = f"../tools/mpremote/mpremote.py connect {device}"
 mpr_run_script = ""
@@ -157,7 +158,11 @@ def copy_files(input_cp_files):
 
     cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
 
+    ls_cmd = f"cd ./ports/psoc6/inputs/ && ls -l"
+
     logger.debug(f"cp_files command: {cp_cmd}")
+
+    print("Check if file is available: ", subprocess.run(ls_cmd, shell=True, capture_output=True))
 
     print("Copying files...", subprocess.run(cp_cmd, shell=True, capture_output=True))
 
