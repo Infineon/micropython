@@ -157,6 +157,7 @@ def copy_files(input_cp_files):
         cp_sub_cmd += f"cp {test_input_dir}/{file} :{remote_directory_path}{append_cmd_operand}"
 
     cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
+    cp_cmd = f"{mpr_connect}"
 
     ls_cmd = f"ls -l ./ports/psoc6/inputs"
 
