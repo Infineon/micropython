@@ -7,20 +7,15 @@ import time
 logger = logging.getLogger("fs")
 logging.basicConfig(format="%(levelname)s: %(message)s", encoding="utf-8", level=logging.WARNING)
 
-'''device = sys.argv[1]
+device = sys.argv[1]
 test_type = sys.argv[2]
-mem_type = sys.argv[3]'''
+mem_type = sys.argv[3]
 
-device = '/dev/ttyACM3'
-test_type = "basic"
-mem_type = "flash"
-
-# tests inputs and script paths
-test_input_dir = "/home/nikhita/MPY/micropython/tests/ports/psoc6/inputs"
-test_script_dir = "/home/nikhita/MPY/micropython/tests/ports/psoc6/mp_custom"
+test_input_dir = "./ports/psoc6/inputs"
+test_script_dir = "./ports/psoc6/mp_custom"
 
 # List of mpremote commands
-mpr_connect = f"/home/nikhita/MPY/micropython/tools/mpremote/mpremote.py connect {device}"
+mpr_connect = f"../tools/mpremote/mpremote.py connect {device}"
 mpr_run_script = ""
 
 # Remote directory path
@@ -187,10 +182,9 @@ def validate_test(files, file_sizes):
 
 
 def cp_files_test(input_files, input_files_size):
-    # rm_files_if_exist(input_files)
+    rm_files_if_exist(input_files)
     copy_files(input_files)
-    # time.sleep(1)
-    # validate_test(input_files, input_files_size)
+    validate_test(input_files, input_files_size)
 
 
 def large_file_tests(device, test_type, mem_type):
