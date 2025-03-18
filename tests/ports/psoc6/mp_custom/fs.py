@@ -155,7 +155,7 @@ def copy_files(input_cp_files):
             append_cmd_operand = " + "
         cp_sub_cmd += f"cp {test_input_dir}/{file} :{remote_directory_path}{append_cmd_operand}"
 
-    cp_cmd = f"{mpr_connect} {cp_sub_cmd}"
+    cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
 
     logger.debug(f"cp_files command: {cp_cmd}")
 
