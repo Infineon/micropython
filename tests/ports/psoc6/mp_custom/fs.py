@@ -158,7 +158,7 @@ def copy_files(input_cp_files):
 
     cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
 
-    ls_cmd = f"cd ./ports/psoc6/inputs/ && ls -l"
+    ls_cmd = f"ls -l ./ports/psoc6/inputs"
 
     logger.debug(f"cp_files command: {cp_cmd}")
 
