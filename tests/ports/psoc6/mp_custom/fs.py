@@ -13,6 +13,8 @@ mem_type = sys.argv[3]
 
 test_input_dir = "./ports/psoc6/inputs"
 test_script_dir = "./ports/psoc6/mp_custom"
+curr_dir = os.getcwd()
+print(f"Current directory: {curr_dir}")
 
 # List of mpremote commands
 mpr_connect = f"../tools/mpremote/mpremote.py connect {device}"
