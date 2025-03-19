@@ -161,7 +161,7 @@ mpremote_vfs_large_file_tests() {
   echo 
   echo "running tests : vfs large files"
   echo
-  chmod 777 ${tests_psoc6_dir}/mp_custom/fs.py
+  chmod 777 ${tests_psoc6_dir}/mp_custom/fs_test.py
 
   # On device file saving tests for medium and large size takes considerable 
   # amount of time. Hence only when needed, this should be triggered.
@@ -170,7 +170,7 @@ mpremote_vfs_large_file_tests() {
      enable_adv_tests="adv"
   fi
 
-  python3 ${tests_psoc6_dir}/mp_custom/fs.py ${dev_test} ${enable_adv_tests} ${storage_device}
+  python3 ${tests_psoc6_dir}/mp_custom/fs_test.py --device ${dev_test} --test_type ${enable_adv_tests} --mem_type ${storage_device}
   
   update_test_result $?
 }
