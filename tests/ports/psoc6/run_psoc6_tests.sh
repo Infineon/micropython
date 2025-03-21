@@ -88,7 +88,7 @@ while getopts "b:d:h:s:t:x" o; do
        exit 1
        ;;
   esac
-done
+done2
 
 if [ -z "${dev_test}" ]; then
   dev_test="/dev/ttyACM0"
