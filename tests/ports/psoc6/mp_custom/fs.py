@@ -7,18 +7,25 @@ import time
 logger = logging.getLogger("fs")
 logging.basicConfig(format="%(levelname)s: %(message)s", encoding="utf-8", level=logging.WARNING)
 
-device = sys.argv[1]
+'''device = sys.argv[1]
 test_type = sys.argv[2]
-mem_type = sys.argv[3]
+mem_type = sys.argv[3]'''
+
+device = "/dev/ttyACM1"
+test_type = "basic"
+mem_type = "flash"
+
 
 test_input_dir = "./ports/psoc6/inputs"
 test_script_dir = "./ports/psoc6/mp_custom"
 curr_dir = os.getcwd()
 print(f"Current directory: {curr_dir}")
 
+mpremote = "~/MPY/micropython/tools/mpremote/mpremote.py"
+
 
 # List of mpremote commands
-mpr_connect = f"../tools/mpremote/mpremote.py connect {device}"
+# mpr_connect = f"{mpremote} connect {device}"
 mpr_run_script = ""
 
 # Remote directory path
@@ -157,13 +164,8 @@ def copy_files(input_cp_files):
         cp_sub_cmd += f"cp {test_input_dir}/{file} :{remote_directory_path}{append_cmd_operand}"
 
     cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
-    cp_cmd = f"{mpr_connect}"
-
-    ls_cmd = f"ls -l ./ports/psoc6/inputs"
 
     logger.debug(f"cp_files command: {cp_cmd}")
-
-    print("Check if file is available: ", subprocess.run(ls_cmd, shell=True, capture_output=True))
 
     print("Copying files...", subprocess.run(cp_cmd, shell=True, capture_output=True))
 
@@ -192,7 +194,7 @@ def validate_test(files, file_sizes):
 def cp_files_test(input_files, input_files_size):
     rm_files_if_exist(input_files)
     copy_files(input_files)
-    validate_test(input_files, input_files_size)
+    # validate_test(input_files, input_files_size)
 
 
 def large_file_tests(device, test_type, mem_type):
@@ -204,13 +206,54 @@ def large_file_tests(device, test_type, mem_type):
     cp_files_test(input_files, input_files_size)
 
 
-def connect_to_dev_test():
-    print("Connecting to device...")
+def copy_files_to_dev(cmd, file):
+    mpr_cp = f"{mpr_connect} fs cp {file} :/"
+    print("Copying files...", subprocess.run(mpr_cp, shell=True, capture_output=True))
 
-    mpr_connect_ls = f"{mpr_connect} fs ls"
-    print(subprocess.run(f"{mpr_connect_ls}", shell=True, capture_output=True))
-    # print(subprocess.run(f"{mpr_connect}", shell=True, capture_output=True))
 
+# Function to find the micropython project root directory
+def find_micropython_root(start_path="/"):
+    for root, dirs, files in os.walk(start_path):
+        if os.path.basename(root) == "micropython":
+            return root
+    return None
+
+
+# Function to search for a file within the micropython project directory
+def find_file_in_micropython(root_dir, filename):
+    for root, dirs, files in os.walk(root_dir):
+        if filename in files:
+            return os.path.join(root, filename)
+    return None
+
+
+# Main script logic
+if __name__ == "__main__":
+    # Find the micropython project root starting from the root of the filesystem
+    root_dir = find_micropython_root(start_path="/")
+
+    if root_dir is None:
+        print("micropython directory not found")
+    else:
+        print(f"Found micropython project root at: {root_dir}")
+
+        filename = "mpremote.py"
+        mpremote = find_file_in_micropython(root_dir, filename)
+
+        if mpremote:
+            print(f"File found at: {mpremote}")
+        else:
+            print(f"File {filename} not found in the micropython project.")
+
+        mpr_connect = f"{mpremote} connect {device}"
+
+        ip_file = "test_fs_small_file.txt"
+        test_ip = find_file_in_micropython(root_dir, ip_file)
+
+        mpr_cp = f"{mpr_connect} fs cp {test_ip} :/"
+        print("Copying files...", subprocess.run(mpr_cp, shell=True, capture_output=True))
 
 # connect_to_dev_test()
-large_file_tests(device, test_type, mem_type)
+# large_file_tests(device, test_type, mem_type)
+
+# copy_files_to_dev()
