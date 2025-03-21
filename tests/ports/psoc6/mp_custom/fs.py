@@ -7,13 +7,13 @@ import time
 logger = logging.getLogger("fs")
 logging.basicConfig(format="%(levelname)s: %(message)s", encoding="utf-8", level=logging.WARNING)
 
-'''device = sys.argv[1]
+device = sys.argv[1]
 test_type = sys.argv[2]
-mem_type = sys.argv[3]'''
+mem_type = sys.argv[3]
 
-device = "/dev/ttyACM1"
+'''device = "/dev/ttyACM1"
 test_type = "basic"
-mem_type = "flash"
+mem_type = "flash"'''
 
 
 test_input_dir = "./ports/psoc6/inputs"
