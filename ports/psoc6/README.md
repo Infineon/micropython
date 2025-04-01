@@ -16,6 +16,11 @@ If the ModusToolbox™ has not been installed in the default path (`~/ModusToolb
 
     source tools/psoc6/dev-setup.sh && toolchain_setup [mtb_path]
 
+### MacOS
+
+> [!NOTE]  
+> If you are using MacOS, you need to install GNU make. The default make on Mac OS is BSD make, which is not compatible with the Makefile used in this port. Remember to add GNU make to the system path PATH.
+
 ## Building and running Linux version
 
 As we are working on the ports-psoc6-main branch (for now), first checkout that branch after cloning this repo:
