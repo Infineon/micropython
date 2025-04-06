@@ -74,7 +74,7 @@ jobs:
           echo "File test_fs_small_file.txt not found!"
           exit 1
         fi
-    - name: Debug: Listing files in input directory
+    - name: Listing files in input directory
       run: |
         ls -l ./ports/psoc6/inputs/    
     - name: Run psoc6 tests
