@@ -67,7 +67,16 @@ jobs:
     - name: Setup devices
       run: |
         cp mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
-        source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml
+        source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml  
+    - name: Check for test file
+      run: |
+        if [ ! -f ./ports/psoc6/inputs/test_fs_small_file.txt ]; then
+          echo "File test_fs_small_file.txt not found!"
+          exit 1
+        fi
+    - name: Debug: Listing files in input directory
+      run: |
+        ls -l ./ports/psoc6/inputs/    
     - name: Run psoc6 tests
       timeout-minutes: 12
       run: |
