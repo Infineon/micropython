@@ -157,7 +157,7 @@ def copy_files(input_cp_files):
 
     logger.debug(f"cp_files command: {cp_cmd}")
 
-    subprocess.run(cp_cmd, shell=True, capture_output=True)
+    print("Copying files...", subprocess.run(cp_cmd, shell=True, capture_output=True))
 
 
 def validate_test(files, file_sizes):
