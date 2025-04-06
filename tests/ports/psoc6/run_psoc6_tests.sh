@@ -88,7 +88,7 @@ while getopts "b:d:h:s:t:x" o; do
        exit 1
        ;;
   esac
-done2
+done
 
 if [ -z "${dev_test}" ]; then
   dev_test="/dev/ttyACM0"
@@ -170,12 +170,13 @@ mpremote_vfs_large_file_tests() {
      enable_adv_tests="adv"
   fi
 
-  python3 ${tests_psoc6_dir}/mp_custom/fs.py --device ${dev_test} --test_type ${enable_adv_tests} --mem_type ${storage_device}
+  python3 ${tests_psoc6_dir}/mp_custom/fs.py ${dev_test} ${enable_adv_tests} ${storage_device}
   
   update_test_result $?
 }
 
 vfs_flash_tests() {
+  #devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml))
   run_tests "file system flash" ${dev_test} \
   "extmod/vfs_basic.py 
    extmod/vfs_lfs_superblock.py
