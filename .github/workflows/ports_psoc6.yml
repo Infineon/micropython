@@ -81,7 +81,7 @@ jobs:
       run: |
         devs=$(python3 ./tools/psoc6/get-devs.py port -b ${{ matrix.board }} -y tools/psoc6/${{ runner.name }}-devs.yml)
         dev_test=${devs[0]}
-        ./tools/mpremote/mpremote.py connect ${dev_test} fs cp ./ports/psoc6/inputs/test_fs_small_file.txt :/ 
+        ./tools/mpremote/mpremote.py connect $dev_test fs cp ./tests/ports/psoc6/inputs/test_fs_small_file.txt :/ 
     - name: Run psoc6 tests
       timeout-minutes: 12
       run: |
