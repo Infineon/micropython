@@ -154,8 +154,13 @@ def copy_files(input_cp_files):
         cp_sub_cmd += f"cp {test_input_dir}/{file} :{remote_directory_path}{append_cmd_operand}"
 
     cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
+    ls_cmd = f"{mpr_connect} fs ls"
+
+    print("List files in local: ", os.listdir(test_input_dir))
 
     logger.debug(f"cp_files command: {cp_cmd}")
+
+    print("List files in device: ", subprocess.run(ls_cmd, shell=True, capture_output=True))
 
     print("Copying files...", subprocess.run(cp_cmd, shell=True, capture_output=True))
 
@@ -192,6 +197,7 @@ def large_file_tests(device, test_type, mem_type):
     set_remote_dir_path(mem_type)
 
     input_files, input_files_size = get_test_input_files(test_type)
+    print(input_files)
 
     cp_files_test(input_files, input_files_size)
 
