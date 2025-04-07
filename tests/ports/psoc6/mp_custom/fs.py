@@ -142,6 +142,21 @@ def rm_files_if_exist(files):
             print(f"Existing files removed.")
 
 
+def find_file(name, path="."):
+    try:
+        for entry in os.listdir(path):
+            full = path + "/" + entry
+            if entry == name:
+                return full
+            if os.stat(full)[0] & 0x4000:
+                found = find_file(name, full)
+                if found:
+                    return found
+    except:
+        pass
+    return None
+
+
 def copy_files(input_cp_files):
     ### This will create a command with concatenation of cp commands for each file in the list:
     # ../tools/mpremote/mpremote.py connect /dev/ttyACM0 fs cp ./ports/psoc6/test_inputs/test_fs_medium_file.txt :/ + fs cp ./ports/psoc6/test_inputs/test_fs_medium_file.txt :/
@@ -153,14 +168,21 @@ def copy_files(input_cp_files):
             append_cmd_operand = " + "
         cp_sub_cmd += f"cp {test_input_dir}/{file} :{remote_directory_path}{append_cmd_operand}"
 
-    cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
+    # cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_cmd}"
     ls_cmd = f"{mpr_connect} fs ls"
 
     print("List files in local: ", os.listdir(test_input_dir))
 
-    logger.debug(f"cp_files command: {cp_cmd}")
+    # logger.debug(f"cp_files command: {cp_cmd}")
 
     print("List files in device: ", subprocess.run(ls_cmd, shell=True, capture_output=True))
+
+    result = find_file("test_fs_small_file.txt")
+    print("Found at:" if result else "Not found:", result)
+
+    cp_sub_modified = f"cp {result} :/"
+
+    cp_cmd = f"{mpr_connect} {mpr_run_script} {cp_sub_modified}"
 
     print("Copying files...", subprocess.run(cp_cmd, shell=True, capture_output=True))
 
