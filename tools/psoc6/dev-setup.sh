@@ -14,7 +14,7 @@ function set_mtb_tools_path {
         mtb_path=~/ModusToolbox
     fi
     
-    echo ${mtb_path}/tools_*
+    echo ${mtb_path}/tools_3.0
 }
 
 function export_path {
