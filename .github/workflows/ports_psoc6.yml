@@ -80,6 +80,7 @@ jobs:
     - name: mpremote test
       run: |
         devs=$(python3 ./tools/psoc6/get-devs.py port -b ${{ matrix.board }} -y tools/psoc6/${{ runner.name }}-devs.yml)
+        echo "${devs}"
         dev_test=${devs[0]}
         echo "${dev_test}"
         ./tools/mpremote/mpremote.py connect ${dev_test} fs cp ./tests/ports/psoc6/inputs/test_fs_small_file.txt :/ 
