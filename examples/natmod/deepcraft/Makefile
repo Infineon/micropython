@@ -15,3 +15,7 @@ LINK_RUNTIME = 1
 
 # Include to get the rules for compiling and linking the module
 include $(MPY_DIR)/py/dynruntime.mk
+
+# Custom clean target
+clean:
+	rm -rf .mpy_ld_cache/ build/ $(MOD).mpy
