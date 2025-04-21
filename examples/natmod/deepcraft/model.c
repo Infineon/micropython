@@ -1,197 +1,3 @@
-/*
-* DEEPCRAFT Studio 5.2.2102+2abb7d94b69921b66d282c11929c83b8adc99268
-* Copyright © 2023- Imagimob AB, All Rights Reserved.
-* 
-* Generated at 12/09/2024 06:20:58 UTC. Any changes will be lost.
-* 
-* Model ID  d30ff2e4-3b55-4b8f-b3e5-ab5513979b3b
-* 
-* Memory    Size                      Efficiency
-* Buffers   33600 bytes (RAM)         86 %
-* State     8392 bytes (RAM)          100 %
-* Readonly  155056 bytes (Flash)      100 %
-* 
-* Backend              tensorflow
-* Keras Version        2.15.0
-* Backend Model Type   Sequential
-* Backend Model Name   conv2d-medium-speed-0
-* 
-* Class Index | Symbol Label
-* 0           | unlabelled
-* 1           | baby_cry
-* 
-* Layer                          Shape           Type       Function
-* Sliding Window (data points)   [512]           float      dequeue
-*    window_shape = [512]
-*    stride = 160
-*    buffer_multiplier = 1
-* Hann smoothing                 [512]           float      dequeue
-*    sym = True
-* Real Discrete Fourier Transform [257,2]         float      dequeue
-*    axis = 0
-* Frobenius norm                 [257]           float      dequeue
-*    axis = 0
-* Mel Filterbank                 [20]            float      dequeue
-*    num_filters = 20
-*    sample_rate = 16000
-*    f_low = 300
-*    f_high = 8000
-*    htk = True
-*    librosa = False
-* Clip                           [20]            float      dequeue
-*    min = 0.000316227766016
-*    max = 3.40282347E+38
-* Logarithm                      [20]            float      dequeue
-*    base = 0
-* Sliding Window (data points)   [60,20]         float      dequeue
-*    window_shape = [60,20]
-*    stride = 660
-*    buffer_multiplier = 1
-* Input Layer                    [60,20]         float      dequeue
-*    shape = [60,20]
-* Reshape                        [60,20,1]       float      dequeue
-*    shape = [60,20,1]
-*    trainable = True
-* Convolution 2D                 [30,10,12]      float      dequeue
-*    filters = 12
-*    kernel_size = [5,5]
-*    strides = [2,2]
-*    padding = same
-*    activation = linear
-*    use_bias = False
-*    trainable = True
-*    weight = float[5,5,1,12]
-* Batch Normalization            [30,10,12]      float      dequeue
-*    epsilon = 0.001
-*    trainable = True
-*    scale = True
-*    center = True
-*    axis = 3
-*    gamma = float[12]
-*    beta = float[12]
-*    mean = float[12]
-*    variance = float[12]
-* Activation                     [30,10,12]      float      dequeue
-*    activation = relu
-*    trainable = True
-* Convolution 2D                 [15,5,24]       float      dequeue
-*    filters = 24
-*    kernel_size = [5,5]
-*    strides = [2,2]
-*    padding = same
-*    activation = linear
-*    use_bias = False
-*    trainable = True
-*    weight = float[5,5,12,24]
-* Convolution 2D                 [8,3,24]        float      dequeue
-*    filters = 24
-*    kernel_size = [5,5]
-*    strides = [2,2]
-*    padding = same
-*    activation = linear
-*    use_bias = False
-*    trainable = True
-*    weight = float[5,5,24,24]
-* Batch Normalization            [8,3,24]        float      dequeue
-*    epsilon = 0.001
-*    trainable = True
-*    scale = True
-*    center = True
-*    axis = 3
-*    gamma = float[24]
-*    beta = float[24]
-*    mean = float[24]
-*    variance = float[24]
-* Activation                     [8,3,24]        float      dequeue
-*    activation = relu
-*    trainable = True
-* Convolution 2D                 [8,3,32]        float      dequeue
-*    filters = 32
-*    kernel_size = [3,3]
-*    strides = [1,1]
-*    padding = same
-*    activation = linear
-*    use_bias = False
-*    trainable = True
-*    weight = float[3,3,24,32]
-* Convolution 2D                 [8,3,32]        float      dequeue
-*    filters = 32
-*    kernel_size = [3,3]
-*    strides = [1,1]
-*    padding = same
-*    activation = linear
-*    use_bias = False
-*    trainable = True
-*    weight = float[3,3,32,32]
-* Batch Normalization            [8,3,32]        float      dequeue
-*    epsilon = 0.001
-*    trainable = True
-*    scale = True
-*    center = True
-*    axis = 3
-*    gamma = float[32]
-*    beta = float[32]
-*    mean = float[32]
-*    variance = float[32]
-* Activation                     [8,3,32]        float      dequeue
-*    activation = relu
-*    trainable = True
-* Global average pooling 2D      [32]            float      dequeue
-* Dense                          [2]             float      dequeue
-*    units = 2
-*    use_bias = True
-*    activation = linear
-*    trainable = True
-*    weight = float[32,2]
-*    bias = float[2]
-* Activation                     [2]             float      dequeue
-*    activation = softmax
-*    trainable = True
-* 
-* Exported functions:
-* 
-* int IMAI_dequeue(float *restrict data_out)
-*    Description: Dequeue features. RET_SUCCESS (0) on success, RET_NODATA (-1) if no data is available, RET_NOMEM (-2) on internal memory error
-*    Parameter data_out is Output of size float[2].
-* 
-* int IMAI_enqueue(const float *restrict data_in)
-*    Description: Enqueue features. Returns SUCCESS (0) on success, else RET_NOMEM (-2) when low on memory.
-*    Parameter data_in is Input of size float[1].
-* 
-* void IMAI_init(void)
-*    Description: Initializes buffers to initial state. This function also works as a reset function.
-* 
-* 
-* Disclaimer:
-*   The generated code relies on the optimizations done by the C compiler.
-*   For example many for-loops of length 1 must be removed by the optimizer.
-*   This can only be done if the functions are inlined and simplified.
-*   Check disassembly if unsure.
-*   tl;dr Compile using gcc with -O3 or -Ofast
-*/
-
-/*
-* Tensorflow Test Set
-* 
-* (ACC) Accuracy 82.509 %
-* (F1S) F1 Score 83.636 %
-* 
-* Name of class                                            (unlabelled)         baby_cry
-* (TP) True Positive or Correct Positive Prediction                 622               62
-* (FN) False Negative or Incorrect Negative Prediction               94               51
-* (FP) False Positive or Incorrect Positive Prediction               51               94
-* (TN) True Negative or Correct Negative Prediction                  62              622
-* (TPR) True Positive Rate or Sensitivity, Recall               86.87 %          54.87 %
-* (TNR) True Negative Rate or Specificity, Selectivity          54.87 %          86.87 %
-* (PPV) Positive Predictive Value or Precision                  92.42 %          39.74 %
-* (NPV) Negative Predictive Value                               39.74 %          92.42 %
-* (FNR) False Negative Rate or Miss Rate                        13.13 %          45.13 %
-* (FPR) False Positive Rate or Fall-Out                         45.13 %          13.13 %
-* (FDR) False Discovery Rate                                     7.58 %          60.26 %
-* (FOR) False Omission Rate                                     60.26 %           7.58 %
-* (F1S) F1 Score                                                89.56 %          46.10 %
-*/
-
 #include <float.h>
 #include <math.h>
 #include <stdint.h>
@@ -204,7 +10,7 @@ int8_t _buffer[33600];
 int8_t _state[8392];
 
 // Parameters
-static const uint32_t _K4[] = {
+const uint32_t _K4[] = {
     0x00000000, 0x381e87c4, 0x391e863b, 0x39b25423, 0x3a1e8019, 0x3a77a0f6, 0x3ab2449b, 0x3af29a52, 
     0x3b1e6790, 0x3b487014, 0x3b776514, 0x3b95a260, 0x3bb2068a, 0x3bd0ddef, 0x3bf2275e, 0x3c0af0c6, 
     0x3c1e058c, 0x3c325144, 0x3c47d325, 0x3c5e8a59, 0x3c767600, 0x3c87ca96, 0x3c94f373, 0x3ca2b513, 
@@ -5159,7 +4965,7 @@ typedef struct
 #define CBUFFER_NOMEM -1
 
 // Initializes a cbuffer handle with given memory and size.
-inline void cbuffer_init(cbuffer_t *dest, void *mem, int size) {
+static inline void cbuffer_init(cbuffer_t *dest, void *mem, int size) {
 	dest->buf = mem;
 	dest->size = size;
 	dest->used = 0;
@@ -5168,7 +4974,7 @@ inline void cbuffer_init(cbuffer_t *dest, void *mem, int size) {
 }
 
 // Returns the number of free bytes in buffer.
-inline int cbuffer_get_free(cbuffer_t *buf) {
+static inline int cbuffer_get_free(cbuffer_t *buf) {
 	return buf->size - buf->used;
 }
 
@@ -8267,7 +8073,7 @@ int IMAI_dequeue(float *restrict data_out) {
         loge_f32(_K13, 20, _K14);
         __RETURN_ERROR_BREAK_EMPTY(fixwin_enqueuef32(_K16, _K14));
     }
-    __RETURN_ERROR(fixwin_dequeuef32(_K16, _K15, 33));
+    /*__RETURN_ERROR(fixwin_dequeuef32(_K16, _K15, 33));
     conv2d_f32(_K15, _K18, _K17, 12, 5, 5, 2, 2, 60, 20, 1, 1, 2, 1, 2);
     mul_f32(_K17, _K20, 1, 1, 1, 300, 12, _K22);
     add_f32(_K22, _K21, 1, 1, 1, 300, 12, _K19);
@@ -8285,7 +8091,7 @@ int IMAI_dequeue(float *restrict data_out) {
     globav2d_f32(_K41, 3, 8, 32, _K42);
     dott_f32(_K43, _K42, _K44, 32, 2, 1);
     add_f32(_K44, _K45, 1, 1, 1, 1, 2, _K46);
-    softmax_f32(_K46, 2, data_out);
+    softmax_f32(_K46, 2, data_out);*/
     return 0;
 }
 
@@ -8298,3 +8104,4 @@ void IMAI_init(void) {
     fixwin_initf32(_K3, 4, 512);
     fixwin_initf32(_K16, 80, 60);
 }
+
