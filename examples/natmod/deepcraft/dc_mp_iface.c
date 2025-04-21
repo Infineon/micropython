@@ -1,7 +1,33 @@
 #include "py/dynruntime.h"
 
 
+#if !defined(__linux__)
+void *memcpy(void *dst, const void *src, size_t n) {
+    return mp_fun_table.memmove_(dst, src, n);
+}
+void *memset(void *s, int c, size_t n) {
+    return mp_fun_table.memset_(s, c, n);
+}
+/*float logf(float x) {
+    // Optional: You can define a very basic approximation, or just return x
+    // to make the code compile and defer real computation
+    return x;  // Placeholder – replace with approximation if needed
+}*/
+
+#endif
+
+int native_errno=0;
+#if defined(__linux__)
+int *__errno_location (void)
+#else
+int *__errno (void)
+#endif
+{
+    return &native_errno;
+}
+
 #include "examples/natmod/deepcraft/mp_src.c"
+
 
 typedef struct _dc_obj_t {
     mp_obj_base_t base;
