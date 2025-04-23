@@ -8,6 +8,14 @@ void *memcpy(void *dst, const void *src, size_t n) {
 void *memset(void *s, int c, size_t n) {
     return mp_fun_table.memset_(s, c, n);
 }
+
+__attribute__((weak))
+float logf(float x) {
+    // Basic fallback or dummy version — avoids pulling in full libm
+    // Replace with your approximation if needed
+    return 0.0f;  // Just to satisfy the linker
+}
+
 /*float logf(float x) {
     // Optional: You can define a very basic approximation, or just return x
     // to make the code compile and defer real computation

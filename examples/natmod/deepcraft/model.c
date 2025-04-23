@@ -8029,7 +8029,7 @@ static inline void softmax_f32(const float* restrict x, int count, float* restri
 {
 	float sum = 0;
 	for (int i = 0; i < count; i++) {
-		float value = expf(x[i]);
+		float value = 0;expf(x[i]);
 		sum += value;
 		result[i] = value;
 	}
@@ -8070,10 +8070,10 @@ int IMAI_dequeue(float *restrict data_out) {
         norm_f32(_K6, 1, 2, 257, _K10);
         mel_f32(_K10, _K11, 257, 1, 20, _K12);
         clip_f32(_K12, 20, 0.000316227766016, 3.40282347E+38, _K13);
-        loge_f32(_K13, 20, _K14);
+        //loge_f32(_K13, 20, _K14);
         __RETURN_ERROR_BREAK_EMPTY(fixwin_enqueuef32(_K16, _K14));
     }
-    /*__RETURN_ERROR(fixwin_dequeuef32(_K16, _K15, 33));
+    __RETURN_ERROR(fixwin_dequeuef32(_K16, _K15, 33));
     conv2d_f32(_K15, _K18, _K17, 12, 5, 5, 2, 2, 60, 20, 1, 1, 2, 1, 2);
     mul_f32(_K17, _K20, 1, 1, 1, 300, 12, _K22);
     add_f32(_K22, _K21, 1, 1, 1, 300, 12, _K19);
@@ -8091,7 +8091,7 @@ int IMAI_dequeue(float *restrict data_out) {
     globav2d_f32(_K41, 3, 8, 32, _K42);
     dott_f32(_K43, _K42, _K44, 32, 2, 1);
     add_f32(_K44, _K45, 1, 1, 1, 1, 2, _K46);
-    softmax_f32(_K46, 2, data_out);*/
+    softmax_f32(_K46, 2, data_out);
     return 0;
 }
 

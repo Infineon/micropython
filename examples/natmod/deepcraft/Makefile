@@ -14,14 +14,7 @@ ARCH = armv7emsp
 LINK_RUNTIME = 1
 
 CFLAGS += -Dsqrtf=__builtin_sqrtf -fno-math-errno -fno-trapping-math -fno-builtin-logf -ffreestanding
-CFLAGS += --data-sections
-# If -lm is required:
-# Even stronger — exclude specific problematic objects
-LDFLAGS += -Wl,--exclude-libs,ALL
-
-
-
-
+CFLAGS += -Dlogf=logf
 
 #CFLAGS += -Dlogf=__builtin_logf -ffreestanding -fno-math-errno -fno-trapping-math -ffast-math
 
