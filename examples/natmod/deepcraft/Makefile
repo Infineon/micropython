@@ -13,12 +13,9 @@ ARCH = armv7emsp
 # Link with libm.a and libgcc.a from the toolchain
 LINK_RUNTIME = 1
 
-CFLAGS += -Dsqrtf=__builtin_sqrtf -fno-math-errno -fno-trapping-math -fno-builtin-logf -ffreestanding
-CFLAGS += -Dlogf=logf
+override LIBGCC_PATH := gcc/lib/gcc/arm-none-eabi/11.3.1/thumb/v7e-m+fp/hard/libgcc.a
+override LIBM_PATH := gcc/arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
 
-#CFLAGS += -Dlogf=__builtin_logf -ffreestanding -fno-math-errno -fno-trapping-math -ffast-math
-
-# Include to get the rules for compiling and linking the module
 include $(MPY_DIR)/py/dynruntime.mk
 
 # Custom clean target
