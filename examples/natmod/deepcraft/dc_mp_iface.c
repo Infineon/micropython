@@ -1,6 +1,5 @@
 #include "py/dynruntime.h"
 
-
 #if !defined(__linux__)
 void *memcpy(void *dst, const void *src, size_t n) {
     return mp_fun_table.memmove_(dst, src, n);
@@ -8,20 +7,6 @@ void *memcpy(void *dst, const void *src, size_t n) {
 void *memset(void *s, int c, size_t n) {
     return mp_fun_table.memset_(s, c, n);
 }
-
-__attribute__((weak))
-float logf(float x) {
-    // Basic fallback or dummy version — avoids pulling in full libm
-    // Replace with your approximation if needed
-    return 0.0f;  // Just to satisfy the linker
-}
-
-/*float logf(float x) {
-    // Optional: You can define a very basic approximation, or just return x
-    // to make the code compile and defer real computation
-    return x;  // Placeholder – replace with approximation if needed
-}*/
-
 #endif
 
 int native_errno=0;
@@ -36,15 +21,10 @@ int *__errno (void)
 
 #include "examples/natmod/deepcraft/mp_src.c"
 
-
-typedef struct _dc_obj_t {
-    mp_obj_base_t base;
-} dc_obj_t;
-
 // Forward declaration of type
 mp_obj_full_type_t dc_type;
 
-mp_map_elem_t dc_locals_dict_table[3];
+mp_map_elem_t dc_locals_dict_table[5];
 static MP_DEFINE_CONST_DICT(dc_locals_dict, dc_locals_dict_table);
 
 // Constructor
@@ -67,9 +47,10 @@ mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *a
     dc_locals_dict_table[0] = (mp_map_elem_t){ MP_OBJ_NEW_QSTR(MP_QSTR_init), MP_OBJ_FROM_PTR(&init_obj) };
     dc_locals_dict_table[1] = (mp_map_elem_t){ MP_OBJ_NEW_QSTR(MP_QSTR_enqueue), MP_OBJ_FROM_PTR(&enqueue_obj) };
     dc_locals_dict_table[2] = (mp_map_elem_t){ MP_OBJ_NEW_QSTR(MP_QSTR_dequeue), MP_OBJ_FROM_PTR(&dequeue_obj) };
- 
+    dc_locals_dict_table[3] = (mp_map_elem_t){ MP_OBJ_NEW_QSTR(MP_QSTR_get_model_input_dim), MP_OBJ_FROM_PTR(&get_model_input_dim_obj) };
+    dc_locals_dict_table[4] = (mp_map_elem_t){ MP_OBJ_NEW_QSTR(MP_QSTR_get_model_output_dim), MP_OBJ_FROM_PTR(&get_model_output_dim_obj) };
     
-    MP_OBJ_TYPE_SET_SLOT(&dc_type, locals_dict, (void*)&dc_locals_dict, 2);
+    MP_OBJ_TYPE_SET_SLOT(&dc_type, locals_dict, (void*)&dc_locals_dict, 5);
 
     // Expose constructor as DEEPCRAFT
     mp_store_global(MP_QSTR_DEEPCRAFT, MP_OBJ_FROM_PTR(&dc_type));
