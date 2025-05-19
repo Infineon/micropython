@@ -222,7 +222,7 @@ build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
 all: build
 
-clean: mtb_clean
+#clean: mtb_clean
 
 rebuild: clean mtb_clean all
 
