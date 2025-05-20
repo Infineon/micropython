@@ -1140,7 +1140,7 @@ def load_object_file(env, f, felf):
         elif sym.entry["st_shndx"] == "SHN_UNDEF" and sym["st_info"]["bind"] == "STB_GLOBAL":
             # Undefined global symbol, needs resolving
             env.unresolved_syms.append(sym)
-    if len(dup_errors):
+    if len(dup_errors) > 0:
         raise LinkError("\n".join(dup_errors))
 
 
