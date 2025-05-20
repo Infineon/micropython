@@ -1132,7 +1132,7 @@ def load_object_file(env, f, felf):
         elif sym.entry["st_shndx"] == "SHN_UNDEF" and sym["st_info"]["bind"] == "STB_GLOBAL":
             # Undefined global symbol, needs resolving
             env.unresolved_syms.append(sym)
-    if len(dup_errors):
+    if len(dup_errors) > 0:
         raise LinkError("\n".join(dup_errors))
 
 
@@ -1214,7 +1214,7 @@ def link_objects(env, native_qstr_vals_len):
             else:
                 raise LinkError("{}: undefined symbol: {}".format(sym.filename, sym.name))
 
-    if len(undef_errors):
+    if len(undef_errors) > 0:
         raise LinkError("\n".join(undef_errors))
 
     # Align sections, assign their addresses, and create full_text
