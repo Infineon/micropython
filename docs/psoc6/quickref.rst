@@ -21,6 +21,16 @@ working with this port it may be useful to get an overview of the microcontrolle
    installation.rst
    mpy-usage.rst
 
+And if you are already familiar with MicroPython enablement for PSoC6 and want to try it's integrations
+in other application domains, check below:
+
+.. toctree::
+   :maxdepth: 1
+   :includehidden:
+
+   integrations/deepcraft_integration.rst
+
+
 .. note::
 
     The PSoC6™ port is now a mature port and is expected any MicroPython built-in
@@ -1007,3 +1017,4 @@ The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more det
    - The timing parameter can be used in the `NeoPixel()` constructor with timing tuples supported by the `machine.bitstream()` module. The timing parameter is optional and by default set to 1 which is the default timing [400, 850, 800, 450] for WS2812B LEDs at 800kHz.
    - Use timing = 0 for WS2812B LEDs at 400kHz ie, [800, 1700, 1600, 900].
    - Use timing = [300, 900, 600, 600] for SK6812 LEDs. 
+
