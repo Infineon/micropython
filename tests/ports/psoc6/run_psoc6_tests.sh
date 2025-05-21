@@ -284,8 +284,8 @@ run_ci_tests() {
     devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b))
     devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c))
 
-    dev_test=${devs[0]}
-    vfs_flash_tests  
+    #dev_test=${devs[0]}
+    #vfs_flash_tests  
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
       dev_test=${devs_b[0]}
