@@ -63,6 +63,8 @@ instructions and examples for data acquisition using MicroPython.
 This part is covered in the `model converter repository <https://github.com/Infineon/deepcraft-micropython-converter>`_, which provides instructions 
 on how to convert a DEEPCRAFT™ model into a MicroPython-compatible format and deploy it on the PSOC board.
 
+.. note:: This is WIP and soon to be made available!
+
 Example Projects
 ==================
 - `Edge AI-based baby cry detector with Home Assistant integration <https://www.hackster.io/Infineon_Team/ai-baby-cry-detector-with-home-assistant-integration-05576f>`_
