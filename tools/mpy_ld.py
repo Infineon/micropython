@@ -1278,7 +1278,7 @@ def link_objects(env, native_qstr_vals_len):
                 ),
             )
 
-    if len(undef_errors):
+    if undef_errors:
         raise LinkError("\n".join(undef_errors))
 
     # Generate the entry trampoline assuming the offset is already known.
