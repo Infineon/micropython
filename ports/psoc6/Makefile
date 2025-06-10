@@ -14,7 +14,9 @@ endif
 # has been run. 
 ifeq ($(BOARD),)
     ifeq ($(ACTIVE_BOARD),)
-        $(error ModusToolbox not initialized. Run "make mtb_init BOARD=<target-board>" to configure the environment. )
+		ifneq ($(MAKECMDGOALS), submodules)
+        	$(error ModusToolbox not initialized. Run "make mtb_init BOARD=<target-board>" to configure the environment. )
+		endif
     else
         BOARD = $(ACTIVE_BOARD)
     endif
@@ -51,7 +53,7 @@ CONFIG        ?= Debug
 # include py core make definitions
 include ../../py/mkenv.mk
 include mpconfigport.mk
-include $(BOARD_DIR)/mpconfigboard.mk
+-include $(BOARD_DIR)/mpconfigboard.mk
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
 
@@ -216,7 +218,7 @@ $(BUILD)/firmware.hex: $(BUILD)/firmware.elf
 
 
 # include adapter makefile
-include $(TOP)/lib/mtb-psoc6-libs/makefile_mtb.mk
+-include $(TOP)/lib/mtb-psoc6-libs/makefile_mtb.mk
 
 MPY_CROSS_FLAGS += -march=armv7m
 
