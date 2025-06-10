@@ -2,8 +2,9 @@ BOARD ?=
 
 # Check if the ModusToolbox setup has been initialized
 # If that is the case, get active board
-MTB_LIB_DIR = mtb-libs
+MTB_LIB_DIR = ../../lib/mtb-psoc6-libs
 MTB_LIBS_APP_INFO = $(MTB_LIB_DIR)/build/get_app_info.txt
+
 ifneq ($(wildcard $(MTB_LIBS_APP_INFO)),)
 	ACTIVE_BOARD = $(shell egrep '^ *MTB_TARGET' $(MTB_LIBS_APP_INFO) | sed 's/^.*= *//g' | sed 's/APP_//')
 endif
@@ -54,6 +55,7 @@ include $(BOARD_DIR)/mpconfigboard.mk
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
 
+GIT_SUBMODULES += lib/mtb-psoc6-libs
 
 INC += -I.
 INC += -I$(TOP)
@@ -214,7 +216,7 @@ $(BUILD)/firmware.hex: $(BUILD)/firmware.elf
 
 
 # include adapter makefile
-include mtb-libs/makefile_mtb.mk
+include $(TOP)/lib/mtb-psoc6-libs/makefile_mtb.mk
 
 MPY_CROSS_FLAGS += -march=armv7m
 
