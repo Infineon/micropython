@@ -80,3 +80,6 @@
 [submodule "lib/CMSIS_6"]
 	path = lib/CMSIS_6
 	url = https://github.com/ARM-software/CMSIS_6.git
+[submodule "lib/mtb-psoc6-libs"]
+	path = lib/mtb-psoc6-libs
+	url = https://github.com/Infineon/mtb-micropython-psoc6-port-integration.git
