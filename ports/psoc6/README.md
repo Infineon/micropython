@@ -27,13 +27,13 @@ As we are working on the ports-psoc6-main branch (for now), first checkout that 
 
     git checkout --track origin/ports-psoc6-main
 
-Then initialize the ModusToolbox™ environment: 
-
-    make mtb_init BOARD=<board-name>
-
 Retrieve submodules:
 
     make submodules
+
+Then initialize the ModusToolbox™ environment: 
+
+    make mtb_init BOARD=<board-name>
     
 Build the firmware:
 
