@@ -104,3 +104,6 @@
 [submodule "lib/psoc-edge/async-transfer"]
 	path = lib/psoc-edge/async-transfer
 	url = https://github.com/Infineon/async-transfer.git
+[submodule "lib/mtb-psoc6-libs"]
+	path = lib/mtb-psoc6-libs
+	url = https://github.com/Infineon/mtb-micropython-psoc6-port-integration.git
