@@ -1244,7 +1244,7 @@ def link_objects(env, native_qstr_vals_len):
                 ),
             )
 
-    if len(undef_errors):
+    if len(undef_errors) > 0:
         raise LinkError("\n".join(undef_errors))
 
     # Align sections, assign their addresses, and create full_text
