@@ -155,6 +155,12 @@ Trigger can be ``Pin.IRQ_FALLING`` or ``Pin.IRQ_RISING`` or ``PIN.IRQ_FALLING | 
 
 Set pin value to its complement.
 
+.. method:: Pin.deinit()
+
+Deinitializes the pin object. This will release any resources associated with it. The pin object created from MicroPython side would still be available, but it will not be functional anymore. 
+The pin can be re-initialised by calling the :meth:`Pin.init` function.
+
+
 Signal 
 ^^^^^^
 
