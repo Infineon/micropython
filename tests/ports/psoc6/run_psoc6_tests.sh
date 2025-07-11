@@ -207,6 +207,10 @@ pwm_tests() {
   run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pwm.py"
 }
 
+time_pulse_tests() {
+  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/time_pulse_us.py" 
+}
+
 pin_tests() {
   run_tests "pin" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pin.py"
 }
@@ -236,11 +240,6 @@ spi_tests() {
 i2s_tests() {
   run_tests "i2s" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_rx.py" \
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
-}
-
-time_pulse_tests() {
-  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_us.py" \
-  "" "time_pulse_us_sig_gen" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_us_sig_gen.py"
 }
 
 pdm_pcm_tests() {
@@ -308,6 +307,9 @@ run_ci_tests() {
     dev_test=${devs_a[0]}
     pwm_tests
 
+    dev_test=${devs_a[0]}
+    time_pulse_tests
+
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
     else
@@ -357,16 +359,6 @@ run_ci_tests() {
     fi
     i2s_tests
 
-    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-      dev_test=${devs_b[0]}
-      dev_stub=${devs_a[0]}
-    else
-      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-        dev_test=${devs_c[0]}
-        dev_stub=${devs_b[0]}
-      fi
-    fi
-    time_pulse_tests
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_b[0]}
