@@ -41,6 +41,7 @@ usage() {
   echo "  pdm_pcm           run pdm_pcm tests"
   echo "  bitstream         run bitstream tests"
   echo "  watchdog          run watchdog tests"
+  echo "  time_pulse        run time_pulse test"
   echo "  multi-instance    run multiple board instances tests"
   echo "  help              display this help"
   echo
@@ -237,6 +238,11 @@ i2s_tests() {
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
 }
 
+time_pulse_tests() {
+  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_us.py" \
+  "" "time_pulse_us_sig_gen" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_us_sig_gen.py"
+}
+
 pdm_pcm_tests() {
   run_tests "pdm_pcm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/pdm_pcm_rx.py" \
   "" "pdm_pcm_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/pdm_pcm_tx.py"
@@ -269,7 +275,7 @@ run_ci_tests() {
     echo "board          : ${board}"
     echo "hil            : ${hil_name}"
 
-    devs=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml))
+    devs=$(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml)
 
     # TODO: This mess needs to be solved in a future script rework using yml files to define the compatible boards requirements
     if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
@@ -280,9 +286,9 @@ run_ci_tests() {
       board_version=0.5.0
     fi
 
-    devs_a=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.a))
-    devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b))
-    devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c))
+    devs_a=$(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.a)
+    devs_b=$(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b)
+    devs_c=$(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c)
 
     #dev_test=${devs[0]}
     #vfs_flash_tests  
@@ -360,6 +366,17 @@ run_ci_tests() {
         dev_stub=${devs_b[0]}
       fi
     fi
+    time_pulse_tests
+
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_b[0]}
+      dev_stub=${devs_a[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
     pdm_pcm_tests
     
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
@@ -418,6 +435,9 @@ case ${test_suite} in
         ;;
     "i2s")
         i2s_tests
+        ;;
+    "time_pulse")
+        time_pulse_tests
         ;;
     "pdm_pcm")
         pdm_pcm_tests
