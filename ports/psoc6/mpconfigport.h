@@ -154,6 +154,7 @@
 #define MICROPY_PY_MACHINE_PDM_PCM              (1)
 #define MICROPY_PY_MACHINE_PDM_PCM_RING_BUF     (1)
 
+#define MICROPY_PY_MACHINE_PULSE                (1)
 // VFS
 #define MICROPY_VFS                             (1)
 #define MICROPY_READER_VFS                      (1)
