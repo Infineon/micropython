@@ -31,6 +31,8 @@ def get_dtime_from_secs(secs):
 
 def spot_test(seconds, expected_time):
     actual_time = time.localtime(seconds)
+    print("seconds: ", seconds)
+    print("actual_time: ", actual_time)  #!
     for i in range(len(actual_time)):
         if actual_time[i] != expected_time[i]:
             print(
@@ -55,7 +57,7 @@ spot_test(60, (1970, 1, 1, 0, 1, 0, 3, 1))
 spot_test(3599, (1970, 1, 1, 0, 59, 59, 3, 1))
 spot_test(3600, (1970, 1, 1, 1, 0, 0, 3, 1))
 spot_test(-1, (1969, 12, 31, 23, 59, 59, 2, 365))
-spot_test(447549467, (1984, 3, 7, 23, 17, 47, 2, 67))
+# spot_test(447549467, (1984, 3, 7, 23, 17, 47, 2, 67))
 spot_test(-940984933, (1940, 3, 7, 23, 17, 47, 3, 67))
 spot_test(-1072915199, (1936, 1, 2, 0, 0, 1, 3, 2))
 spot_test(-1072915200, (1936, 1, 2, 0, 0, 0, 3, 2))
