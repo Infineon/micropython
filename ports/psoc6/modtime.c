@@ -101,6 +101,6 @@ static mp_obj_t mp_time_time_get(void) {
         mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
     }
 
-    return mp_obj_new_int_from_ull(timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
+    return timeutils_obj_from_timestamp(timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
         current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec));
 }
