@@ -17,7 +17,7 @@ elif "CY8CPROTO-063-BLE" in board:
     pwm_pin = "P9_6"
 elif "CY8CKIT-062S2-AI" in board:
     pulse_in_pin = "P9_0"
-    pwm_pin = "9_5"
+    pwm_pin = "P9_5"
 
 pulse_in = Pin(pulse_in_pin, Pin.IN)
 
@@ -40,6 +40,5 @@ print(
     f"Pulse timing verified for 75% dc : {True if (0.70 < (width / 1000000) < 0.80) else 'False, width=' + str(width / 1000000)}"
 )
 
-pulse_in_pin.deinit()
+pulse_in.deinit()
 pwm.deinit()
-pwm_pin.deinit()
