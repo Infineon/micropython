@@ -1,4 +1,5 @@
-_  # Machine - time.pulse_us tests
+# Machine - time.pulse_us test
+# Setup: Connect pulse_in to pwm_pin
 
 import time
 import os
