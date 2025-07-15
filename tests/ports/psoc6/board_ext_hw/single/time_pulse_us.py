@@ -1,25 +1,23 @@
 # Machine - time_pulse_us test
 # Setup: Connect pulse_in to pwm_pin
 
-import time
+from machine import PWM, Pin, time_pulse_us
 import os
-from machine import time_pulse_us
-from machine import Pin
-from machine import PWM
+import time
 
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
-    pulse_in_pin = "P13_7"
-    pwm_pin = "P13_6"
+    pwm_pin = "P13_7"
+    pulse_pin_in = "P13_6"
 elif "CY8CPROTO-063-BLE" in board:
-    pulse_in_pin = "P12_6"
-    pwm_pin = "P12_7"
+    pwm_pin = "P12_6"
+    pulse_pin_in = "P12_7"
 elif "CY8CKIT-062S2-AI" in board:
-    pulse_in_pin = "P9_6"
-    pwm_pin = "P9_7"
+    pwm_pin = "P9_6"
+    pulse_pin_in = "P9_7"
 
-pulse_in = Pin(pulse_in_pin, Pin.IN)
+pulse_in = Pin(pulse_pin_in, Pin.IN)
 
 pwm = PWM(pwm_pin, freq=1, duty_ns=250000000)
 time.sleep(2)  # Wait for the pwm signal to be initialized and started
