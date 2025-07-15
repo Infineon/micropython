@@ -41,6 +41,7 @@ usage() {
   echo "  pdm_pcm           run pdm_pcm tests"
   echo "  bitstream         run bitstream tests"
   echo "  watchdog          run watchdog tests"
+  echo "  time_pulse        run time_pulse test"
   echo "  multi-instance    run multiple board instances tests"
   echo "  help              display this help"
   echo
@@ -206,6 +207,10 @@ pwm_tests() {
   run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pwm.py"
 }
 
+time_pulse_tests() {
+  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/time_pulse_us.py"
+}
+
 pin_tests() {
   run_tests "pin" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pin.py"
 }
@@ -302,6 +307,9 @@ run_ci_tests() {
     dev_test=${devs_a[0]}
     pwm_tests
 
+    dev_test=${devs_a[0]}
+    time_pulse_tests
+
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
     else
@@ -350,6 +358,7 @@ run_ci_tests() {
       fi
     fi
     i2s_tests
+
 
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_b[0]}
@@ -418,6 +427,9 @@ case ${test_suite} in
         ;;
     "i2s")
         i2s_tests
+        ;;
+    "time_pulse")
+        time_pulse_tests
         ;;
     "pdm_pcm")
         pdm_pcm_tests
