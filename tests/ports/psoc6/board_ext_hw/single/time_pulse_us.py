@@ -27,14 +27,12 @@ print(
 )
 
 pwm.duty_ns(500000000)
-time.sleep(0.5)
 width = time_pulse_us(pulse_in, 1, 1000000)
 print(
     f"Pulse timing verified for 50% dc : {True if (0.45 < (width / 1000000) < 0.55) else 'False, width=' + str(width / 1000000)}"
 )
 
 pwm.duty_ns(750000000)
-time.sleep(0.5)
 width = time_pulse_us(pulse_in, 1, 1000000)
 print(
     f"Pulse timing verified for 75% dc : {True if (0.70 < (width / 1000000) < 0.80) else 'False, width=' + str(width / 1000000)}"
