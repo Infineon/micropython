@@ -10,14 +10,14 @@ from machine import PWM
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
-    pulse_in_pin = "P9_4"
-    pwm_pin = "P9_6"
+    pulse_in_pin = "P13_7"
+    pwm_pin = "P13_6"
 elif "CY8CPROTO-063-BLE" in board:
-    pulse_in_pin = "P9_4"
-    pwm_pin = "P9_6"
+    pulse_in_pin = "P12_6"
+    pwm_pin = "P12_7"
 elif "CY8CKIT-062S2-AI" in board:
-    pulse_in_pin = "P9_0"
-    pwm_pin = "P9_5"
+    pulse_in_pin = "P9_6"
+    pwm_pin = "P9_7"
 
 pulse_in = Pin(pulse_in_pin, Pin.IN)
 
