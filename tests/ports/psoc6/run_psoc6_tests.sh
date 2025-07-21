@@ -207,9 +207,9 @@ pwm_tests() {
   run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pwm.py"
 }
 
-time_pulse_tests() {
-  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/time_pulse_us.py"
-}
+#time_pulse_tests() {
+#  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/time_pulse_us.py"
+#}
 
 pin_tests() {
   run_tests "pin" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pin.py"
@@ -222,6 +222,7 @@ signal_tests() {
 i2c_tests() {
   run_tests "i2c" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/i2c.py"
 }
+
 
 uart_tests() {
   run_tests "uart" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/uart.py"
@@ -240,6 +241,11 @@ spi_tests() {
 i2s_tests() {
   run_tests "i2s" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_rx.py" \
   "" "i2s_tx" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/i2s_tx.py"
+}
+
+time_pulse_tests() {
+  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_us.py" \
+  "" "time_pulse_sig_gen" ${dev_stub} "${tests_psoc6_dir}/board_ext_hw/multi/time_pulse_sig_gen.py"
 }
 
 pdm_pcm_tests() {
