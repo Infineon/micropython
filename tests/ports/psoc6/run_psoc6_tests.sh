@@ -380,8 +380,9 @@ run_ci_tests() {
         dev_stub=${devs_c[0]}
       fi
     fi
+    # TODO:Enable this 2 test properly in the HIL!
     # bitstream_tests
-    time_pulse_tests
+    #time_pulse_tests
 
     dev_test=${devs[0]}
     wdt_tests
