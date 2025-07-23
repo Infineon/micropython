@@ -11,7 +11,7 @@ elif "CY8CPROTO-063-BLE" in board:
     pulse_in_pin = "P5_2"
     ack_out_pin = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
-    pulse_in_pin = "P9_5"
+    pulse_in_pin = "P9_2"
     ack_out_pin = "P9_7"
 
 
@@ -26,9 +26,6 @@ ack_out = Pin(ack_out_pin, Pin.OUT)
 ack_out.low()
 
 width = 0
-
-# Wait initially for a brief period
-blocking_delay_ms(1000)
 
 # Send begin ack to start generating pulse
 ack_out.high()
