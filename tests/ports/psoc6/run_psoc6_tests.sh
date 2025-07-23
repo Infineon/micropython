@@ -207,10 +207,6 @@ pwm_tests() {
   run_tests "pwm" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pwm.py"
 }
 
-#time_pulse_tests() {
-#  run_tests "time_pulse" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/time_pulse_us.py"
-#}
-
 pin_tests() {
   run_tests "pin" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/pin.py"
 }
