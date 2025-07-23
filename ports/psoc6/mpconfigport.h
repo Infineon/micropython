@@ -148,6 +148,8 @@
 #define MICROPY_PY_MACHINE_UART_SENDBREAK       (1)
 #define MICROPY_PY_MACHINE_UART_IRQ             (1)
 
+#define MICROPY_TIME_SUPPORT_Y1969_AND_BEFORE   (1)
+
 #define MICROPY_PY_MACHINE_PSOC6_I2S            (1)
 #define MICROPY_PY_MACHINE_I2S_INCLUDEFILE      "ports/psoc6/machine_i2s.c"
 
