@@ -5,21 +5,14 @@ import time
 # Allocate pin based on board
 board = os.uname().machine
 if "CY8CPROTO-062-4343W" in board:
-    pulse_in_pin = "P9_7"
-    ack_out_pin = "P9_6"
+    pulse_in_pin = "P12_1"
+    ack_out_pin = "P12_3"
 elif "CY8CPROTO-063-BLE" in board:
-    pulse_in_pin = "P9_4"
-    ack_out_pin = "P9_6"
+    pulse_in_pin = "P5_2"
+    ack_out_pin = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
-    pulse_in_pin = "P9_7"
-    ack_out_pin = "P9_6"
-
-pin_high_received = False
-
-
-def cback(pin):
-    global pin_high_received
-    pin_high_received = True
+    pulse_in_pin = "P9_5"
+    ack_out_pin = "P9_7"
 
 
 def blocking_delay_ms(delay_ms):
@@ -34,18 +27,10 @@ ack_out.low()
 
 width = 0
 
-pulse_in.irq(trigger=Pin.IRQ_RISING, handler=cback)
+# Wait initially for a brief period
+blocking_delay_ms(1000)
 
 # Send begin ack to start generating pulse
-ack_out.high()
-blocking_delay_ms(1000)
-ack_out.low()
-
-# Wait to receive pulse high signal
-while not pin_high_received:
-    pass
-
-# Send pulse high recvd ack
 ack_out.high()
 
 # Measure the pulse width
@@ -55,5 +40,6 @@ print(
     f"Pulse timing verified: {True if (0.98 < (width / 1000000) < 1.2) else 'False, width=' + str(width / 1000000)}"
 )
 
+# Deinitialize the pins
 pulse_in.deinit()
 ack_out.deinit()
