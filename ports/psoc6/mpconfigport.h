@@ -170,7 +170,7 @@
 #define MICROPY_PY_CRYPTOLIB_CTR                (MICROPY_PY_SSL)
 #define MICROPY_PY_CRYPTOLIB_CONSTS             (MICROPY_PY_SSL)
 
-
+#define MICROPY_PY_SSL_DTLS                     (0)
 #define MP_STATE_PORT MP_STATE_VM
 
 // By default networking should include sockets, ssl, websockets, webrepl
