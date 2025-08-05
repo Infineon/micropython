@@ -346,6 +346,9 @@ function ci_psoc6_setup {
 
     # Initialize the submodules
     docker exec mtb-ci make submodules
+
+    # Required dependency by mpremote.py
+    sudo pip install platformdirs>=4.3.7
 }
 
 function ci_psoc6_build {
