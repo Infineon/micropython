@@ -48,7 +48,7 @@ def notify_readiness_to_tx():
     )  # signal to inform the transmitter that receiver is ready
     rx_ready_signal_pin.low()
     # delay
-    for i in range(1000):
+    for i in range(10000):
         pass
     rx_ready_signal_pin.high()
     rx_ready_signal_pin.deinit()
