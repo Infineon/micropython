@@ -19,7 +19,7 @@ elif "CY8CPROTO-063-BLE" in board:
     rx_ready_signal_pin_name = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
     bitstream_in_pin_name = "P9_2"
-    rx_ready_signal_pin_name = "P9_7"
+    rx_ready_signal_pin_name = "P9_1"
 
 expected_values = [
     8000,
@@ -48,7 +48,7 @@ def notify_readiness_to_tx():
     )  # signal to inform the transmitter that receiver is ready
     rx_ready_signal_pin.low()
     # delay
-    for i in range(10000):
+    for i in range(5000):
         pass
     rx_ready_signal_pin.high()
     rx_ready_signal_pin.deinit()

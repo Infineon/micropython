@@ -12,7 +12,7 @@ elif "CY8CPROTO-063-BLE" in board:
     ack_in_pin = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
     pulse_out_pin = "P9_5"
-    ack_in_pin = "P9_7"
+    ack_in_pin = "P9_4"
 
 ack_recvd = False
 
