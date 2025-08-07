@@ -25,6 +25,12 @@ elif "CY8CKIT-062S2-AI" in board:
 signal_received = False
 
 
+def blocking_delay_ms(delay_ms):
+    start = time.ticks_ms()
+    while time.ticks_diff(time.ticks_ms(), start) < delay_ms:
+        pass
+
+
 def signal_irq(arg):
     global signal_received
     signal_received = True
@@ -54,4 +60,5 @@ def send_bitstream():
 
 # print("bitstream tx")
 wait_for_rx_ready()
+blocking_delay_ms(1000)
 send_bitstream()
