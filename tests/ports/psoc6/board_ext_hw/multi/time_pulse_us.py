@@ -12,7 +12,7 @@ elif "CY8CPROTO-063-BLE" in board:
     ack_out_pin = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
     pulse_in_pin = "P9_2"
-    ack_out_pin = "P9_1"
+    ack_out_pin = "P9_7"
 
 
 def blocking_delay_ms(delay_ms):
@@ -22,7 +22,7 @@ def blocking_delay_ms(delay_ms):
 
 
 pulse_in = Pin(pulse_in_pin, Pin.IN, Pin.PULL_DOWN)
-ack_out = Pin(ack_out_pin, Pin.OUT)
+ack_out = Pin(ack_out_pin, Pin.OUT, value=0)
 ack_out.low()
 
 width = 0

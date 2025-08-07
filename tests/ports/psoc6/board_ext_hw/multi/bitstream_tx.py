@@ -20,7 +20,7 @@ elif "CY8CPROTO-063-BLE" in board:
     wait_signal_pin_name = "P6_2"
 elif "CY8CKIT-062S2-AI" in board:
     bitstream_pin_name = "P9_5"
-    wait_signal_pin_name = "P9_4"
+    wait_signal_pin_name = "P9_7"
 
 signal_received = False
 
