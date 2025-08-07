@@ -377,7 +377,7 @@ run_ci_tests() {
       fi
     fi
     bitstream_tests
-    #time_pulse_tests
+    time_pulse_tests
 
     # dev_test=${devs[0]}
     # wdt_tests
