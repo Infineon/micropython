@@ -38,7 +38,7 @@ pulse_out.low()
 while not ack_recvd:
     pass  # Wait for the Begin ACK signal
 
-blocking_delay_ms(100)
+blocking_delay_ms(1000)
 
 # Generate high pulse
 pulse_out.high()
