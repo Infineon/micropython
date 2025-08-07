@@ -26,7 +26,7 @@ ack_out = Pin(ack_out_pin, Pin.OUT)
 ack_out.low()
 
 width = 0
-blocking_delay_ms(1000)
+blocking_delay_ms(2000)
 
 # Send begin ack to start generating pulse
 ack_out.high()
