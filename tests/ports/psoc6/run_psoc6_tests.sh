@@ -291,81 +291,81 @@ run_ci_tests() {
     devs_b=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.b))
     devs_c=($(python ${tools_psoc6_dir}/get-devs.py port -b ${board} -y ${tools_psoc6_dir}/${hil_name}-devs.yml --hw-ext ${board_version}.c))
 
-    # dev_test=${devs[0]}
-    # vfs_flash_tests  
+    dev_test=${devs[0]}
+    vfs_flash_tests  
 
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
-    #   dev_test=${devs_b[0]}
-    #   vfs_sdcard_tests
-    # fi
+    if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
+      dev_test=${devs_b[0]}
+      vfs_sdcard_tests
+    fi
 
-    # dev_test=${devs[0]}
-    # no_ext_hw_tests
+    dev_test=${devs[0]}
+    no_ext_hw_tests
 
-    # dev_test=${devs_a[0]}
-    # pin_tests
-    # signal_tests
-    # pwm_tests
+    dev_test=${devs_a[0]}
+    pin_tests
+    signal_tests
+    pwm_tests
     
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #   dev_test=${devs_a[0]} 
-    # else
-    #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_b[0]}
-    #   fi
-    # fi
-    # adc_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]} 
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_b[0]}
+      fi
+    fi
+    adc_tests
 
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
-    #   dev_test=${devs_b[0]} 
-    # else
-    #   if [ "${board}" == "CY8CPROTO-063-BLE" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_a[0]}
-    #   fi
-    # fi
-    # i2c_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ]; then
+      dev_test=${devs_b[0]} 
+    else
+      if [ "${board}" == "CY8CPROTO-063-BLE" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_a[0]}
+      fi
+    fi
+    i2c_tests
   
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #   dev_test=${devs_a[0]} 
-    # else
-    #   if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #     dev_test=${devs_b[0]}
-    #   fi
-    # fi
-    # uart_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+      dev_test=${devs_a[0]} 
+    else
+      if [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+        dev_test=${devs_b[0]}
+      fi
+    fi
+    uart_tests
 
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #   dev_test=${devs_a[0]}
-    #   dev_stub=${devs_b[0]}
-    # else
-    #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_c[0]}
-    #     dev_stub=${devs_b[0]}
-    #   fi
-    # fi
-    # spi_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]}
+      dev_stub=${devs_b[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
+    spi_tests
     
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #   dev_test=${devs_b[0]}
-    #   dev_stub=${devs_a[0]}
-    # else
-    #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_c[0]}
-    #     dev_stub=${devs_b[0]}
-    #   fi
-    # fi
-    # i2s_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_b[0]}
+      dev_stub=${devs_a[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
+    i2s_tests
 
-    # if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
-    #   dev_test=${devs_b[0]}
-    #   dev_stub=${devs_a[0]}
-    # else
-    #   if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
-    #     dev_test=${devs_c[0]}
-    #     dev_stub=${devs_b[0]}
-    #   fi
-    # fi
-    # pdm_pcm_tests
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_b[0]}
+      dev_stub=${devs_a[0]}
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_c[0]}
+        dev_stub=${devs_b[0]}
+      fi
+    fi
+    pdm_pcm_tests
     
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]}
@@ -379,12 +379,12 @@ run_ci_tests() {
     bitstream_tests
     time_pulse_tests
 
-    # dev_test=${devs[0]}
-    # wdt_tests
+    dev_test=${devs[0]}
+    wdt_tests
 
-    # dev_test=${devs[0]}
-    # dev_stub=${devs[1]}
-    # multi_tests
+    dev_test=${devs[0]}
+    dev_stub=${devs[1]}
+    multi_tests
 
     echo
     echo "##########################################"
