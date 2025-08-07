@@ -23,6 +23,7 @@ elif "CY8CKIT-062S2-AI" in board:
     wait_signal_pin_name = "P9_7"
 
 signal_received = False
+bitstream_pin = Pin(bitstream_pin_name, Pin.OUT, value=0)
 
 
 def blocking_delay_ms(delay_ms):
@@ -51,7 +52,7 @@ def wait_for_rx_ready():
 def send_bitstream():
     timing = [3000000, 1000000, 8000000, 5000000]
     buf = bytearray([0xF0])
-    bitstream_pin = Pin(bitstream_pin_name, Pin.OUT, value=0)
+    # bitstream_pin = Pin(bitstream_pin_name, Pin.OUT, value=0)
     for i in range(2):
         bitstream(bitstream_pin, 0, timing, buf)
 
