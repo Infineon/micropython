@@ -51,31 +51,58 @@ jobs:
     needs: server-build
     strategy:
       matrix:
+        # This matrix can be also generated in a previous job as a JSON list:
+        #   echo 'test-suite-list=["pin", "signal", ...]' >> $GITHUB_OUTPUT
+        # Then here use the corresponding variable: 
+        #  ${{ fromJson(needs.<job-name>.outputs.test-suite-list) }}
+        # That way we don´t need to hardcode the values here.
         board:
           - CY8CPROTO-062-4343W
           - CY8CPROTO-063-BLE
           - CY8CKIT-062S2-AI
+        test-suite: 
+          - vfs-flash
+          - vfs-sdcard
+          - no-hw-ext
+          - pin
+          - signal
+          - adc
+          - pwm
+          - i2c
+          - spi
+          - i2s
+          - time_pulse
+          - bitstream
+          - uart
+          - pdm_pcm
+          - watchdog
+          - multi-instance
+        exclude:
+          - board: CY8CPROTO-063-BLE
+            test-suite: vfs-sdcard
+          - board: CY8CKIT-062S2-AI
+            test-suite: vfs-sdcard  
     steps:
-    - uses: actions/checkout@v4
-    - name: Download binaries
-      uses: actions/download-artifact@v4
-    - name: Container setup
-      run: |
-        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
-        source tools/ci.sh && ci_psoc6_setup
-    - name: Setup devices
-      run: |
-        cp mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
-        source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml
-    - name: Run psoc6 tests
-      timeout-minutes: 12
-      run: |
-       ./tests/ports/psoc6/run_psoc6_tests.sh --test-suite ci-tests --board ${{ matrix.board }} --hil ${{ runner.name }}
-       
-    - name: Container teardown 
-      if: failure() || success()
-      run: |
-        source tools/ci.sh && ci_psoc6_teardown
+      - uses: actions/checkout@v4
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+      - name: Container setup
+        run: |
+          echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
+          source tools/ci.sh && ci_psoc6_setup
+      - name: Setup devices
+        run: |
+          cp mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
+          source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml
+      - name: Run psoc6 tests
+        timeout-minutes: 12
+        run: |
+          ./tests/ports/psoc6/run_psoc6_tests.sh --test-suite  ${{ matrix.test-suite }} --board ${{ matrix.board }} --hil ${{ runner.name }}
+        
+      - name: Container teardown 
+        if: failure() || success()
+        run: |
+          source tools/ci.sh && ci_psoc6_teardown
 
   release:
     runs-on: ubuntu-latest
