@@ -49,7 +49,7 @@ jobs:
         if: success() && github.repository_owner == 'infineon'
         id: test_suite
         run: |
-          echo "test-suite-list=[pin, signal]" >> $GITHUB_OUTPUT
+          echo 'test-suite-list=["pin", "signal"]' >> $GITHUB_OUTPUT
 
   # Jobs only relevant for Infineon fork 
   on-target-test:
@@ -62,7 +62,7 @@ jobs:
           - CY8CPROTO-062-4343W
           - CY8CPROTO-063-BLE
           - CY8CKIT-062S2-AI
-        test-suite : ${{ needs.server-build.outputs.test-suite-list }}
+        test-suite: ${{ fromJson(needs.server-build.outputs.test-suite-list) }}
     steps:
     # - uses: actions/checkout@v4
     # - name: Download binaries
