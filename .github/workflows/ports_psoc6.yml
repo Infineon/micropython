@@ -82,6 +82,10 @@ jobs:
             test-suite: vfs-sdcard
           - board: CY8CKIT-062S2-AI
             test-suite: vfs-sdcard  
+          - board: CY8CKIT-062S2-AI
+            test-suite: bitstream
+          - board: CY8CKIT-062S2-AI
+            test-suite: time_pulse
     steps:
       - uses: actions/checkout@v4
       - name: Download binaries
