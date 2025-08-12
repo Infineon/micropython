@@ -173,6 +173,11 @@ ifeq ($(MICROPY_PY_SD_CARD),1)
 	MOD_SRC_C += machine_sdcard.c 
 endif
 
+ifeq ($(MICROPY_PSOC6_BLUETOOTH),1)
+	CFLAGS += -DMICROPY_PSOC6_BLUETOOTH=1
+	MOD_SRC_C += modbluetooth.c 
+endif
+
 ifeq ($(MICROPY_PY_NETWORK_IFX_WCM),1)
 CFLAGS += -DMICROPY_PY_NETWORK=1 -DMICROPY_PY_NETWORK_IFX_WCM=1 -Wno-stringop-truncation
 	MOD_SRC_C += network_ifx_wcm.c 
@@ -226,7 +231,7 @@ build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
 all: build
 
-#clean: mtb_clean
+clean: mtb_clean
 
 rebuild: clean mtb_clean all
 
