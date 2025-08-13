@@ -22,10 +22,12 @@ def blocking_delay_ms(delay_ms):
 
 
 pulse_in = Pin(pulse_in_pin, Pin.IN, Pin.PULL_DOWN)
-ack_out = Pin(ack_out_pin, Pin.OUT)
+ack_out = Pin(ack_out_pin, Pin.OUT, value=0)
 ack_out.low()
 
 width = 0
+
+blocking_delay_ms(2000)
 
 # Send begin ack to start generating pulse
 ack_out.high()
