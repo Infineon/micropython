@@ -61,31 +61,11 @@ jobs:
           - CY8CPROTO-063-BLE
           - CY8CKIT-062S2-AI
         test-suite: 
-          - vfs-flash
-          - vfs-sdcard
-          - no-hw-ext
-          - pin
-          - signal
-          - adc
-          - pwm
-          - i2c
-          - spi
-          - i2s
-          - time_pulse
-          - bitstream
-          - uart
-          - pdm_pcm
-          - watchdog
-          - multi-instance
-        exclude:
-          - board: CY8CPROTO-063-BLE
-            test-suite: vfs-sdcard
-          - board: CY8CKIT-062S2-AI
-            test-suite: vfs-sdcard  
-          - board: CY8CKIT-062S2-AI
-            test-suite: bitstream
-          - board: CY8CKIT-062S2-AI
-            test-suite: time_pulse
+          - vfs
+          - no-ext-hw-single
+          - no-ext-hw-multi
+          - ext-hw-single
+          - ext-hw-multi
     steps:
       - uses: actions/checkout@v4
       - name: Download binaries
