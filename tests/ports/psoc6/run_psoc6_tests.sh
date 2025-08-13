@@ -21,7 +21,21 @@ usage() {
   echo
   echo "  ci-tests          run all continuous integration enabled tests
                             Requires --board and --hil options."
-  echo "  vfs-flash         run virtual filesystem related tests on flash.
+  echo
+  echo "  Test suites by hardware configuration:"
+  echo "  All the tests in this list require --board and --hil options."  
+  echo
+  echo "    vfs               run all virtual file system tests"
+  echo "    no-ext-hw-single  run all tests which only require a board without external hardware"
+  echo "    no-ext-hw-multi   run all tests which require multiple boards without external hardware"
+  echo "    ext-hw-single     run all tests which require a single board with external hardware"
+  echo "    ext-hw-multi      run all tests which require multiple boards with external hardware"
+  echo
+  echo "  Test suites as per peripheral:"
+  echo
+  echo "    vfs-flash         run virtual filesystem related tests on flash.
+                              If followed by -x, runs advance tests too."
+  echo "    vfs-sdcard        run virtual filesystem related tests on sd card.
                             If followed by -x, runs advance tests too."
   echo "  vfs-sdcard        run virtual filesystem related tests on sd card.
                             If followed by -x, runs advance tests too."
@@ -126,9 +140,6 @@ if [ -n "${board}" ] && [ -n "${hil}" ]; then
 
     echo
     echo "##########################################"
-  
-    # # Delay to ensure device are ready for repl mode
-    # sleep 5
 else
     # Otherwise, we will use the provided devices or the default ones.
     use_hil=0
@@ -138,9 +149,6 @@ else
     if [ -z "${dev_stub}" ]; then
       dev_stub="/dev/ttyACM1"
     fi
-
-    # # Delay to ensure device are ready for repl mode
-    # sleep 5
 fi
 
 exit_result=0
@@ -419,7 +427,7 @@ wdt_tests() {
   run_tests "wdt reset check" ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/wdt_reset_check.py"
 }
 
-multi_tests() {
+wifi_tests() {
   if [ ${use_hil} -eq 1 ]; then
     dev_test=${devs[0]}
     dev_stub=${devs[1]}
@@ -450,7 +458,50 @@ run_ci_tests() {
     bitstream_tests
     time_pulse_tests
     wdt_tests
-    multi_tests
+    wifi_tests
+}
+
+# This grouping is convenient to cluster
+# tests based on hardware requirements. It supports
+# the parallelization of jobs in ci, where the boards
+# are flashed before running the tests. A very large 
+# matrix of "boards" vs "test-suites" lead to a long 
+# ci execution time for each commit due to the amount of 
+# individual sequential jobs and re-flashing.
+# All ci tests in a single job it is also slow when 
+# we need to rerun the whole job due to a single test failure.
+# With this grouping we can find a compromise, and reorganize them
+# based on how the stable the test ci infrastructure is.
+
+vfs_tests() {
+    vfs_flash_tests
+    vfs_sdcard_tests
+}
+
+no_ext_hw_single_tests() {
+    no_ext_hw_tests
+    wdt_tests
+}
+
+no_ext_hw_multi_tests() {
+    wifi_tests
+}
+
+ext_hw_single_tests() {
+    pin_tests
+    signal_tests
+    pwm_tests
+    adc_tests
+    i2c_tests
+}
+
+ext_hw_multi_tests() {
+    uart_tests
+    spi_tests
+    i2s_tests
+    pdm_pcm_tests
+    bitstream_tests
+    time_pulse_tests
 }
 
 case ${test_suite} in
@@ -505,8 +556,23 @@ case ${test_suite} in
     "watchdog")
         wdt_tests 
         ;;
-    "multi-instance")
-        multi_tests 
+    "wifi")
+        wifi_tests
+        ;;
+    "vfs")
+        vfs_tests
+        ;;
+    "no-ext-hw-single")
+        no_ext_hw_single_tests
+        ;;
+    "no-ext-hw-multi")
+        no_ext_hw_multi_tests
+        ;;
+    "ext-hw-single")
+        ext_hw_single_tests
+        ;;
+    "ext-hw-multi")
+        ext_hw_multi_tests
         ;;
    "help")
         usage
