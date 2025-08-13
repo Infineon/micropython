@@ -42,14 +42,18 @@ expected_values = [
 tolerance = 100
 
 
+def blocking_delay_ms(delay_ms):
+    start = time.ticks_ms()
+    while time.ticks_diff(time.ticks_ms(), start) < delay_ms:
+        pass
+
+
 def notify_readiness_to_tx():
     rx_ready_signal_pin = Pin(
         rx_ready_signal_pin_name, Pin.OUT, value=0
     )  # signal to inform the transmitter that receiver is ready
     rx_ready_signal_pin.low()
-    # delay
-    for i in range(1000):
-        pass
+    blocking_delay_ms(500)
     rx_ready_signal_pin.high()
     rx_ready_signal_pin.deinit()
 
