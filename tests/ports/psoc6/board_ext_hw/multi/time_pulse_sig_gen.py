@@ -22,12 +22,6 @@ def cback(pin):
     ack_recvd = True
 
 
-def blocking_delay_ms(delay_ms):
-    start = time.ticks_ms()
-    while time.ticks_diff(time.ticks_ms(), start) < delay_ms:
-        pass
-
-
 pulse_out = Pin(pulse_out_pin, Pin.OUT)
 ack_in = Pin(ack_in_pin, Pin.IN)
 ack_in.irq(trigger=Pin.IRQ_RISING, handler=cback)
@@ -38,7 +32,14 @@ pulse_out.low()
 while not ack_recvd:
     pass  # Wait for the Begin ACK signal
 
-blocking_delay_ms(100)
+
+def blocking_delay_ms(delay_ms):
+    start = time.ticks_ms()
+    while time.ticks_diff(time.ticks_ms(), start) < delay_ms:
+        pass
+
+
+blocking_delay_ms(200)
 
 # Generate high pulse
 pulse_out.high()
