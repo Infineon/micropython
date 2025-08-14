@@ -68,6 +68,7 @@ usage() {
   echo "  --board, b        board name"
   echo "  --hil, h          hardware-in-the-loop server name"
   echo
+  echo "  --not-fail-fast   continue running tests even if one of them fails"
 }
 
 for arg in "$@"; do
@@ -78,6 +79,7 @@ for arg in "$@"; do
     '--dev-stub')         set -- "$@" '-s'   ;;
     '--board')            set -- "$@" '-b'   ;;
     '--hil')              set -- "$@" '-h'   ;;
+    '--not-fail-fast')    set -- "$@" '-x'   ;;
     *)                    set -- "$@" "$arg" ;;
   esac
 done
@@ -102,6 +104,9 @@ while getopts "b:d:h:s:t:x" o; do
     h)
        hil=${OPTARG}
        ;;     
+    x)
+       fail_fast=0
+       ;;
     *)
        usage
        exit 1
@@ -111,6 +116,10 @@ done
 
 if [ -z "${afs}" ]; then
   afs=0
+fi
+
+if [ -z "${fail_fast}" ]; then
+  fail_fast=1
 fi
 
 if [ -n "${board}" ] && [ -n "${hil}" ]; then
@@ -155,6 +164,13 @@ exit_result=0
 update_test_result() {
   last_test_result=$1
   exit_result=$((${exit_result} | ${last_test_result}))
+  
+  if [ ${exit_result} -ne 0 ]; then
+    if [ ${fail_fast} -eq 1 ]; then
+      echo "Test failed, exiting..."
+      exit ${last_test_result}
+    fi
+  fi
 }
 
 start_test_info() {
@@ -455,7 +471,6 @@ run_ci_tests() {
     spi_tests
     i2s_tests
     pdm_pcm_tests
-    time_pulse_tests
     bitstream_tests
     wdt_tests
     time_pulse_tests
