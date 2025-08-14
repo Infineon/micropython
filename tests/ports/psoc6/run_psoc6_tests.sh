@@ -455,9 +455,10 @@ run_ci_tests() {
     spi_tests
     i2s_tests
     pdm_pcm_tests
-    bitstream_tests
     time_pulse_tests
+    bitstream_tests
     wdt_tests
+    time_pulse_tests
     wifi_tests
 }
 
@@ -500,8 +501,8 @@ ext_hw_multi_tests() {
     spi_tests
     i2s_tests
     pdm_pcm_tests
-    bitstream_tests
     time_pulse_tests
+    bitstream_tests
 }
 
 case ${test_suite} in
