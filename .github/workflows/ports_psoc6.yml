@@ -61,11 +61,12 @@ jobs:
           - CY8CPROTO-063-BLE
           - CY8CKIT-062S2-AI
         test-suite: 
-          - vfs
-          - no-ext-hw-single
-          - no-ext-hw-multi
-          - ext-hw-single
-          - ext-hw-multi
+          # - vfs
+          # - no-ext-hw-single
+          # - no-ext-hw-multi
+          # - ext-hw-single
+          # - ext-hw-multi
+          - ci-tests
     steps:
       - uses: actions/checkout@v4
       - name: Download binaries
