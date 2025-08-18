@@ -105,7 +105,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     print, bluetooth_uuid_print
     );
 // ----------------------------------------------------------------------------
-// Bluetooth object: Definition
+// Bluetooth object: Definition.
 // ----------------------------------------------------------------------------
 
 static const mp_rom_map_elem_t bluetooth_ble_locals_dict_table[] = {
