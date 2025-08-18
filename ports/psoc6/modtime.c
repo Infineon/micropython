@@ -69,7 +69,7 @@ void time_deinit(void) {
 
 // Convert a time expressed in seconds since the Epoch into an 8-tuple which
 // contains: (year, month, mday, hour, minute, second, weekday, yearday)
-static mp_obj_t mp_time_localtime_get(void) {
+static void mp_time_localtime_get(timeutils_struct_time_t *time) {
     struct tm current_date_time = {0};
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
@@ -77,18 +77,14 @@ static mp_obj_t mp_time_localtime_get(void) {
         mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
     }
 
-    mp_obj_t tuple[8] = {
-        mp_obj_new_int(current_date_time.tm_year),
-        mp_obj_new_int(current_date_time.tm_mon),
-        mp_obj_new_int(current_date_time.tm_mday),
-        mp_obj_new_int(current_date_time.tm_hour),
-        mp_obj_new_int(current_date_time.tm_min),
-        mp_obj_new_int(current_date_time.tm_sec),
-        mp_obj_new_int(current_date_time.tm_wday),
-        mp_obj_new_int(timeutils_year_day(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday)),
-    };
-
-    return mp_obj_new_tuple(8, tuple);
+    time->tm_year = current_date_time.tm_year;
+    time->tm_mon = current_date_time.tm_mon;
+    time->tm_mday = current_date_time.tm_mday;
+    time->tm_hour = current_date_time.tm_hour;
+    time->tm_min = current_date_time.tm_min;
+    time->tm_sec = current_date_time.tm_sec;
+    time->tm_wday = current_date_time.tm_wday;
+    time->tm_yday = timeutils_year_day(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday);
 }
 
 // time()
