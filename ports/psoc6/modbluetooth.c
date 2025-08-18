@@ -103,7 +103,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     MP_TYPE_FLAG_NONE,
     make_new, bluetooth_uuid_make_new,
     print, bluetooth_uuid_print
-);
+    );
 // ----------------------------------------------------------------------------
 // Bluetooth object: Definition
 // ----------------------------------------------------------------------------
