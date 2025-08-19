@@ -40,38 +40,97 @@ typedef struct {
 } mp_obj_bluetooth_uuid_t;
 
 extern const mp_obj_type_t mp_type_bluetooth_uuid;
+
 // Constructor for the UUID class
 static mp_obj_t bluetooth_uuid_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    // Ensure exactly one argument (UUID value)
+    (void)type;
+
     mp_arg_check_num(n_args, n_kw, 1, 1, false);
-    mp_obj_t arg = all_args[0];
 
-    // Create a new UUID object
-    mp_obj_bluetooth_uuid_t *self = mp_obj_malloc(mp_obj_bluetooth_uuid_t, type);
+    // Allocate memory for the UUID object
+    mp_obj_bluetooth_uuid_t *self = mp_obj_malloc(mp_obj_bluetooth_uuid_t, &mp_type_bluetooth_uuid);
 
-    if (mp_obj_is_int(arg)) {
+    if (mp_obj_is_int(all_args[0])) {
         // Handle 16-bit UUID
-        uint16_t uuid16 = mp_obj_get_int(arg);
-        if (uuid16 > 0xFFFF) {
-            mp_raise_ValueError(MP_ERROR_TEXT("UUID must be a valid 16-bit value"));
+        self->type = MP_BLUETOOTH_UUID_TYPE_16;
+        mp_int_t value = mp_obj_get_int(all_args[0]);
+        if (value > 65535) {
+            mp_raise_ValueError(MP_ERROR_TEXT("invalid UUID"));
         }
-        self->type = 16;  // 16-bit UUID type
-        self->data[0] = uuid16 & 0xFF;         // Low byte
-        self->data[1] = (uuid16 >> 8) & 0xFF; // High byte
-        mp_printf(&mp_plat_print, "Created 16-bit UUID: 0x%04x\n", uuid16);
-    } else if (mp_obj_is_type(arg, &mp_type_bytes)) {
-        // Handle 128-bit UUID
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(arg, &bufinfo, MP_BUFFER_READ);
-        if (bufinfo.len != 16) {
-            mp_raise_ValueError(MP_ERROR_TEXT("UUID must be 16 bytes long"));
-        }
-        self->type = 128;  // 128-bit UUID type
-        memcpy(self->data, bufinfo.buf, 16);
-        mp_printf(&mp_plat_print, "Created 128-bit UUID");
+        self->data[0] = value & 0xff;
+        self->data[1] = (value >> 8) & 0xff;
+
+        // Debug: Print the 16-bit UUID
+        mp_printf(&mp_plat_print, "Created 16-bit UUID: 0x%04x\n", value);
+
     } else {
-        // Invalid type
-        mp_raise_TypeError(MP_ERROR_TEXT("UUID must be an int (16-bit) or bytes (128-bit)"));
+        mp_buffer_info_t uuid_bufinfo = {0};
+        mp_get_buffer_raise(all_args[0], &uuid_bufinfo, MP_BUFFER_READ);
+
+        if (uuid_bufinfo.len == 2 || uuid_bufinfo.len == 4 || uuid_bufinfo.len == 16) {
+            // Handle byte data (16-bit, 32-bit, or 128-bit UUID)
+            self->type = uuid_bufinfo.len;
+            memcpy(self->data, uuid_bufinfo.buf, self->type);
+
+            if (uuid_bufinfo.len == 2) {
+                // Debug: Print the 16-bit UUID
+                uint16_t uuid16 = (self->data[1] << 8) | self->data[0];
+                mp_printf(&mp_plat_print, "Created 16-bit UUID from bytes: 0x%04x\n", uuid16);
+            } else if (uuid_bufinfo.len == 4) {
+                // Debug: Print the 32-bit UUID
+                uint32_t uuid32 = (self->data[3] << 24) | (self->data[2] << 16) | (self->data[1] << 8) | self->data[0];
+                mp_printf(&mp_plat_print, "Created 32-bit UUID from bytes: 0x%08lx\n", uuid32);
+            } else if (uuid_bufinfo.len == 16) {
+                // Debug: Print the 128-bit UUID
+                mp_printf(&mp_plat_print, "Created 128-bit UUID from bytes: ");
+                for (size_t i = 0; i < 16; i++) {
+                    mp_printf(&mp_plat_print, "%02x", self->data[i]);
+                    if (i < 15) {
+                        mp_printf(&mp_plat_print, ":");
+                    }
+                }
+                mp_printf(&mp_plat_print, "\n");
+            }
+
+        } else {
+            // Handle UUID string
+            self->type = MP_BLUETOOTH_UUID_TYPE_128;
+            int uuid_i = 32;
+            for (size_t i = 0; i < uuid_bufinfo.len; i++) {
+                char c = ((char *)uuid_bufinfo.buf)[i];
+                if (c == '-') {
+                    continue;
+                }
+                if (!unichar_isxdigit(c)) {
+                    mp_raise_ValueError(MP_ERROR_TEXT("invalid char in UUID"));
+                }
+                c = unichar_xdigit_value(c);
+                uuid_i--;
+                if (uuid_i < 0) {
+                    mp_raise_ValueError(MP_ERROR_TEXT("UUID too long"));
+                }
+                if (uuid_i % 2 == 0) {
+                    // lower nibble
+                    self->data[uuid_i / 2] |= c;
+                } else {
+                    // upper nibble
+                    self->data[uuid_i / 2] = c << 4;
+                }
+            }
+            if (uuid_i > 0) {
+                mp_raise_ValueError(MP_ERROR_TEXT("UUID too short"));
+            }
+
+            // Debug: Print the parsed 128-bit UUID from string
+            mp_printf(&mp_plat_print, "Created 128-bit UUID from string: ");
+            for (size_t i = 0; i < 16; i++) {
+                mp_printf(&mp_plat_print, "%02x", self->data[i]);
+                if (i < 15) {
+                    mp_printf(&mp_plat_print, ":");
+                }
+            }
+            mp_printf(&mp_plat_print, "\n");
+        }
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -105,7 +164,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     print, bluetooth_uuid_print
     );
 // ----------------------------------------------------------------------------
-// Bluetooth object: Definition.
+// Bluetooth object: Definition
 // ----------------------------------------------------------------------------
 
 static const mp_rom_map_elem_t bluetooth_ble_locals_dict_table[] = {
