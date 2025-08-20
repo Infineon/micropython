@@ -465,6 +465,17 @@ run_ci_tests() {
     pin_tests
     signal_tests
     pwm_tests
+
+    dev_test=${devs_a[0]}
+    ble_UUID_tests
+    
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]} 
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_b[0]}
+      fi
+    fi
     adc_tests
     i2c_tests
     uart_tests
