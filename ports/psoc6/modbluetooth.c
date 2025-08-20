@@ -135,4 +135,4 @@ int mp_bluetooth_set_preferred_mtu(uint16_t mtu) {
     return 0;
 }
 
-#endif
+// #endif
