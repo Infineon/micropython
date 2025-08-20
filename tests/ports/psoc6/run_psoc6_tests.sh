@@ -31,6 +31,7 @@ usage() {
                             If followed by -x, runs advance tests too."
   echo "  no-hw-ext         run machine modules tests not requiring extended hardware"
   echo "  adc               run adc tests"
+  echo "  ble_UUID          run ble_UUID tests"
   echo "  pin               run pin tests"
   echo "  signal            run signal tests"
   echo "  pwm               run pwm tests"
@@ -198,6 +199,9 @@ no_ext_hw_tests() {
   "-e ${tests_psoc6_dir}/board_only_hw/single/wdt.py \
    -e ${tests_psoc6_dir}/board_only_hw/single/wdt_reset_check.py"
 }
+ble_UUID_tests() {
+  run_tests "ble_UUID"  ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/ble_UUID.py"
+}
 
 adc_tests() {
   run_tests "adc" ${dev_test} "${tests_psoc6_dir}/board_ext_hw/single/adc.py"
@@ -308,6 +312,9 @@ run_ci_tests() {
 
     dev_test=${devs_a[0]}
     pwm_tests
+
+    dev_test=${devs_a[0]}
+    ble_UUID_tests
     
     if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
       dev_test=${devs_a[0]} 
@@ -414,6 +421,9 @@ case ${test_suite} in
     "signal")
         signal_tests
       ;;
+    "ble_UUID")
+        ble_UUID_tests
+        ;;      
     "adc")
         adc_tests
         ;;

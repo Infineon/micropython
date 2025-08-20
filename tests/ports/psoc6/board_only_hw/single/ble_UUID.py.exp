@@ -1,0 +1,24 @@
+=== UUID Testing ===
+
+Testing valid 16-bit UUID:
+Created 16-bit UUID: 0x180d
+Valid 16-bit UUID:  
+
+Testing valid 32-bit UUID:
+Created 32-bit UUID from bytes: 0x78563412
+Valid 32-bit UUID:  
+
+Testing valid 128-bit UUID:
+Created 128-bit UUID from bytes: 12:34:56:78:9a:bc:de:f0:12:34:56:78:9a:bc:de:f0
+Valid 128-bit UUID: UUID(0x3412) 
+
+Testing invalid 16-bit UUID:
+Caught error with invalid 16-bit UUID: invalid UUID 
+
+Testing invalid 32-bit UUID:
+Caught error with invalid 32-bit UUID: invalid char in UUID 
+
+Testing invalid 128-bit UUID:
+Caught error with invalid 128-bit UUID: invalid char in UUID 
+
+=== UUID Testing Complete ===
