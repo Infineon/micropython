@@ -37,21 +37,24 @@ usage() {
                               If followed by -x, runs advance tests too."
   echo "    vfs-sdcard        run virtual filesystem related tests on sd card.
                             If followed by -x, runs advance tests too."
-  echo "    no-hw-ext         run machine modules tests not requiring extended hardware"
-  echo "    adc               run adc tests"
-  echo "    pin               run pin tests"
-  echo "    signal            run signal tests"
-  echo "    pwm               run pwm tests"
-  echo "    i2c               run i2c tests"
-  echo "    uart              run uart tests"
-  echo "    spi               run spi tests"
-  echo "    i2s               run i2s tests"
-  echo "    pdm_pcm           run pdm_pcm tests"
-  echo "    bitstream         run bitstream tests"
-  echo "    watchdog          run watchdog tests"
-  echo "    time_pulse        run time_pulse test"
-  echo "    wifi              run wifi tests"
-  echo "    help              display this help"
+  echo "  vfs-sdcard        run virtual filesystem related tests on sd card.
+                            If followed by -x, runs advance tests too."
+  echo "  no-hw-ext         run machine modules tests not requiring extended hardware"
+  echo "  adc               run adc tests"
+  echo "  ble_UUID          run ble_UUID tests"
+  echo "  pin               run pin tests"
+  echo "  signal            run signal tests"
+  echo "  pwm               run pwm tests"
+  echo "  i2c               run i2c tests"
+  echo "  uart              run uart tests"
+  echo "  spi               run spi tests"
+  echo "  i2s               run i2s tests"
+  echo "  pdm_pcm           run pdm_pcm tests"
+  echo "  bitstream         run bitstream tests"
+  echo "  watchdog          run watchdog tests"
+  echo "  time_pulse        run time_pulse test"
+  echo "  multi-instance    run multiple board instances tests"
+  echo "  help              display this help"
   echo
   echo "Available options:"
   echo 
@@ -274,6 +277,9 @@ no_ext_hw_tests() {
   "-e ${tests_psoc6_dir}/board_only_hw/single/wdt.py \
    -e ${tests_psoc6_dir}/board_only_hw/single/wdt_reset_check.py"
 }
+ble_UUID_tests() {
+  run_tests "ble_UUID"  ${dev_test} "${tests_psoc6_dir}/board_only_hw/single/ble_UUID.py"
+}
 
 adc_tests() {
   if [ ${use_hil} -eq 1 ]; then
@@ -459,6 +465,17 @@ run_ci_tests() {
     pin_tests
     signal_tests
     pwm_tests
+
+    dev_test=${devs_a[0]}
+    ble_UUID_tests
+    
+    if [ "${board}" == "CY8CPROTO-062-4343W" ] || [ "${board}" == "CY8CPROTO-063-BLE" ]; then
+      dev_test=${devs_a[0]} 
+    else
+      if [ "${board}" == "CY8CKIT-062S2-AI" ]; then
+        dev_test=${devs_b[0]}
+      fi
+    fi
     adc_tests
     i2c_tests
     uart_tests
@@ -533,6 +550,9 @@ case ${test_suite} in
     "signal")
         signal_tests
       ;;
+    "ble_UUID")
+        ble_UUID_tests
+        ;;      
     "adc")
         adc_tests
         ;;
