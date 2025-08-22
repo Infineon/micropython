@@ -7,6 +7,10 @@
 #include "py/objlist.h"
 #include "py/ringbuf.h"
 
+#define bluetooth_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
+}
+
 // Port specific configuration.
 #ifndef MICROPY_PY_BLUETOOTH_RINGBUF_SIZE
 #define MICROPY_PY_BLUETOOTH_RINGBUF_SIZE (128)
