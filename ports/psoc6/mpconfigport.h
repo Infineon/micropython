@@ -193,6 +193,10 @@ extern const struct _mp_obj_type_t mp_network_ifx_wcm_type;
 
 #endif
 
+// BLE defines
+#define MICROPY_PY_BLUETOOTH (1)
+
+
 // Miscellaneous settings
 #define MICROPY_MAKE_POINTER_CALLABLE(p)        ((void *)((mp_uint_t)(p) | 1))
 
