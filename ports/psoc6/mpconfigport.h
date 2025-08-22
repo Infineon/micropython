@@ -194,7 +194,9 @@ extern const struct _mp_obj_type_t mp_network_ifx_wcm_type;
 #endif
 
 // BLE defines
+#if MICROPY_PSOC6_BLUETOOTH
 #define MICROPY_PY_BLUETOOTH (1)
+#endif
 
 
 // Miscellaneous settings
