@@ -154,7 +154,7 @@ endif
 
 ifeq ($(MICROPY_PSOC6_BLUETOOTH),1)
 	CFLAGS += -DMICROPY_PSOC6_BLUETOOTH=1
-	MOD_SRC_C += modbluetooth.c 
+	MOD_SRC_C += modbluetooth.c
 endif
 
 ifeq ($(MICROPY_PY_NETWORK_IFX_WCM),1)
@@ -166,7 +166,8 @@ SRC_C = help.c \
 		main.c \
 		mphalport.c \
 		frozen_content.c \
-		pins_$(BOARD).c
+		pins_$(BOARD).c \
+
 
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
