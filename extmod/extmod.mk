@@ -545,7 +545,9 @@ endif
 
 ifneq ($(MICROPY_BLUETOOTH_NIMBLE),1)
 ifneq ($(MICROPY_BLUETOOTH_BTSTACK),1)
+ifneq ($(MICROPY_BLUETOOTH_PORT_BTSTACK),1)
 $(error Must enable one of MICROPY_BLUETOOTH_NIMBLE or MICROPY_BLUETOOTH_BTSTACK)
+endif
 endif
 endif
 
