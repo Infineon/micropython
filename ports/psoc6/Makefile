@@ -173,8 +173,8 @@ ifeq ($(MICROPY_PY_SD_CARD),1)
 	MOD_SRC_C += machine_sdcard.c 
 endif
 
-ifeq ($(MICROPY_PSOC6_BLUETOOTH),1)
-	CFLAGS += -DMICROPY_PSOC6_BLUETOOTH=1
+ifeq ($(MICROPY_PY_BLUETOOTH),1)
+	CFLAGS += -DMICROPY_PY_BLUETOOTH=1
 	MOD_SRC_C += modbluetooth.c
 endif
 
@@ -228,9 +228,15 @@ $(BUILD)/firmware.hex: $(BUILD)/firmware.elf
 
 MPY_CROSS_FLAGS += -march=armv7m
 
+ifeq ($(MICROPY_PY_BLUETOOTH),1)
+.PHONY: ble
+ble: 
+	$(Q) cp ble/design.cybt $(MTB_LIBS_DIR)
+endif
+
 build: mtb_get_build_flags $(GENERATED_PINS) $(BUILD)/firmware.hex
 
-all: build
+all: ble build
 
 clean: mtb_clean
 
