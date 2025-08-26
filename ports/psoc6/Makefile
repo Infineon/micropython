@@ -205,12 +205,6 @@ mpy_build: $(BUILD)/firmware.hex
 
 MPY_CROSS_FLAGS += -march=armv7m
 
-ifeq ($(MICROPY_PY_BLUETOOTH),1)
-.PHONY: ble
-ble: 
-	$(Q) cp ble/design.cybt $(MTB_LIBS_DIR)
-endif
-
 all: mtb_init ble mtb_get_build_flags mpy_build
 
 clean: mtb_clean
