@@ -447,7 +447,7 @@ wifi_tests() {
 
   multi_tests=$(find ${tests_psoc6_dir}/board_only_hw/multi/ -type f -name "*.py")
 
-  ./run-multitests.py -i pyb:${dev_test} -i pyb:${dev_stub} ${multi_tests} 
+  ./run-multitests.py -t ${dev_test} -t ${dev_stub} ${multi_tests} 
   
   update_test_result $?
 }
