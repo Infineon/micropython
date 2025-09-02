@@ -126,8 +126,6 @@ static void start_advertisement(void) {
         BLE_ADDR_PUBLIC,
         NULL);
 
-    // mp_printf(&mp_plat_print, "Start adv status: %d\r\n", wiced_status);
-
     if (WICED_SUCCESS != wiced_status) {
         mp_printf(&mp_plat_print, "Starting undirected Bluetooth LE advertisements"
             "Failed with err 0x%x\n", wiced_status);
