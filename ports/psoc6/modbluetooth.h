@@ -7,6 +7,16 @@
 #include "py/objlist.h"
 #include "py/ringbuf.h"
 
+enum {
+    MP_BLUETOOTH_BLE_STATE_OFF,
+    MP_BLUETOOTH_BLE_STATE_STARTING,
+    MP_BLUETOOTH_BLE_STATE_WAITING_FOR_SYNC,
+    MP_BLUETOOTH_BLE_STATE_ACTIVE,
+    MP_BLUETOOTH_BLE_STATE_STOPPING,
+};
+
+extern volatile int mp_bluetooth_ble_stack_state;
+
 #define bluetooth_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
 }
