@@ -7,6 +7,7 @@
 #include "py/objlist.h"
 #include "py/ringbuf.h"
 
+// ToDo: Micropython BLE states - Does this match with PSOC BLE Stack?
 enum {
     MP_BLUETOOTH_BLE_STATE_OFF,
     MP_BLUETOOTH_BLE_STATE_STARTING,
