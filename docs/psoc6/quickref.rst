@@ -1012,7 +1012,7 @@ Methods
 .. method:: BLE.config('param', /)
             BLE.config(*, param=value, ...)
 
-Among the suggested parameters of the general network WLAN API, for this port, only these are available:
+Among the suggested parameters of the general BLE.config() API, for this port, only these are available:
 
 - ``'addr_mode'``: Supported values:
 
