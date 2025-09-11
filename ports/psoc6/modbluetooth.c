@@ -183,7 +183,6 @@ static void ble_init() {
 wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
     wiced_bt_management_evt_data_t *p_event_data) {
     wiced_result_t wiced_result = WICED_BT_SUCCESS;
-    wiced_bt_device_address_t bda = { 0 };
 
     switch (event)
     {
