@@ -1011,7 +1011,11 @@ Methods
 .. method:: BLE.config('param', /)
             BLE.config(*, param=value, ...)
 
+<<<<<<< HEAD
 Among the suggested parameters of the general BLE.config() API, for this port, only these are available:
+=======
+Among the suggested parameters of the general network WLAN API, for this port, only these are available:
+>>>>>>> fa337b280 (docs/psoc6/quickref: Add deviations in API.)
 
 - ``'addr_mode'``: Supported values:
 
