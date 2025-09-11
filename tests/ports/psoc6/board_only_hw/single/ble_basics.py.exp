@@ -1,5 +1,11 @@
 Bluetooth Stack Initialization Successful 
 BLE active:  True
-Turning off BLE radio
+
+** Configurations set for device **
+GAP_NAME:  b'Hello'
+MTU:  23
+MAC:  00a050000000
+
+
 Bluetooth disabled
-BLE active:  False
+Turned off BLE radio:  True
