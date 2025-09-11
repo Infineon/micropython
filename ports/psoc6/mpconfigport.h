@@ -159,6 +159,10 @@
 #define MICROPY_TIME_SUPPORT_Y1969_AND_BEFORE   (1)
 
 #define MICROPY_PY_MACHINE_PULSE                (1)
+
+// BLE
+#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS (1)
+
 // VFS
 #define MICROPY_VFS                             (1)
 #define MICROPY_READER_VFS                      (1)

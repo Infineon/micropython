@@ -38,11 +38,16 @@
 // ******************************************************************************
 #if MICROPY_PY_BLUETOOTH
 #define NUM_ADV_PACKETS                 (3u)
-
+#define ERRNO_BLUETOOTH_NOT_ACTIVE      MP_ENODEV
 #define CASE_RETURN_STR(const)          case const: \
         return #const;
 
+// Bring externs from MTB GeneratedSource/
+extern uint8_t app_gap_device_name[];
+
+// MPY defines and variables
 volatile int mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_OFF;
+static uint8_t address_mode = BLE_ADDR_PUBLIC;
 
 // ToDo: Add appropriate BLE device name in GeneratedSource/cycfg_bt_settings.c. Currently it is set to "Hello"
 
@@ -185,9 +190,9 @@ wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
         case BTM_ENABLED_EVT:
             /* Bluetooth Controller and Host Stack Enabled */
             if (WICED_BT_SUCCESS == p_event_data->enabled.status) {
-                wiced_result = wiced_bt_set_local_bdaddr((uint8_t *)cy_bt_device_address, BLE_ADDR_PUBLIC);
+                address_mode = BLE_ADDR_PUBLIC;
+                // wiced_result = wiced_bt_set_local_bdaddr((uint8_t *)cy_bt_device_address, address_mode);
                 wiced_bt_dev_read_local_addr(bda);
-
                 /* Perform application-specific initialization */
                 ble_init();
             } else {
@@ -275,23 +280,85 @@ bool mp_bluetooth_is_active(void) {
     return mp_bluetooth_ble_stack_state == MP_BLUETOOTH_BLE_STATE_ACTIVE;
 }
 
-// Gets the current address of this device in big-endian format.
-void mp_bluetooth_get_current_address(uint8_t *addr_type, uint8_t *addr) {
-
+void print_bd_address(wiced_bt_device_address_t bdadr) {
+    printf("%02X:%02X:%02X:%02X:%02X:%02X \n", bdadr[0], bdadr[1], bdadr[2], bdadr[3], bdadr[4], bdadr[5]);
 }
 
-// Sets the addressing mode to use.
-void mp_bluetooth_set_address_mode(uint8_t addr_mode) {
+// Gets the current address of this device in big-endian format.
+void mp_bluetooth_get_current_address(uint8_t *addr_type, uint8_t *addr) {
+    // wiced_bt_device_address_t bda = { 0 };
+    if (!mp_bluetooth_is_active()) {
+        mp_raise_OSError(ERRNO_BLUETOOTH_NOT_ACTIVE);
+    }
+    switch (address_mode) {
+        case BLE_ADDR_PUBLIC:
+            *addr_type = BLE_ADDR_PUBLIC;
+            break;
+        case BLE_ADDR_RANDOM:
+            *addr_type = BLE_ADDR_RANDOM;
+            break;
+        default:
+            mp_raise_OSError(MP_EINVAL);
+    }
 
+    wiced_bt_dev_read_local_addr(addr);
+}
+
+static void generate_random_address(wiced_bt_device_address_t addr) {
+    cyhal_trng_t trng_obj;
+    uint32_t random_data[2];
+    cy_rslt_t rslt = cyhal_trng_init(&trng_obj);
+    if (rslt != CY_RSLT_SUCCESS) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("TRNG init failed!\n"));
+    }
+    random_data[0] = cyhal_trng_generate(&trng_obj);
+    random_data[1] = cyhal_trng_generate(&trng_obj);
+    memcpy(addr, random_data, 6);
+    cyhal_trng_free(&trng_obj);
+}
+
+// Sets the addressing mode to use.Alongwith it already sets the address as well based on mode selected
+void mp_bluetooth_set_address_mode(uint8_t addr_mode) {
+    wiced_bt_device_address_t addr;
+    if (!mp_bluetooth_is_active()) {
+        mp_raise_OSError(ERRNO_BLUETOOTH_NOT_ACTIVE);
+    }
+    switch (addr_mode) {
+        case MP_BLUETOOTH_ADDRESS_MODE_PUBLIC: {
+            address_mode = BLE_ADDR_PUBLIC;
+            for (int i = 0; i < 5; i++) {
+                addr[i] = *(cy_bt_device_address + i);
+            }
+            break;
+        }
+        case MP_BLUETOOTH_ADDRESS_MODE_RANDOM: {
+            address_mode = BLE_ADDR_RANDOM;
+            generate_random_address(addr);
+            addr[5] = (addr[5] & 0x3F) | 0xC0; // MSB[0:1] - 11 - Static Random Address
+            break;
+        }
+        // ToDo: This is in a way supported from MTB BLE stack side but is complicated to map to MPY side. Requires NVRAM to store the keys. Considering this is not an absolutely necessary feature, let's postpone for extension after MVP?
+        case MP_BLUETOOTH_ADDRESS_MODE_RPA:
+        case MP_BLUETOOTH_ADDRESS_MODE_NRPA:
+            // Not yet supported.
+            mp_raise_OSError(MP_EINVAL);
+            break;
+    }
+    wiced_result_t wiced_result = wiced_bt_set_local_bdaddr(addr, address_mode);
+    if (WICED_BT_SUCCESS != wiced_result) {
+        mp_printf(&mp_plat_print, "Device address setting failed!\n");
+    }
 }
 
 // Get or set the GAP device name that will be used by service 0x1800, characteristic 0x2a00.
 size_t mp_bluetooth_gap_get_device_name(const uint8_t **buf) {
-    return 0;
+    *buf = (const uint8_t *)app_gap_device_name;
+    return strlen((const char *)app_gap_device_name);
 }
 
 int mp_bluetooth_gap_set_device_name(const uint8_t *buf, size_t len) {
-    return 0;
+    mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("Feature unsupported: Device name cannot be set in run-time for this port.\n"));
+    return MP_EOPNOTSUPP;
 }
 
 // Start advertisement. Will re-start advertisement when already enabled.
@@ -344,11 +411,16 @@ int mp_bluetooth_gap_disconnect(uint16_t conn_handle) {
 }
 
 // Set/get the MTU that we will respond to a MTU exchange with.
+// ToDo: wiced_bt_l2cap_le_get_peer_mtu gets the peer mtu but needs L2CAP connection established. Handle in L2CAP enablement // Default size is GATT_BLE_DEFAULT_MTU_SIZE : 23
 int mp_bluetooth_get_preferred_mtu(void) {
-    return 0;
+    return GATT_BLE_DEFAULT_MTU_SIZE;
 }
 
+// ToDo: wiced_bt_gatt_client_configure_mtu allows configuring mtu size but needs GATT connection handle. Handle in GATT enablement.
 int mp_bluetooth_set_preferred_mtu(uint16_t mtu) {
-    return 0;
+    if (!mp_bluetooth_is_active()) {
+        return ERRNO_BLUETOOTH_NOT_ACTIVE;
+    }
+    return MP_EOPNOTSUPP;
 }
 #endif
