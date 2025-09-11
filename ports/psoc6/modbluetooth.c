@@ -190,13 +190,10 @@ wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
         case BTM_ENABLED_EVT:
             /* Bluetooth Controller and Host Stack Enabled */
             if (WICED_BT_SUCCESS == p_event_data->enabled.status) {
-                address_mode = BLE_ADDR_PUBLIC;
-                // wiced_result = wiced_bt_set_local_bdaddr((uint8_t *)cy_bt_device_address, address_mode);
-                wiced_bt_dev_read_local_addr(bda);
                 /* Perform application-specific initialization */
                 ble_init();
             } else {
-                mp_printf(&mp_plat_print, "Bluetooth Disabled \n");
+                mp_printf(&mp_plat_print, "Bluetooth disabled \n");
             }
             break;
 
