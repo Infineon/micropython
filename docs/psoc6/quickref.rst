@@ -1012,10 +1012,14 @@ Methods
             BLE.config(*, param=value, ...)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Among the suggested parameters of the general BLE.config() API, for this port, only these are available:
 =======
 Among the suggested parameters of the general network WLAN API, for this port, only these are available:
 >>>>>>> fa337b280 (docs/psoc6/quickref: Add deviations in API.)
+=======
+Among the suggested parameters of the general BLE.config() API, for this port, only these are available:
+>>>>>>> 5e34d26b2 (docs/psoc6/quickref: Fix typo.)
 
 - ``'addr_mode'``: Supported values:
 
