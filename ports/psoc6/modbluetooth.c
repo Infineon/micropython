@@ -24,6 +24,7 @@
 #include "wiced_memory.h"
 #include "cyhal.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "cycfg_gatt_db.h"
 #include "cycfg_gap.h"
 #include "wiced_bt_dev.h"
@@ -250,14 +251,12 @@ int mp_bluetooth_init(void) {
 
     /* Register call back and configuration with stack */
     wiced_result = wiced_bt_stack_init(bt_management_callback, &wiced_bt_cfg_settings);
-    if (WICED_BT_SUCCESS == wiced_result) {
-        mp_printf(&mp_plat_print, "Bluetooth Stack Initialization Successful \n");
-        mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_ACTIVE;
-    } else {
-        mp_printf(&mp_plat_print, "Bluetooth Stack Initialization failed \n");
+    bluetooth_assert_raise_val("Bluetooth Stack Initialization failed with error: ", wiced_result, WICED_BT_SUCCESS);
+    if (WICED_BT_SUCCESS != wiced_result) {
         mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_STOPPING;
+        return 0;
     }
-
+    mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_ACTIVE;
     return 0;
 }
 
@@ -360,11 +359,103 @@ int mp_bluetooth_gap_set_device_name(const uint8_t *buf, size_t len) {
 // Start advertisement. Will re-start advertisement when already enabled.
 // Returns errno on failure.
 int mp_bluetooth_gap_advertise_start(bool connectable, int32_t interval_us, const uint8_t *adv_data, size_t adv_data_len, const uint8_t *sr_data, size_t sr_data_len) {
-    return 0;
+    static uint8_t *temp_adv_data = NULL;
+    static uint8_t *temp_sr_data = NULL;
+    static uint32_t temp_adv_data_len = 0;
+    static uint32_t temp_sr_data_len = 0;
+
+    // Stop advertising if interval is 0
+    if (interval_us == 0) {
+        wiced_bt_start_advertisements(BTM_BLE_ADVERT_OFF, 0, NULL);
+        return 0;
+    }
+
+    if (adv_data != NULL) {
+        // Free previous data if it exists
+        if (temp_adv_data != NULL) {
+            free(temp_adv_data);
+            temp_adv_data = NULL;
+        }
+
+        // Store new data (if not empty)
+        if (adv_data_len > 0) {
+            temp_adv_data = malloc(adv_data_len);
+            if (temp_adv_data == NULL) {
+                return -1; // Memory allocation failed
+            }
+            memcpy(temp_adv_data, adv_data, adv_data_len);
+            temp_adv_data_len = adv_data_len;
+        } else {
+            temp_adv_data_len = 0;
+        }
+    }
+    // Else: reuse previous temp_adv_data
+
+    // Update scan response data if provided (not NULL)
+    if (sr_data != NULL) {
+        // Free previous data if it exists
+        if (temp_sr_data != NULL) {
+            free(temp_sr_data);
+            temp_sr_data = NULL;
+        }
+
+        // Store new data (if not empty)
+        if (sr_data_len > 0) {
+            temp_sr_data = malloc(sr_data_len);
+            if (temp_sr_data == NULL) {
+                // Clean up advertising data if it was allocated in this call
+                if (adv_data != NULL && temp_adv_data != NULL) {
+                    free(temp_adv_data);
+                    temp_adv_data = NULL;
+                }
+                return -1; // Memory allocation failed
+            }
+            memcpy(temp_sr_data, sr_data, sr_data_len);
+            temp_sr_data_len = sr_data_len;
+        } else {
+            temp_sr_data_len = 0;
+        }
+    }
+    // Else: reuse previous temp_sr_data
+
+    // Set advertising data
+    if (temp_adv_data_len > 0) {
+        wiced_bt_ble_set_raw_advertisement_data(temp_adv_data_len, cy_bt_adv_packet_data);
+    } else {
+        wiced_bt_ble_set_raw_advertisement_data(0, NULL);
+    }
+
+    // Set scan response data
+    if (temp_sr_data_len > 0) {
+        wiced_bt_ble_set_raw_scan_response_data(temp_sr_data_len, cy_bt_adv_packet_data);
+    } else {
+        wiced_bt_ble_set_raw_scan_response_data(0, NULL);
+    }
+
+    // Determine advertising mode based on connectable parameter
+    wiced_bt_ble_advert_mode_t advert_mode;
+    if (connectable) {
+        advert_mode = BTM_BLE_ADVERT_UNDIRECTED_HIGH; // Connectable undirected advertising[citation:1]
+    } else {
+        advert_mode = BTM_BLE_ADVERT_NONCONN_HIGH;    // Non-connectable advertising[citation:1]
+    }
+
+
+    // Start advertising
+    wiced_result_t result = wiced_bt_start_advertisements(advert_mode, 0, NULL);
+
+    return (result == WICED_BT_SUCCESS) ? 0 : -1;
 }
+
 
 // Stop advertisement. No-op when already stopped.
 void mp_bluetooth_gap_advertise_stop(void) {
+    wiced_result_t wiced_status;
+    if (!mp_bluetooth_is_active()) {
+        return;
+    }
+    wiced_status = wiced_bt_start_advertisements(BTM_BLE_ADVERT_OFF, 0, NULL);
+    bluetooth_assert_raise_val("Stopping Bluetooth LE advertisements failed with error: ", wiced_status, WICED_SUCCESS);
     return;
 }
 

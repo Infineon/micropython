@@ -18,7 +18,7 @@ enum {
 
 extern volatile int mp_bluetooth_ble_stack_state;
 
-#define bluetooth_assert_raise_val(msg, ret)   if (ret != CY_RSLT_SUCCESS) { \
+#define bluetooth_assert_raise_val(msg, ret, exp)   if (ret != exp) { \
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT(msg), ret); \
 }
 
