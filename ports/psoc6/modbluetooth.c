@@ -46,7 +46,6 @@
 // ******************************************************************************
 #if MICROPY_PY_BLUETOOTH
 #define NUM_ADV_PACKETS                 (3u)
-#define MAX_ADV_ELEMENTS                (10u)
 #define ERRNO_BLUETOOTH_NOT_ACTIVE      MP_ENODEV
 #define CASE_RETURN_STR(const)          case const: \
         return #const;
@@ -59,12 +58,6 @@
 extern uint8_t app_gap_device_name[];
 
 wiced_bt_ble_advert_elem_t cy_bt_adv_pkt[8];    // Max 8 elements possible
-
-
-// static wiced_bt_ble_advert_elem_t bt_ad_data[8];
-// static size_t bt_ad_len = 0;
-// static wiced_bt_ble_advert_elem_t bt_sd_data[8];
-// static size_t bt_sd_len = 0;
 
 // MPY defines and variables
 volatile int mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_OFF;
@@ -374,19 +367,6 @@ wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
             }
             break;
 
-        case BTM_BLE_SCAN_STATE_CHANGED_EVT:
-
-            if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_HIGH_DUTY) {
-                printf("Scan State Change: BTM_BLE_SCAN_TYPE_HIGH_DUTY\n");
-            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_LOW_DUTY) {
-                printf("Scan State Change: BTM_BLE_SCAN_TYPE_LOW_DUTY\n");
-            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_NONE) {
-                printf("Scan stopped\n");
-            } else {
-                printf("Invalid scan state\n");
-            }
-            break;
-
         default:
             break;
     }
@@ -610,46 +590,12 @@ void mp_bluetooth_gap_advertise_stop(void) {
 
 #if MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE
 
-int get_adv_data_length(const uint8_t *p_adv_data) {
-    int offset = 0;
-    while (offset < 31) { // BLE adv max length is 31 bytes
-        uint8_t field_len = p_adv_data[offset];
-        if (field_len == 0 || (offset + field_len + 1) > 31) {
-            break;
-        }
-        offset += field_len + 1;
-    }
-    return offset;
-}
-
-void mp_scan_result_callback(wiced_bt_ble_scan_results_t *p_scan_result,
-    uint8_t *p_adv_data) {
-    printf("Scan works\r\n");
-    if (p_scan_result) {
-        mp_bluetooth_gap_on_scan_complete();
-    } else {
-        mp_printf(&mp_plat_print, "No device found\n");
-    }
-    // Calculate actual length of adv data
-    int adv_data_len = get_adv_data_length(p_adv_data);
-    mp_bluetooth_gap_on_scan_result(p_scan_result->ble_addr_type, p_scan_result->remote_bd_addr, p_scan_result->ble_evt_type, p_scan_result->rssi, p_adv_data, adv_data_len);
-
-}
-
 int mp_bluetooth_gap_scan_start(int32_t duration_ms, int32_t interval_us, int32_t window_us, bool active_scan) {
     return 0;
 }
 
 // Stop discovery
 int mp_bluetooth_gap_scan_stop(void) {
-    wiced_result_t result = wiced_bt_ble_scan(
-        BTM_BLE_SCAN_TYPE_NONE,
-        WICED_TRUE,
-        NULL
-        );
-
-    bluetooth_assert_raise_val("Stopping Bluetooth LE scanning failed with error: ", result, WICED_SUCCESS);
-
     return 0;
 }
 
