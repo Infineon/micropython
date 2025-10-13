@@ -161,8 +161,8 @@
 #define MICROPY_PY_MACHINE_PULSE                (1)
 
 // BLE
-#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS (1)
-
+#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS        (1)
+#define MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE    (1)
 // VFS
 #define MICROPY_VFS                             (1)
 #define MICROPY_READER_VFS                      (1)

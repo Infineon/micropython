@@ -1,3 +1,4 @@
+
 // All includes may or may not be needed
 #include "py/binary.h"
 #include "py/gc.h"
@@ -36,15 +37,34 @@
 #include "wiced_bt_dev.h"
 #include "wiced_bt_gatt.h"
 
+#include "cycfg_bt_settings.h"
+#include "cybsp_bt_config.h"
+#include "wiced_bt_stack.h"
+
+
+
 // ******************************************************************************
 #if MICROPY_PY_BLUETOOTH
 #define NUM_ADV_PACKETS                 (3u)
+#define MAX_ADV_ELEMENTS                (10u)
 #define ERRNO_BLUETOOTH_NOT_ACTIVE      MP_ENODEV
 #define CASE_RETURN_STR(const)          case const: \
         return #const;
 
+
+// Convert microseconds to BLE slots (1 slot = 0.625 ms)
+#define US_TO_SLOTS(us) ((uint16_t)((us) / 625))
+
 // Bring externs from MTB GeneratedSource/
 extern uint8_t app_gap_device_name[];
+
+wiced_bt_ble_advert_elem_t cy_bt_adv_pkt[8];    // Max 8 elements possible
+
+
+// static wiced_bt_ble_advert_elem_t bt_ad_data[8];
+// static size_t bt_ad_len = 0;
+// static wiced_bt_ble_advert_elem_t bt_sd_data[8];
+// static size_t bt_sd_len = 0;
 
 // MPY defines and variables
 volatile int mp_bluetooth_ble_stack_state = MP_BLUETOOTH_BLE_STATE_OFF;
@@ -110,10 +130,140 @@ const char *get_bt_gatt_status_name(wiced_bt_gatt_status_t status) {
     return "UNKNOWN_STATUS";
 }
 
+void free_advert_elements(wiced_bt_ble_advert_elem_t *adv_elements, uint8_t num_elements) {
+    if (adv_elements) {
+        for (uint8_t i = 0; i < num_elements; i++) {
+            if (adv_elements[i].p_data) {
+                free(adv_elements[i].p_data);
+            }
+        }
+        free(adv_elements);
+    }
+}
+
+wiced_result_t parse_ltv_to_advert_elements(const uint8_t *adv_data, uint16_t adv_len,
+    wiced_bt_ble_advert_elem_t **adv_elements,
+    uint8_t *num_elements) {
+
+    if (!adv_data || adv_len == 0 || !adv_elements || !num_elements) {
+        return WICED_BT_ERROR;
+    }
+
+    // Count the number of elements first
+    uint8_t element_count = 0;
+    uint16_t offset = 0;
+    while (offset < adv_len) {
+        if (offset + 1 > adv_len) {
+            break;                       // Insufficient data
+
+        }
+        uint8_t field_len = adv_data[offset];
+        if (field_len == 0 || offset + field_len + 1 > adv_len) {
+            break;
+        }
+
+        element_count++;
+        offset += field_len + 1;
+    }
+
+    if (element_count == 0) {
+        return WICED_BT_ERROR;
+    }
+
+    // Allocate memory for elements
+    *adv_elements = (wiced_bt_ble_advert_elem_t *)malloc(element_count * sizeof(wiced_bt_ble_advert_elem_t));
+    if (!*adv_elements) {
+        return WICED_BT_NO_RESOURCES;
+    }
+
+    // Parse and populate elements
+    offset = 0;
+    *num_elements = 0;
+
+    while (offset < adv_len && *num_elements < element_count) {
+        uint8_t field_len = adv_data[offset];
+        uint8_t field_type = adv_data[offset + 1];
+
+        if (field_len == 0 || offset + field_len + 1 > adv_len) {
+            break;
+        }
+
+        // Allocate memory for this element's data
+        uint8_t *element_data = (uint8_t *)malloc(field_len);
+        if (!element_data) {
+            // Cleanup on failure
+            for (int i = 0; i < *num_elements; i++) {
+                free((*adv_elements)[i].p_data);
+            }
+            free(*adv_elements);
+            *adv_elements = NULL;
+            return WICED_BT_NO_RESOURCES;
+        }
+
+        // Copy the data (excluding the length byte)
+        memcpy(element_data, &adv_data[offset + 1], field_len);
+
+        // Map Bluetooth SIG AD types to WICED BLE advert types
+        wiced_bt_ble_advert_elem_t *element = &(*adv_elements)[*num_elements];
+        element->len = field_len;
+        element->p_data = element_data;
+
+        // Map common AD types
+        switch (field_type) {
+            case 0x01: // Flags
+                element->advert_type = BTM_BLE_ADVERT_TYPE_FLAG;
+                break;
+            case 0x02: // Incomplete List of 16-bit Service Class UUIDs
+                element->advert_type = BTM_BLE_ADVERT_TYPE_16SRV_PARTIAL;
+                break;
+            case 0x03: // Complete List of 16-bit Service Class UUIDs
+                element->advert_type = BTM_BLE_ADVERT_TYPE_16SRV_COMPLETE;
+                break;
+            case 0x06: // Incomplete List of 128-bit Service Class UUIDs
+                element->advert_type = BTM_BLE_ADVERT_TYPE_128SRV_PARTIAL;
+                break;
+            case 0x07: // Complete List of 128-bit Service Class UUIDs
+                element->advert_type = BTM_BLE_ADVERT_TYPE_128SRV_COMPLETE;
+                break;
+            case 0x08: // Shortened Local Name
+                element->advert_type = BTM_BLE_ADVERT_TYPE_NAME_SHORT;
+                break;
+            case 0x09: // Complete Local Name
+                element->advert_type = BTM_BLE_ADVERT_TYPE_NAME_COMPLETE;
+                break;
+            case 0x0A: // Tx Power Level
+                element->advert_type = BTM_BLE_ADVERT_TYPE_TX_POWER;
+                break;
+            case 0x16: // Service Data - 16-bit UUID
+                element->advert_type = BTM_BLE_ADVERT_TYPE_SERVICE_DATA;
+                break;
+            case 0xFF: // Manufacturer Specific Data
+                element->advert_type = BTM_BLE_ADVERT_TYPE_MANUFACTURER;
+                break;
+            default:
+                // For unknown types, use raw data type
+                element->advert_type = BTM_BLE_ADVERT_TYPE_MANUFACTURER;
+                break;
+        }
+
+        (*num_elements)++;
+        offset += field_len + 1;
+    }
+
+    return WICED_SUCCESS;
+}
 
 // *********************************** MTB wrapper API's and callbacks *******************************************
 
 // ToDo : Add better function names to clearly differentiate API's purely using MTB vs MPY vs MPY+MTB
+
+static void stop_advertisement(void) {
+    wiced_result_t status = WICED_BT_SUCCESS;
+    status = wiced_bt_start_advertisements(BTM_BLE_ADVERT_OFF, 0, NULL);
+    bluetooth_assert_raise_val("Stopping Bluetooth LE advertisements failed with error: ", status, WICED_SUCCESS);
+}
+
+
 static void start_advertisement(void) {
     wiced_result_t wiced_status;
 
@@ -175,9 +325,6 @@ static void ble_init() {
     if (WICED_BT_GATT_SUCCESS != gatt_status) {
         mp_printf(&mp_plat_print, "\n GATT DB Initialization failed with err 0x%x\n", gatt_status);
     }
-
-    /* Start Undirected LE Advertisements on device startup. */
-    start_advertisement();
 }
 
 // Receive management events from the LE stack
@@ -227,6 +374,19 @@ wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
             }
             break;
 
+        case BTM_BLE_SCAN_STATE_CHANGED_EVT:
+
+            if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_HIGH_DUTY) {
+                printf("Scan State Change: BTM_BLE_SCAN_TYPE_HIGH_DUTY\n");
+            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_LOW_DUTY) {
+                printf("Scan State Change: BTM_BLE_SCAN_TYPE_LOW_DUTY\n");
+            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_NONE) {
+                printf("Scan stopped\n");
+            } else {
+                printf("Invalid scan state\n");
+            }
+            break;
+
         default:
             break;
     }
@@ -273,10 +433,6 @@ int mp_bluetooth_deinit() {
 // Returns true when the Bluetooth stack is active.
 bool mp_bluetooth_is_active(void) {
     return mp_bluetooth_ble_stack_state == MP_BLUETOOTH_BLE_STATE_ACTIVE;
-}
-
-void print_bd_address(wiced_bt_device_address_t bdadr) {
-    printf("%02X:%02X:%02X:%02X:%02X:%02X \n", bdadr[0], bdadr[1], bdadr[2], bdadr[3], bdadr[4], bdadr[5]);
 }
 
 // Gets the current address of this device in big-endian format.
@@ -356,95 +512,88 @@ int mp_bluetooth_gap_set_device_name(const uint8_t *buf, size_t len) {
     return MP_EOPNOTSUPP;
 }
 
-// Start advertisement. Will re-start advertisement when already enabled.
-// Returns errno on failure.
-int mp_bluetooth_gap_advertise_start(bool connectable, int32_t interval_us, const uint8_t *adv_data, size_t adv_data_len, const uint8_t *sr_data, size_t sr_data_len) {
-    static uint8_t *temp_adv_data = NULL;
-    static uint8_t *temp_sr_data = NULL;
-    static uint32_t temp_adv_data_len = 0;
-    static uint32_t temp_sr_data_len = 0;
+int mp_bluetooth_gap_advertise_start(bool connectable, int32_t interval_us,
+    const uint8_t *adv_data, size_t adv_data_len,
+    const uint8_t *sr_data, size_t sr_data_len) {
 
-    // Stop advertising if interval is 0
+    if (!mp_bluetooth_is_active()) {
+        return ERRNO_BLUETOOTH_NOT_ACTIVE;
+    }
+
+    wiced_result_t result = WICED_BT_SUCCESS;
+    // Static storage for last used adv/scanned data
+    static wiced_bt_ble_advert_elem_t *last_adv_elements = NULL;
+    static uint8_t last_num_adv_elements = 0;
+    static wiced_bt_ble_advert_elem_t *last_sr_elements = NULL;
+    static uint8_t last_num_sr_elements = 0;
+
+    // Stop advertising if interval_us is 0 or None
     if (interval_us == 0) {
-        wiced_bt_start_advertisements(BTM_BLE_ADVERT_OFF, 0, NULL);
+        stop_advertisement();
         return 0;
-    }
-
-    if (adv_data != NULL) {
-        // Free previous data if it exists
-        if (temp_adv_data != NULL) {
-            free(temp_adv_data);
-            temp_adv_data = NULL;
-        }
-
-        // Store new data (if not empty)
-        if (adv_data_len > 0) {
-            temp_adv_data = malloc(adv_data_len);
-            if (temp_adv_data == NULL) {
-                return -1; // Memory allocation failed
-            }
-            memcpy(temp_adv_data, adv_data, adv_data_len);
-            temp_adv_data_len = adv_data_len;
-        } else {
-            temp_adv_data_len = 0;
-        }
-    }
-    // Else: reuse previous temp_adv_data
-
-    // Update scan response data if provided (not NULL)
-    if (sr_data != NULL) {
-        // Free previous data if it exists
-        if (temp_sr_data != NULL) {
-            free(temp_sr_data);
-            temp_sr_data = NULL;
-        }
-
-        // Store new data (if not empty)
-        if (sr_data_len > 0) {
-            temp_sr_data = malloc(sr_data_len);
-            if (temp_sr_data == NULL) {
-                // Clean up advertising data if it was allocated in this call
-                if (adv_data != NULL && temp_adv_data != NULL) {
-                    free(temp_adv_data);
-                    temp_adv_data = NULL;
-                }
-                return -1; // Memory allocation failed
-            }
-            memcpy(temp_sr_data, sr_data, sr_data_len);
-            temp_sr_data_len = sr_data_len;
-        } else {
-            temp_sr_data_len = 0;
-        }
-    }
-    // Else: reuse previous temp_sr_data
-
-    // Set advertising data
-    if (temp_adv_data_len > 0) {
-        wiced_bt_ble_set_raw_advertisement_data(temp_adv_data_len, cy_bt_adv_packet_data);
     } else {
-        wiced_bt_ble_set_raw_advertisement_data(0, NULL);
+        mp_printf(&mp_plat_print, "Advertising interval is ignored and set to default interval internally - 0x0020 to 0x4000\r\n");
     }
 
-    // Set scan response data
-    if (temp_sr_data_len > 0) {
-        wiced_bt_ble_set_raw_scan_response_data(temp_sr_data_len, cy_bt_adv_packet_data);
-    } else {
-        wiced_bt_ble_set_raw_scan_response_data(0, NULL);
+    // Handle adv_data
+    if (adv_data == NULL) {
+        // Reuse previous
+        adv_data = NULL;
+        adv_data_len = 0;
+    }
+    if (adv_data_len == 0 && last_adv_elements) {
+        // Clear previous
+        free_advert_elements(last_adv_elements, last_num_adv_elements);
+        last_adv_elements = NULL;
+        last_num_adv_elements = 0;
+    }
+    if (adv_data && adv_data_len > 0) {
+        if (last_adv_elements) {
+            free_advert_elements(last_adv_elements, last_num_adv_elements);
+        }
+        result = parse_ltv_to_advert_elements(adv_data, adv_data_len, &last_adv_elements, &last_num_adv_elements);
+        if (result != WICED_SUCCESS) {
+            return result;
+        }
     }
 
-    // Determine advertising mode based on connectable parameter
-    wiced_bt_ble_advert_mode_t advert_mode;
-    if (connectable) {
-        advert_mode = BTM_BLE_ADVERT_UNDIRECTED_HIGH; // Connectable undirected advertising[citation:1]
-    } else {
-        advert_mode = BTM_BLE_ADVERT_NONCONN_HIGH;    // Non-connectable advertising[citation:1]
+    // Handle scan response data
+    if (sr_data == NULL) {
+        sr_data = NULL;
+        sr_data_len = 0;
+    }
+    if (sr_data_len == 0 && last_sr_elements) {
+        free_advert_elements(last_sr_elements, last_num_sr_elements);
+        last_sr_elements = NULL;
+        last_num_sr_elements = 0;
+    }
+    if (sr_data && sr_data_len > 0) {
+        if (last_sr_elements) {
+            free_advert_elements(last_sr_elements, last_num_sr_elements);
+        }
+        result = parse_ltv_to_advert_elements(sr_data, sr_data_len, &last_sr_elements, &last_num_sr_elements);
+        if (result != WICED_SUCCESS) {
+            return result;
+        }
     }
 
+    // Set advertisement data
+    result = wiced_bt_ble_set_raw_advertisement_data(last_num_adv_elements, last_adv_elements);
+    if (result != WICED_SUCCESS) {
+        return result;
+    }
+
+    if (sr_data && sr_data_len > 0) {
+        result = wiced_bt_ble_set_raw_scan_response_data(last_num_sr_elements, last_sr_elements);
+        if (result != WICED_SUCCESS) {
+            return result;
+        }
+    }
 
     // Start advertising
-    wiced_result_t result = wiced_bt_start_advertisements(advert_mode, 0, NULL);
+    result = wiced_bt_start_advertisements(BTM_BLE_ADVERT_UNDIRECTED_HIGH, BLE_ADDR_PUBLIC, NULL);
 
-    return (result == WICED_BT_SUCCESS) ? 0 : -1;
+    return result;
 }
 
 
@@ -458,6 +607,66 @@ void mp_bluetooth_gap_advertise_stop(void) {
     bluetooth_assert_raise_val("Stopping Bluetooth LE advertisements failed with error: ", wiced_status, WICED_SUCCESS);
     return;
 }
+
+#if MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE
+
+int get_adv_data_length(const uint8_t *p_adv_data) {
+    int offset = 0;
+    while (offset < 31) { // BLE adv max length is 31 bytes
+        uint8_t field_len = p_adv_data[offset];
+        if (field_len == 0 || (offset + field_len + 1) > 31) {
+            break;
+        }
+        offset += field_len + 1;
+    }
+    return offset;
+}
+
+void mp_scan_result_callback(wiced_bt_ble_scan_results_t *p_scan_result,
+    uint8_t *p_adv_data) {
+    printf("Scan works\r\n");
+    if (p_scan_result) {
+        mp_bluetooth_gap_on_scan_complete();
+    } else {
+        mp_printf(&mp_plat_print, "No device found\n");
+    }
+    // Calculate actual length of adv data
+    int adv_data_len = get_adv_data_length(p_adv_data);
+    mp_bluetooth_gap_on_scan_result(p_scan_result->ble_addr_type, p_scan_result->remote_bd_addr, p_scan_result->ble_evt_type, p_scan_result->rssi, p_adv_data, adv_data_len);
+
+}
+
+int mp_bluetooth_gap_scan_start(int32_t duration_ms, int32_t interval_us, int32_t window_us, bool active_scan) {
+    return 0;
+}
+
+// Stop discovery
+int mp_bluetooth_gap_scan_stop(void) {
+    wiced_result_t result = wiced_bt_ble_scan(
+        BTM_BLE_SCAN_TYPE_NONE,
+        WICED_TRUE,
+        NULL
+        );
+
+    bluetooth_assert_raise_val("Stopping Bluetooth LE scanning failed with error: ", result, WICED_SUCCESS);
+
+    return 0;
+}
+
+// Connect to a found peripheral.
+int mp_bluetooth_gap_peripheral_connect(uint8_t addr_type, const uint8_t *addr, int32_t duration_ms, int32_t min_conn_interval_us, int32_t max_conn_interval_us) {
+    // ret_status = wiced_bt_gatt_le_connect( p_scan_result->remote_bd_addr, p_scan_result->ble_addr_type, BLE_CONN_MODE_LOW_DUTY, TRUE );
+    // printf( "wiced_bt_gatt_connect status %d\r\n", ret_status );
+    return 0;
+}
+
+// Cancel in-progress connection to a peripheral.
+int mp_bluetooth_gap_peripheral_connect_cancel(void) {
+    return 0;
+}
+
+#endif // MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE
+
 
 // Start adding services. Must be called before mp_bluetooth_register_service.
 int mp_bluetooth_gatts_register_service_begin(bool append) {
@@ -491,6 +700,35 @@ int mp_bluetooth_gatts_notify_indicate(uint16_t conn_handle, uint16_t value_hand
 int mp_bluetooth_gatts_set_buffer(uint16_t value_handle, size_t len, bool append) {
     return 0;
 }
+
+#if MICROPY_PY_BLUETOOTH_ENABLE_GATT_CLIENT
+
+// Find all primary services on the connected peripheral.
+int mp_bluetooth_gattc_discover_primary_services(uint16_t conn_handle, const mp_obj_bluetooth_uuid_t *uuid) {
+    return 0;
+}
+// Find all characteristics on the specified service on a connected peripheral.
+int mp_bluetooth_gattc_discover_characteristics(uint16_t conn_handle, uint16_t start_handle, uint16_t end_handle, const mp_obj_bluetooth_uuid_t *uuid) {
+    return 0;
+}
+// Find all descriptors on the specified characteristic on a connected peripheral.
+int mp_bluetooth_gattc_discover_descriptors(uint16_t conn_handle, uint16_t start_handle, uint16_t end_handle) {
+    return 0;
+}
+// Initiate read of a value from the remote peripheral.
+int mp_bluetooth_gattc_read(uint16_t conn_handle, uint16_t value_handle) {
+    return 0;
+}
+
+// Write the value to the remote peripheral.
+int mp_bluetooth_gattc_write(uint16_t conn_handle, uint16_t value_handle, const uint8_t *value, size_t value_len, unsigned int mode) {
+    return 0;
+}
+// Initiate MTU exchange for a specific connection using the preferred MTU.
+int mp_bluetooth_gattc_exchange_mtu(uint16_t conn_handle) {
+    return 0;
+}
+#endif // MICROPY_PY_BLUETOOTH_ENABLE_GATT_CLIENT
 
 // Disconnect from a central or peripheral.
 int mp_bluetooth_gap_disconnect(uint16_t conn_handle) {
