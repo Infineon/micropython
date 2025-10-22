@@ -13,38 +13,27 @@ psoc6/
 │  ├─ single/           --> Tests require a single board
 ├─ mp_custom/           --> Tests based on mpremote (and not based on the run-test.py utility)
 ├─ inputs/              --> Non-test files utilities required as inputs for the tests
-├─ run_psoc6_tests.sh   --> Script handling PSoC6 tests
 ├─ README
 ```
 ## Running the tests
 
-In order to run a particular test or group of tests make use of the `run_psoc6_tests.h` script.
+In order to run a particular test or group of tests make use of the `tools/psoc6/run_test_plan.py` script.
 
-Find the available test suites and options by running the help command:
-
-```
-./run_psoc6_tests.sh help
-```
-
-For example, to run the "PWM" tests (default device will be /dev/ttyACM0):
+For example, to run a test in your local machine, use the following command:
 
 ```
-./run_psoc6_tests.sh -t pwm
+python tools/psoc6/run_test_plan.py <test_name>
 ```
 
-If you need to specify the serial ports of the devices, for example, in a multiple instances test:
+And this will execute the test and use by default the "/dev/ttyACM0" serial port, and the "/dev/ttyACM1" as the stub device port.
+
+Alternatively, you can use a HIL devices file and board type to run the tests. For example, to run the `wifi` test with a given board and HIL devices file:
 
 ```
-./run_psoc6_tests.sh -t bitstream --dev-test /dev/ttyACM0 --dev-stub /dev/ttyACM3
+python  tools/psoc6/run_test_plan.py wifi --max-retries 1 --hil-devs local-devs.yml --board CY8CKIT-062S2-AI    
 ```
 
-Or directly running all the tests of test under CI/CD for a given board type:
-
-```
-./run_psoc6_tests.sh --test-suite ci-tests --board CY8CPROTO-062-4343W --hil ifx-mpy-hil
-```
-
-In this case, the hardware device list connected to the hardware in the loop (HIL) needs to be provided.
+Check the `tools/psoc6/run_test_plan.py --help` for more details and options.
  
 ## Extended Hardware Setup Tests
 
