@@ -367,6 +367,19 @@ wiced_result_t bt_management_callback(wiced_bt_management_evt_t event,
             }
             break;
 
+        case BTM_BLE_SCAN_STATE_CHANGED_EVT:
+
+            if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_HIGH_DUTY) {
+                printf("Scan State Change: BTM_BLE_SCAN_TYPE_HIGH_DUTY\n");
+            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_LOW_DUTY) {
+                printf("Scan State Change: BTM_BLE_SCAN_TYPE_LOW_DUTY\n");
+            } else if (p_event_data->ble_scan_state_changed == BTM_BLE_SCAN_TYPE_NONE) {
+                printf("Scan stopped\n");
+            } else {
+                printf("Invalid scan state\n");
+            }
+            break;
+
         default:
             break;
     }
@@ -590,13 +603,165 @@ void mp_bluetooth_gap_advertise_stop(void) {
 
 #if MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE
 
+static void isr_timer(void *callback_arg, cyhal_timer_event_t event) {
+    // printf("Tim int\r\n");
+    mp_bluetooth_gap_scan_stop();
+}
+
+static cyhal_timer_t mp_bluetooth_gap_scan_timer_obj;
+
+void mp_bluetooth_gap_scan_timer_start(int32_t duration_ms) {
+    uint32_t period_hal;        // Period/count input for the PSoC6 HAL timer configuration
+    uint32_t fz_hal = 1000000;  // Frequency for the PSoC timer clock is fixed as 1 MHz
+    period_hal = (uint32_t)(duration_ms * fz_hal) - 1; // Overflow Period = (Period + 1)/ frequency ;period = (overflow period * frequency)-1
+
+    // Adjust the frequency & recalculate the period if period/count is  greater than the maximum overflow value for a 32 bit timer ie; 2^32
+    while (period_hal > 4294967296) {
+        fz_hal = fz_hal / 10;  // Reduce the fz_hal value by 10%
+        period_hal = (uint32_t)(duration_ms * fz_hal) - 1;  // Recalculate Period input for the PSoC6 HAL timer configuration
+    }
+
+    // Timer initialisation of port
+    cy_rslt_t rslt;
+    period_hal = 13000; // For testing purpose only, remove later//9999
+
+    const cyhal_timer_cfg_t timer_cfg =
+    {
+        .compare_value = 0,                 /* Timer compare value, not used */
+        .period = period_hal,               /* Defines the timer period */
+        .direction = CYHAL_TIMER_DIR_UP,    /* Timer counts up */
+        .is_compare = false,                /* Don't use compare mode */
+        .is_continuous = 0,                 /* Run the timer */
+        .value = 0                          /* Initial value of counter */
+    };
+
+    /* Initialize the timer object. Does not use pin output ('pin' is NC) and
+     * does not use a pre-configured clock source ('clk' is NULL). */
+
+    rslt = cyhal_timer_init(&mp_bluetooth_gap_scan_timer_obj, NC, NULL);
+    CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
+    /* Apply timer configuration such as period, count direction, run mode, etc. */
+    rslt = cyhal_timer_configure(&mp_bluetooth_gap_scan_timer_obj, &timer_cfg);
+
+    /* Set the frequency of timer to Defined frequency */
+    rslt = cyhal_timer_set_frequency(&mp_bluetooth_gap_scan_timer_obj, fz_hal);
+
+    /* Assign the ISR to execute on timer interrupt */
+    cyhal_timer_register_callback(&mp_bluetooth_gap_scan_timer_obj, isr_timer, NULL);
+
+    /* Set the event on which timer interrupt occurs and enable it */
+    cyhal_timer_enable_event(&mp_bluetooth_gap_scan_timer_obj, CYHAL_TIMER_IRQ_TERMINAL_COUNT, 3, true);
+
+    /* Start the timer with the configured settings */
+    rslt = cyhal_timer_start(&mp_bluetooth_gap_scan_timer_obj);
+
+    CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
+}
+
+void print_bd_address(wiced_bt_device_address_t bdadr) {
+    printf("%02X:%02X:%02X:%02X:%02X:%02X \n", bdadr[0], bdadr[1], bdadr[2], bdadr[3], bdadr[4], bdadr[5]);
+}
+
+void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
+    uint8_t *p_adv_data) {
+    printf("Yayy\r\n");
+}
+
+// void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
+//                            uint8_t *p_adv_data )
+// {
+//    wiced_result_t         result = WICED_BT_SUCCESS;
+//    uint8_t                length = 0u;
+//    uint8_t                *adv_name;
+//    uint8_t                client_device_name[15] = {'C','T','S',' ','C','l',
+//                                                     'i','e','n','t','\0'};
+//
+//    if (p_scan_result)
+//    {
+//        mp_bluetooth_gap_on_scan_result(p_scan_result->ble_addr_type, p_scan_result->remote_bd_addr, p_scan_result->flag, p_scan_result->rssi, p_adv_data, sizeof(p_adv_data));
+//        adv_name = wiced_bt_ble_check_advertising_data(p_adv_data,
+//                                BTM_BLE_ADVERT_TYPE_NAME_COMPLETE,
+//                                                         &length);
+//        if(NULL == adv_name)
+//        {
+//            return;
+//        }
+//        /* Check if the peer device's name is "BLE CTS Client" */
+//        if(0 == memcmp(adv_name, client_device_name, strlen((const char *)client_device_name)))
+//        {
+//            printf("\nFound the peer device! BD Addr: ");
+//            print_bd_address(p_scan_result->remote_bd_addr);
+//
+//            /* Device found. Stop scan. */
+//            if((result = wiced_bt_ble_scan(BTM_BLE_SCAN_TYPE_NONE, WICED_TRUE,
+//                                           ctss_scan_result_cback))!= WICED_BT_SUCCESS)
+//            {
+//                printf("\r\nscan off status %d\n", result);
+//            }
+//            else
+//            {
+//                printf("Scan completed\n\n");
+//            }
+//
+//            printf("Initiating connection\n");
+//            /* Initiate the connection */
+//            if(wiced_bt_gatt_le_connect(p_scan_result->remote_bd_addr,
+//                                        p_scan_result->ble_addr_type,
+//                                        BLE_CONN_MODE_HIGH_DUTY,
+//                                        WICED_TRUE)!= WICED_TRUE)
+//            {
+//                printf("\rwiced_bt_gatt_connect failed\n");
+//            }
+//        }
+//        else
+//        {
+//            printf("BD Addr: ");
+//            print_bd_address(p_scan_result->remote_bd_addr);
+//            return;    //Skip - This is not the device we are looking for.
+//        }
+//    }
+// }
+
 int mp_bluetooth_gap_scan_start(int32_t duration_ms, int32_t interval_us, int32_t window_us, bool active_scan) {
+    // Stop any ongoing GAP scan.
+    wiced_result_t result;
+    /*int ret = mp_bluetooth_gap_scan_stop();
+    if (ret) {
+        return ret;
+    }*/
+    mp_bluetooth_gap_scan_timer_start(duration_ms);
+
+    for (;;) {
+        result = wiced_bt_ble_scan(BTM_BLE_SCAN_TYPE_HIGH_DUTY, WICED_TRUE, ctss_scan_result_cback);
+        if ((WICED_BT_PENDING == result) || (WICED_BT_BUSY == result)) {
+            printf("Scanning...\r\n");
+            // vTaskDelay(10);
+            // cyhal_system_delay_ms(1);
+        } else {
+            printf("\rError: Starting scan failed. Error code: %d\n", result);
+            return -1;
+        }
+    }
+
     return 0;
 }
 
 // Stop discovery
 int mp_bluetooth_gap_scan_stop(void) {
-    return 0;
+    printf("Scan stopping\r\n");
+    wiced_result_t result;
+    result = wiced_bt_ble_scan(BTM_BLE_SCAN_TYPE_NONE, WICED_TRUE, ctss_scan_result_cback);
+    if (result != WICED_BT_SUCCESS) {
+        mp_printf(&mp_plat_print, "Stopping scan failed with error: %d\n", result);
+        return -1;
+    }
+    cyhal_timer_stop(&mp_bluetooth_gap_scan_timer_obj);
+    cyhal_timer_free(&mp_bluetooth_gap_scan_timer_obj);
+
+    mp_bluetooth_gap_on_scan_complete();
+    return result;
 }
 
 // Connect to a found peripheral.
