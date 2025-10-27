@@ -663,11 +663,20 @@ void mp_bluetooth_gap_scan_timer_start(int32_t duration_ms) {
 void print_bd_address(wiced_bt_device_address_t bdadr) {
     printf("%02X:%02X:%02X:%02X:%02X:%02X \n", bdadr[0], bdadr[1], bdadr[2], bdadr[3], bdadr[4], bdadr[5]);
 }
+bool device_found = false;
 
-void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
-    uint8_t *p_adv_data) {
-    printf("Yayy\r\n");
+void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result, uint8_t *p_adv_data) {
+    printf("Scan result callback called!\n");
+    if (p_scan_result) {
+        print_bd_address(p_scan_result->remote_bd_addr);
+    }
 }
+
+/*void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
+    uint8_t *p_adv_data) {
+    device_found = true;
+
+}*/
 
 // void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
 //                            uint8_t *p_adv_data )
@@ -726,24 +735,15 @@ void ctss_scan_result_cback(wiced_bt_ble_scan_results_t *p_scan_result,
 
 int mp_bluetooth_gap_scan_start(int32_t duration_ms, int32_t interval_us, int32_t window_us, bool active_scan) {
     // Stop any ongoing GAP scan.
-    wiced_result_t result;
+    // wiced_result_t result;
     /*int ret = mp_bluetooth_gap_scan_stop();
     if (ret) {
         return ret;
     }*/
-    mp_bluetooth_gap_scan_timer_start(duration_ms);
+    // mp_bluetooth_gap_scan_timer_start(duration_ms);
 
-    for (;;) {
-        result = wiced_bt_ble_scan(BTM_BLE_SCAN_TYPE_HIGH_DUTY, WICED_TRUE, ctss_scan_result_cback);
-        if ((WICED_BT_PENDING == result) || (WICED_BT_BUSY == result)) {
-            printf("Scanning...\r\n");
-            // vTaskDelay(10);
-            // cyhal_system_delay_ms(1);
-        } else {
-            printf("\rError: Starting scan failed. Error code: %d\n", result);
-            return -1;
-        }
-    }
+    wiced_bt_ble_scan(BTM_BLE_SCAN_TYPE_HIGH_DUTY, WICED_TRUE, ctss_scan_result_cback);
+    printf("Scan started \r\n");
 
     return 0;
 }
