@@ -406,12 +406,11 @@ function ci_psoc6_setup {
 
 function ci_psoc6_build {
     board=$1
-    docker exec mtb-ci make mtb_init BOARD=${board}
-    docker exec mtb-ci make
+    docker exec mtb-ci make BOARD=${board}
 }
 
 function ci_psoc6_deploy {
-    docker exec mtb-ci make program
+    docker exec mtb-ci make deploy
 }
 
 function ci_psoc6_flash_multiple_devices {
@@ -420,7 +419,7 @@ function ci_psoc6_flash_multiple_devices {
     hex_file=$2
     devs_file=$3
 
-    docker exec mtb-ci make program_multi BOARD=${board} EXT_HEX_FILE=../../${hex_file} DEVS_FILE=../../${devs_file}
+    docker exec mtb-ci make qdeploy_multi BOARD=${board} EXT_HEX_FILE=../../${hex_file} DEVS_FILE=../../${devs_file}
 }
 
 function ci_psoc6_run_tests {
