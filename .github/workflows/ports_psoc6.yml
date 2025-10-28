@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with: 
           name: mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}
-          path: ports/psoc6/build/firmware.hex
+          path: ports/psoc6/build-${{ matrix.board }}/firmware.hex
 
   # Jobs only relevant for Infineon fork 
   on-target-test:
