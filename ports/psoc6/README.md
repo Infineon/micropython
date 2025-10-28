@@ -31,22 +31,28 @@ Retrieve submodules:
 
     make submodules
 
-Then initialize the ModusToolbox™ environment: 
-
-    make mtb_init BOARD=<board-name>
-    
 Build the firmware:
 
-    make 
+    make BOARD=CY8CKIT_062S2_AI
 
-To build and program the device:
+> [!NOTE] 
+> The first time we call `make` the board needs to be specified with 
+> `BOARD=<board>`. This is required as the ModusToolbox libraries need to be
+> initialized for the selected board. 
+> This board will then be set as the default board for subsequent builds, you
+> can just call `make` without the `BOARD=` argument.
 
-    make program
+And flash it to the board:
+
+    make deploy
+
+> [!NOTE]
+> This will also build the firmware if it has not been built yet.
+> Use `deploy` target to avoid rebuilding the firmware.
 
 Find more information about the available makefile targets:
 
     make help
-
 
 # Run micropython
 
