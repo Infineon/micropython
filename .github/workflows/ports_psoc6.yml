@@ -67,12 +67,14 @@ jobs:
       - name: Setup devices
         run: |
           cp mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
-          source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tools/psoc6/${{ runner.name }}-devs.yml
+          source tools/ci.sh && ci_psoc6_flash_multiple_devices ${{ matrix.board }} firmware.hex tests/ports/psoc6/${{ runner.name }}-devs.yml
       - name: Run psoc6 tests
         timeout-minutes: 12
+        env: 
+          psoc6_test_dir: ../../tests/ports/psoc6
         run: |
-          cd tools/psoc6
-          python -u run_test_plan.py --board ${{ matrix.board }} --hil-devs ${{ runner.name }}-devs.yml --max-retries 2
+          cd lib/mpy-test-ext
+          python -u run_test_plan.py --board ${{ matrix.board }} --max-retries 2 --test-plan $psoc6_test_dir/test-plan.yml --hil-devs $psoc6_test_dir/${{ runner.name }}-devs.yml 
         
       - name: Container teardown 
         if: failure() || success()
