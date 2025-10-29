@@ -36,7 +36,7 @@ include ../../py/mkenv.mk
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
 
-GIT_SUBMODULES += lib/mtb-psoc6-libs
+GIT_SUBMODULES += lib/mtb-psoc6-libs lib/mpy-test-ext
 
 INC += -I.
 INC += -I$(TOP)
