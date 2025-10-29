@@ -396,6 +396,7 @@ function ci_psoc6_setup {
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/mbedtls"
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/lwip"
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/mtb-psoc6-libs"
+    docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/mpy-test-ext"
 
     # Initialize the submodules
     docker exec mtb-ci make submodules
