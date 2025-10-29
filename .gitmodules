@@ -77,3 +77,6 @@
 [submodule "lib/mtb-psoc6-libs"]
 	path = lib/mtb-psoc6-libs
 	url = https://github.com/Infineon/mtb-micropython-psoc6-port-integration.git
+[submodule "lib/mpy-test-ext"]
+	path = lib/mpy-test-ext
+	url = https://github.com/Infineon/mpy-test-ext.git
