@@ -205,7 +205,7 @@ mpy_build: $(BUILD)/firmware.hex
 
 MPY_CROSS_FLAGS += -march=armv7m
 
-all: mtb_init ble mtb_get_build_flags mpy_build
+all: mtb_init mtb_get_build_flags mpy_build
 
 clean: mtb_clean
 
