@@ -208,8 +208,30 @@ rebuild: clean all
 qdeploy: mtb_program
 deploy: all mtb_program
 
-qdeploy_multi: mtb_program_multi
-deploy_multi: all mtb_program_multi
+# When multiple types of boards are connected, a devs file needs to be provided.
+# When working locally, if a "local-devs.yml" file is placed in "tools/psoc6"
+# it will be used
+ifneq ($(DEVS_FILE),)
+MULTI_BOARD_DEVS_OPTS = -b $(BOARD) -y $(DEVS_FILE)
+else 
+DFLT_LOCAL_DEVS_FILE_NAME = local-devs.yml
+LOCAL_DEVS_FILE=$(TOP)/tools/psoc6/$(DFLT_LOCAL_DEVS_FILE_NAME)
+ifneq (,$(wildcard $(LOCAL_DEVS_FILE)))
+MULTI_BOARD_DEVS_OPTS = -b $(BOARD) -y $(LOCAL_DEVS_FILE)
+endif
+endif
+
+attached_devs:
+	@:
+	$(eval ATTACHED_TARGET_LIST = $(shell $(PYTHON) $(TOP)/lib/mpy-test-ext/get_devs.py serial-number $(MULTI_BOARD_DEVS_OPTS)))
+	$(eval ATTACHED_TARGETS_NUMBER = $(words $(ATTACHED_TARGET_LIST)))
+	$(info Number of attached targets : $(ATTACHED_TARGETS_NUMBER))
+	$(info List of attached targets : $(ATTACHED_TARGET_LIST))
+
+qdeploy_multi: attached_devs
+	$(foreach ATTACHED_TARGET, $(ATTACHED_TARGET_LIST), $(MAKE) qdeploy DEV_SERIAL_NUMBER=$(ATTACHED_TARGET);)
+
+deploy_multi: all qdeploy_multi
 
 TESTS ?=-d psoc6
 DEV0 ?= /dev/ttyACM0
