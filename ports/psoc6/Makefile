@@ -212,18 +212,18 @@ deploy: all mtb_program
 # When working locally, if a "local-devs.yml" file is placed in "tools/psoc6"
 # it will be used
 ifneq ($(DEVS_FILE),)
-MULTI_BOARD_DEVS_OPTS = -b $(BOARD) -y $(DEVS_FILE)
+MULTI_BOARD_DEVS_OPTS = -f name=$(BOARD) --devs-yml $(DEVS_FILE)
 else 
 DFLT_LOCAL_DEVS_FILE_NAME = local-devs.yml
 LOCAL_DEVS_FILE=$(TOP)/tools/psoc6/$(DFLT_LOCAL_DEVS_FILE_NAME)
 ifneq (,$(wildcard $(LOCAL_DEVS_FILE)))
-MULTI_BOARD_DEVS_OPTS = -b $(BOARD) -y $(LOCAL_DEVS_FILE)
+MULTI_BOARD_DEVS_OPTS = -f name=$(BOARD) --devs-yml $(LOCAL_DEVS_FILE)
 endif
 endif
 
 attached_devs:
 	@:
-	$(eval ATTACHED_TARGET_LIST = $(shell $(PYTHON) $(TOP)/lib/mpy-test-ext/get_devs.py serial-number $(MULTI_BOARD_DEVS_OPTS)))
+	$(eval ATTACHED_TARGET_LIST = $(shell $(PYTHON) $(TOP)/lib/mpy-test-ext/devs_query.py serial_number $(MULTI_BOARD_DEVS_OPTS)))
 	$(eval ATTACHED_TARGETS_NUMBER = $(words $(ATTACHED_TARGET_LIST)))
 	$(info Number of attached targets : $(ATTACHED_TARGETS_NUMBER))
 	$(info List of attached targets : $(ATTACHED_TARGET_LIST))
