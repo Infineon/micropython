@@ -369,7 +369,7 @@ function ci_powerpc_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=0.5.0
+MPY_MTB_CI_DOCKER_VERSION=0.6.0
 
 function ci_psoc6_setup {
     # Access to serial device 
