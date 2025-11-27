@@ -385,6 +385,7 @@ function ci_psoc6_setup {
 
     # Required dependency by mpremote.py
     sudo pip install platformdirs>=4.3.7
+    sudo pip install etdevs
 }
 
 function ci_psoc6_build {
