@@ -402,8 +402,8 @@ function ci_psoc6_setup {
     docker exec mtb-ci make submodules
 
     # Required dependency by mpremote.py
-    sudo pip install --updgrade platformdirs>=4.3.7
-    sudo pip install --updgrade etdevs
+    sudo pip install --upgrade platformdirs>=4.3.7
+    sudo pip install --upgrade etdevs
 }
 
 function ci_psoc6_build {
