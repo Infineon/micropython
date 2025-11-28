@@ -402,8 +402,8 @@ function ci_psoc6_setup {
     docker exec mtb-ci make submodules
 
     # Required dependency by mpremote.py
-    sudo pip install platformdirs>=4.3.7
-    sudo pip install etdevs
+    sudo pip install --updgrade platformdirs>=4.3.7
+    sudo pip install --updgrade etdevs
 }
 
 function ci_psoc6_build {
@@ -421,6 +421,9 @@ function ci_psoc6_flash_multiple_devices {
     hex_file=$2
     devs_file=$3
 
+    # etdevs will be later directly available in the docker
+    # As this will be updated frequently currently, we install it each time
+    docker exec mtb-ci /bin/bash -c "pip install etdevs"
     docker exec mtb-ci make qdeploy_multi BOARD=${board} EXT_HEX_FILE=../../${hex_file} DEVS_FILE=../../${devs_file}
 }
 
