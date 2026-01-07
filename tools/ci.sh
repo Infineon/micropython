@@ -982,11 +982,11 @@ function ci_unix_macos_run_tests {
 
 function ci_unix_qemu_mips_setup {
     sudo apt-get update
-    sudo apt-get install gcc-mips-linux-gnu g++-mips-linux-gnu libc6-mips-cross
-    sudo apt-get install qemu-user
-    qemu-mips --version
-    sudo mkdir /etc/qemu-binfmt
-    sudo ln -s /usr/mips-linux-gnu/ /etc/qemu-binfmt/mips
+    sudo apt-get install gcc-mips-linux-gnu g++-mips-linux-gnu libc6-mips-cross libltdl-dev
+    sudo apt-get install qemu-user-static
+    qemu-mips-static --version
+    sudo mkdir -p /usr/gnemul
+    sudo ln -s /usr/mips-linux-gnu /usr/gnemul/qemu-mips
 }
 
 function ci_unix_qemu_mips_build {
@@ -996,20 +996,20 @@ function ci_unix_qemu_mips_build {
 
 function ci_unix_qemu_mips_run_tests {
     # Issues with MIPS tests:
-    # - thread/stress_aes.py takes around 50 seconds
+    # - thread/stress_aes.py takes around 90 seconds
     # - thread/stress_recurse.py is flaky
     # - thread/thread_gc1.py is flaky
     file ./ports/unix/build-coverage/micropython
-    (cd tests && MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=90 ./run-tests.py --exclude 'thread/stress_recurse.py|thread/thread_gc1.py')
+    (cd tests && MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=180 ./run-tests.py --exclude 'thread/stress_recurse.py|thread/thread_gc1.py')
 }
 
 function ci_unix_qemu_arm_setup {
     sudo apt-get update
-    sudo apt-get install gcc-arm-linux-gnueabi g++-arm-linux-gnueabi
-    sudo apt-get install qemu-user
-    qemu-arm --version
-    sudo mkdir /etc/qemu-binfmt
-    sudo ln -s /usr/arm-linux-gnueabi/ /etc/qemu-binfmt/arm
+    sudo apt-get install gcc-arm-linux-gnueabi g++-arm-linux-gnueabi libltdl-dev
+    sudo apt-get install qemu-user-static
+    qemu-arm-static --version
+    sudo mkdir -p /usr/gnemul
+    sudo ln -s /usr/arm-linux-gnueabi /usr/gnemul/qemu-arm
 }
 
 function ci_unix_qemu_arm_build {
@@ -1019,20 +1019,19 @@ function ci_unix_qemu_arm_build {
 
 function ci_unix_qemu_arm_run_tests {
     # Issues with ARM tests:
-    # - (i)listdir does not work, it always returns the empty list (it's an issue with the underlying C call)
     # - thread/stress_aes.py takes around 70 seconds
     # - thread/stress_recurse.py is flaky
     # - thread/thread_gc1.py is flaky
     file ./ports/unix/build-coverage/micropython
-    (cd tests && MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=90 ./run-tests.py --exclude 'vfs_posix.*\.py|thread/stress_recurse.py|thread/thread_gc1.py')
+    (cd tests && MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=90 ./run-tests.py --exclude 'thread/stress_recurse.py|thread/thread_gc1.py')
 }
 
 function ci_unix_qemu_riscv64_setup {
     ci_gcc_riscv_setup
     sudo apt-get update
     sudo apt-get install gcc-riscv64-linux-gnu g++-riscv64-linux-gnu libltdl-dev
-    sudo pip3 install pyelftools
-    sudo pip3 install ar
+    python3 -m pip install pyelftools
+    python3 -m pip install ar
     sudo apt-get install qemu-user-static
     qemu-riscv64-static --version
     sudo mkdir -p /usr/gnemul
@@ -1047,13 +1046,12 @@ function ci_unix_qemu_riscv64_build {
 
 function ci_unix_qemu_riscv64_run_tests {
     # Issues with RISCV-64 tests:
-    # - misc/sys_settrace_features.py doesn't work with CPython 3.12
     # - thread/stress_aes.py takes around 180 seconds
     # - thread/stress_recurse.py is flaky
     # - thread/thread_gc1.py is flaky
     file ./ports/unix/build-coverage/micropython
     pushd tests
-    MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=200 ./run-tests.py --exclude 'misc/sys_settrace_features.py|thread/stress_recurse.py|thread/thread_gc1.py'
+    MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython MICROPY_TEST_TIMEOUT=200 ./run-tests.py --exclude 'thread/stress_recurse.py|thread/thread_gc1.py'
     MICROPY_MICROPYTHON=../ports/unix/build-coverage/micropython ./run-natmodtests.py extmod/btree*.py extmod/deflate*.py extmod/framebuf*.py extmod/heapq*.py extmod/random_basic*.py extmod/re*.py
     popd
 }
