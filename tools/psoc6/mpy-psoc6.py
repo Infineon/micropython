@@ -560,7 +560,7 @@ def parser():
             parser.exit()
 
     main_parser_desc = """
-    Micropython PSoC6 utility script
+    MicroPython PSoC6 utility script
 
     Available commands:
 
