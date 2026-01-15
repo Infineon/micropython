@@ -106,6 +106,6 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        name: Micropython PSoC6 ${{  github.ref_name  }}
+        name: MicroPython PSoC6 ${{  github.ref_name  }}
         files: mpy-psoc6_${{ matrix.board }}.hex
         body: ${{steps.build_changelog.outputs.changelog}}
