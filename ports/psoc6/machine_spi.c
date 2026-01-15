@@ -145,12 +145,14 @@ static inline void spi_obj_free(machine_spi_obj_t *spi_obj_ptr) {
 
 static inline void spi_init(machine_spi_obj_t *machine_spi_obj, int spi_mode) {
     cyhal_spi_mode_t mode = spi_mode_select(machine_spi_obj->firstbit, machine_spi_obj->polarity, machine_spi_obj->phase);
-    // set the baudrate
-    cyhal_spi_set_frequency(&machine_spi_obj->spi_obj, machine_spi_obj->baudrate);
+
     // Initialise the SPI peripheral if any arguments given, or it was not initialised previously.
     cy_rslt_t result = cyhal_spi_init(&machine_spi_obj->spi_obj, machine_spi_obj->mosi, machine_spi_obj->miso, machine_spi_obj->sck, machine_spi_obj->ssel, NULL, machine_spi_obj->bits, mode, spi_mode);
     assert_pin_phy_used(result);
     spi_assert_raise_val("SPI initialisation failed with return code %x !", result);
+
+    // set the baudrate
+    cyhal_spi_set_frequency(&machine_spi_obj->spi_obj, machine_spi_obj->baudrate);
 }
 
 static void machine_spi_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
