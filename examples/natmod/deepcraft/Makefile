@@ -27,7 +27,9 @@ endif
 CFLAGS += -Wno-error=implicit-function-declaration
 
 override LIBGCC_PATH := gcc/lib/gcc/arm-none-eabi/11.3.1/thumb/v7e-m+fp/hard/libgcc.a
-override LIBM_PATH := gcc/arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
+# libm.a is excluded: expf() is provided directly in dc_mp_iface.c.
+# mpy_ld raises "duplicate symbol" if libm.a is also linked.
+override LIBM_PATH :=
 
 include $(MPY_DIR)/py/dynruntime.mk
 
