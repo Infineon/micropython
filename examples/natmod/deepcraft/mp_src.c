@@ -30,24 +30,24 @@ mp_obj_t init(mp_obj_t self_in){
 
 mp_obj_t enqueue(mp_obj_t self_in, const mp_obj_t data_in_obj){
     dc_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    
+
     // Check if model is initialized
     if(!self->model_state){
-        mp_raise_ValueError("Model should be initialized first.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Model should be initialized first."));
     }
 
-    float data_in[self->model_in_dim];
-    mp_obj_t *data_in_items;
-    size_t len;
-    mp_obj_get_array(data_in_obj, &len, &data_in_items);
+    // Use buffer protocol (array.array('f', ...)) instead of mp_obj_get_float to avoid
+    // mp_fun_table ABI mismatch issues.
+    // This is the same approach used by dequeue() and avoids float extraction entirely.
+    mp_buffer_info_t buf_info;
+    mp_get_buffer(data_in_obj, &buf_info, MP_BUFFER_READ);
+    float *data_in = (float *)buf_info.buf;
+    size_t len = buf_info.len / sizeof(float);
 
     if (len != self->model_in_dim) {
-        mp_raise_ValueError("data_in must be a list of floats with size matching to input dimensions to model. Check using get_model_input_dim().");
+        mp_raise_ValueError(MP_ERROR_TEXT("data_in must be array.array('f', ...) with length matching model input dimensions."));
     }
 
-    for (int i = 0; i < self->model_in_dim; i++) {
-        data_in[i] = mp_obj_get_float(data_in_items[i]);
-    }
     int result = IMAI_enqueue(data_in);
     return MP_OBJ_NEW_SMALL_INT(result);
 }
