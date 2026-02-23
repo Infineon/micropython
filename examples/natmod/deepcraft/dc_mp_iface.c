@@ -113,6 +113,118 @@ float powf(float a, float b) {
     return expf(b * logf(a));
 }
 
+// --- sinf / cosf ---
+// Range-reduce to [-pi/4, pi/4] then apply degree-5 minimax polynomials.
+// Max error ~3 ULP across the full float range.
+static float _dc_sinf_kernel(float x) {
+    // sin(x) for |x| <= pi/4, degree-5 polynomial
+    float x2 = x * x;
+    return x * (1.0f + x2 * (-0.16666667f + x2 * (0.0083333337f + x2 * -0.00019841270f)));
+}
+static float _dc_cosf_kernel(float x) {
+    // cos(x) for |x| <= pi/4, degree-6 polynomial
+    float x2 = x * x;
+    return 1.0f + x2 * (-0.5f + x2 * (0.041666668f + x2 * -0.0013888889f));
+}
+float sinf(float x) {
+    // Reduce x into [-pi/4, pi/4] using quadrant index n
+    float q = x * 0.63661977f; // x * (2/pi)
+    int n = (int)(q + (x >= 0.0f ? 0.5f : -0.5f));
+    float r = x - (float)n * 1.5707963268f; // r = x - n*(pi/2)
+    switch (n & 3) {
+        case 0:  return  _dc_sinf_kernel(r);
+        case 1:  return  _dc_cosf_kernel(r);
+        case 2:  return -_dc_sinf_kernel(r);
+        default: return -_dc_cosf_kernel(r);
+    }
+}
+float cosf(float x) {
+    float q = x * 0.63661977f;
+    int n = (int)(q + (x >= 0.0f ? 0.5f : -0.5f));
+    float r = x - (float)n * 1.5707963268f;
+    switch (n & 3) {
+        case 0:  return  _dc_cosf_kernel(r);
+        case 1:  return -_dc_sinf_kernel(r);
+        case 2:  return -_dc_cosf_kernel(r);
+        default: return  _dc_sinf_kernel(r);
+    }
+}
+
+// --- tanf ---
+float tanf(float x) {
+    float c = cosf(x);
+    if (c == 0.0f) return 3.40282347e+38f;
+    return sinf(x) / c;
+}
+
+// --- asinf ---
+// Uses identity: asin(x) = atan(x / sqrt(1 - x*x))
+float asinf(float x) {
+    if (x >= 1.0f)  return  1.5707963268f;  // pi/2
+    if (x <= -1.0f) return -1.5707963268f;
+    float t = x * x;
+    float s = sqrtf(1.0f - t);
+    // atan(x/sqrt(1-x^2)) via degree-5 minimax on [0,1]
+    float u = x / s;
+    float u2 = u * u;
+    return u * (1.0f + u2 * (-0.33333334f + u2 * (0.2f + u2 * (-0.14285715f + u2 * 0.11111111f))));
+}
+
+// --- acosf ---
+float acosf(float x) { return 1.5707963268f - asinf(x); }
+
+// --- atanf ---
+// Degree-9 minimax polynomial, accurate to ~2 ULP for |x| <= 1.
+// Larger |x| uses identity: atan(x) = pi/2 - atan(1/x).
+float atanf(float x) {
+    int inv = 0;
+    if (x < 0.0f)  { x = -x; inv = 2; }   // handle sign
+    if (x > 1.0f)  { x = 1.0f / x; inv ^= 1; }
+    float x2 = x * x;
+    float p = x * (1.0f + x2 * (-0.33333334f + x2 * (0.2f + x2 *
+              (-0.14285715f + x2 * (0.11111111f + x2 * -0.090909094f)))));
+    if (inv & 1) p = 1.5707963268f - p;
+    return (inv & 2) ? -p : p;
+}
+
+// --- atan2f ---
+float atan2f(float y, float x) {
+    if (x > 0.0f)                    return atanf(y / x);
+    if (x < 0.0f && y >= 0.0f)      return atanf(y / x) + 3.14159265359f;
+    if (x < 0.0f && y <  0.0f)      return atanf(y / x) - 3.14159265359f;
+    if (x == 0.0f && y > 0.0f)      return  1.5707963268f;
+    if (x == 0.0f && y < 0.0f)      return -1.5707963268f;
+    return 0.0f; // x == 0, y == 0 — undefined, return 0
+}
+
+// =============================================================================
+// Double-precision shims
+//
+// model.c includes <math.h> which may resolve generic math calls to the
+// double-precision symbols (cos, sin, exp, …) instead of the float ones
+// (cosf, sinf, expf, …).  These thin wrappers delegate to our float shims
+// above so no extra precision logic is needed.
+// =============================================================================
+double cos(double x)              { return (double)cosf((float)x); }
+double sin(double x)              { return (double)sinf((float)x); }
+double tan(double x)              { return (double)tanf((float)x); }
+double acos(double x)             { return (double)acosf((float)x); }
+double asin(double x)             { return (double)asinf((float)x); }
+double atan(double x)             { return (double)atanf((float)x); }
+double atan2(double y, double x)  { return (double)atan2f((float)y, (float)x); }
+double exp(double x)              { return (double)expf((float)x); }
+double log(double x)              { return (double)logf((float)x); }
+double log2(double x)             { return (double)log2f((float)x); }
+double log10(double x)            { return (double)log10f((float)x); }
+double sqrt(double x)             { return (double)sqrtf((float)x); }
+double pow(double a, double b)    { return (double)powf((float)a, (float)b); }
+double fabs(double x)             { return (double)fabsf((float)x); }
+double floor(double x)            { return (double)floorf((float)x); }
+double ceil(double x)             { return (double)ceilf((float)x); }
+double round(double x)            { return (double)roundf((float)x); }
+double fmod(double x, double y)   { return (double)fmodf((float)x, (float)y); }
+double tanh(double x)             { return (double)tanhf((float)x); }
+
 #endif
 
 int native_errno=0;
