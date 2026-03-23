@@ -95,3 +95,6 @@ static inline void mp_hal_pin_config(mp_hal_pin_obj_t pin, uint32_t mode, uint32
     // gpio_set_dir(pin, mode);
     // gpio_set_pulls(pin, pull == MP_HAL_PIN_PULL_UP, pull == MP_HAL_PIN_PULL_DOWN);
 }
+
+
+void mp_hal_get_random(size_t n, uint8_t *buf);
