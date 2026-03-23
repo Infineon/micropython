@@ -174,3 +174,19 @@ void mp_hal_pin_input(mp_hal_pin_obj_t pin) {
 mp_hal_pin_obj_t mp_hal_get_pin_obj(mp_obj_t obj) {
     return pin_addr_by_name(obj);
 }
+
+void mp_hal_get_random(size_t n, uint8_t *buf) {
+    uint32_t r = 0;
+    cyhal_trng_t trng_obj;
+
+    cyhal_trng_init(&trng_obj);
+
+    for (int i = 0; i < n; i++) {
+        if ((i & 3) == 0) {
+            r = cyhal_trng_generate(&trng_obj); // returns 32-bit hardware random number
+        }
+        buf[i] = r;
+        r >>= 8;
+    }
+    cyhal_trng_free(&trng_obj);
+}
