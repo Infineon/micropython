@@ -56,7 +56,7 @@ CFLAGS  += -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-n
 
 ifeq ($(MICROPY_PSOC6_SSL_MBEDTLS),1)
   INC += -I$(TOP)/extmod/mbedtls
-  CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" 
+  CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config_port.h\" 
   CFLAGS += -DMICROPY_SSL_MBEDTLS=1
 endif
 
