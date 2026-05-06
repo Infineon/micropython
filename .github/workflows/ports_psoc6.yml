@@ -47,7 +47,7 @@ jobs:
   # Jobs only relevant for Infineon fork 
   on-target-test:
     if: github.repository_owner == 'infineon'
-    runs-on: self-hosted
+    runs-on: ifx-mpy-nl-hil
     needs: server-build
     strategy:
       fail-fast: false
