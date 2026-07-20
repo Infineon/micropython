@@ -47,6 +47,8 @@ PATHS = [
 EXCLUSIONS = [
     # Fixups broken by preprocessor macro
     "shared/readline/*.[ch]",
+    # Generated example model output.
+    "examples/usercimaimodule/imagimob/model.[ch]",
     # The cc3200 port is not fully formatted yet.
     "drivers/cc3100/*/*.[ch]",
     "ports/cc3200/*/*.[ch]",
