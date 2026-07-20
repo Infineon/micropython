@@ -4,13 +4,13 @@
 #include "py/mphal.h"
 #include "model.h"
 
-static mp_obj_t init(void){
+static mp_obj_t init(void) {
     IMAI_init();
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(init_obj, init);
 
-static mp_obj_t enqueue(const mp_obj_t data_in_obj){
+static mp_obj_t enqueue(const mp_obj_t data_in_obj) {
     float data_in[IMAI_DATA_IN_COUNT];
     mp_obj_t *data_in_items;
     size_t len;
@@ -44,7 +44,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(dequeue_obj, dequeue);
 
 static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_imai) },
-    
+
     // imagimob fns
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&init_obj) },
     { MP_ROM_QSTR(MP_QSTR_enqueue), MP_ROM_PTR(&enqueue_obj) },

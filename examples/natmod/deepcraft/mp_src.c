@@ -4,22 +4,22 @@
 
 typedef struct _dc_obj_t {
     mp_obj_base_t base;
-    bool model_state; 
+    bool model_state;
     uint8_t model_in_dim;
     uint8_t model_out_dim;
 } dc_obj_t;
 
-mp_obj_t get_model_input_dim(mp_obj_t self_in){
+mp_obj_t get_model_input_dim(mp_obj_t self_in) {
     dc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     return MP_OBJ_NEW_SMALL_INT(self->model_in_dim);
 }
 
-mp_obj_t get_model_output_dim(mp_obj_t self_in){
+mp_obj_t get_model_output_dim(mp_obj_t self_in) {
     dc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     return MP_OBJ_NEW_SMALL_INT(self->model_out_dim);
 }
 
-mp_obj_t init(mp_obj_t self_in){
+mp_obj_t init(mp_obj_t self_in) {
     dc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     self->model_state = true;
     self->model_in_dim = IMAI_DATA_IN_COUNT;
@@ -28,11 +28,11 @@ mp_obj_t init(mp_obj_t self_in){
     return mp_const_none;
 }
 
-mp_obj_t enqueue(mp_obj_t self_in, const mp_obj_t data_in_obj){
+mp_obj_t enqueue(mp_obj_t self_in, const mp_obj_t data_in_obj) {
     dc_obj_t *self = MP_OBJ_TO_PTR(self_in);
 
     // Check if model is initialized
-    if(!self->model_state){
+    if (!self->model_state) {
         mp_raise_ValueError(MP_ERROR_TEXT("Model should be initialized first."));
     }
 
@@ -63,7 +63,7 @@ mp_obj_t dequeue(mp_obj_t self_in, mp_obj_t data_out_obj) {
     if (len != self->model_out_dim) {
         mp_raise_ValueError("data_out must be a list of floats with size matching to output dimensions of model. Check using get_model_output_dim().");
     }
-    
+
     int result = IMAI_dequeue(data_out);
     if (result == 0) {
         return MP_OBJ_NEW_SMALL_INT(result);
