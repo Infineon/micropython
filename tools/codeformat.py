@@ -63,6 +63,9 @@ EXCLUSIONS = [
     "ports/nrf/modules/os/*.[ch]",
     # PSoC 3rd party
     "ports/psoc6/boards/**/*.[ch]",
+    # Auto-generated ML model code
+    "examples/usercimaimodule/imagimob/*.[ch]",
+    "examples/natmod/deepcraft/*.[ch]",
     # STM32 USB dev/host code is mostly 3rd party.
     "ports/stm32/usbdev/**/*.[ch]",
     "ports/stm32/usbhost/**/*.[ch]",
