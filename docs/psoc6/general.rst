@@ -9,10 +9,8 @@ The PSoC6™ port supports boards powered by the `Infineon PSoC6 family of micro
 * PSoC™ 62 - Performance
 * PSoC™ 63 - Bluetooth™ Low Energy
 
-.. _Supported boards:
-
-Supported boards
-^^^^^^^^^^^^^^^^^
+Supported PSoC6 boards
+^^^^^^^^^^^^^^^^^^^^^^
 
 The following boards are supported on this port:
 
