@@ -137,6 +137,7 @@ Note that the parameters such as ``value`` can only be passed as keyword argumen
 Methods
 ^^^^^^^
 .. method:: Pin.irq(handler=None, trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING)
+    :no-index:
 
 Two arguments must be passed here.
 Trigger can be ``Pin.IRQ_FALLING`` or ``Pin.IRQ_RISING`` or ``PIN.IRQ_FALLING | PIN.IRQ_RISING``.
@@ -738,16 +739,18 @@ The following specialization applies to this port:
 Constructor
 ^^^^^^^^^^^^
 
-.. class:: UART(id)
+.. class:: UART(id, ...)
+    :no-index:
 
-   Construct a UART object of the given id:
+    Construct a UART object of the given id:
 
-   - ``id`` takes any integer (This value is ignored for PSoC6 port)
+        - ``id`` takes any integer (This value is ignored for PSoC6 port)
 
 Methods
 ^^^^^^^
 
 .. method:: UART.init(baudrate=9600, bits=8, parity=None, stop=1, *, ...)
+    :no-index:
 
     Initialise the UART with the given parameters.
 
