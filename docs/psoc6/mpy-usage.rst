@@ -158,6 +158,28 @@ The first way is to press CTRL-D at the MicroPython prompt, which performs a sof
 If that does not work, you can perform a hard reset by pressing the RESET button. 
 This will end your session, disconnecting whatever program (PuTTY, Thonny, etc.) you used to connect to the board.
 
+.. _psoc6_safe_mode_recovery:
+
+Safe Mode Recovery
+~~~~~~~~~~~~~~~~~~
+
+If ``main.py`` contains code that prevents normal access to the REPL, it will
+run again after every normal reset and can make the board appear unresponsive.
+Use Safe Mode to regain access without running the startup scripts.
+
+To start in Safe Mode, hold the USER button, press and release RESET, and keep
+holding USER until the board's LED flashes twice. Then release USER. In Safe
+Mode, MicroPython skips both ``boot.py`` and ``main.py``, so you can connect to
+the serial REPL and fix or remove the script. For example, to remove ``main.py``
+from the filesystem, run::
+
+    import os
+    os.remove('main.py')
+
+You can then reset the board normally. If you want to keep the script, edit it
+instead of removing it. Safe Mode also skips ``boot.py``; if that script is
+causing the problem, repair or remove it in the same way.
+
 Boot modes
 ----------
 
@@ -170,18 +192,10 @@ There are 2 boot modes:
 
 ``boot.py`` and ``main.py`` are **not** executed in "Safe boot mode".
 
-Changing boot mode:
-
-  * For normal boot mode, just press and release the RESET button on the board.
-
-  * For safe boot mode, press and release the RESET button while pressing the USER button on the board. Release the USER button after the LED on the board flashes twice.
-
-
-If you change the boot mode to safe boot mode, the MicroPython starts without
-the execution of ``main.py``. Then you can remove the ``main.py`` by following command: ::
-    
-    import os
-    os.remove('main.py')
+For the Safe Mode Recovery procedure, including how to enter Safe Mode and
+restore access after a startup-script problem, see :ref:`Safe Mode Recovery
+<psoc6_safe_mode_recovery>` above. To boot normally, press and release the
+RESET button.
 
 Using third-party IDEs for filesystem operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
