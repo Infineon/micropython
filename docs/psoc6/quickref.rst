@@ -545,8 +545,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
     val = adc.read_uv()            # read an analog value in microvolts
 
 The PSoC6 port also supports :ref:`machine.ADCBlock <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
-PSoC6 supports only 1 SAR ADC with the channel-to-pin mapping available in respective pinout diagrams.
-
+PSoC6 supports only 1 SAR ADC with the channel-to-pin mapping available in respective pinout diagrams. Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 .. note::
     Arbitrary connection of ADC channels to GPIO is not supported. Specifying a pin that is not connected to this block, 
     or specifying a mismatched channel and pin will raise an exception.
@@ -556,8 +555,8 @@ To use the APIs:
     
     from machine import ADCBlock
 
-    adcBlock = ADCBlock(0)                      # create an ADCBlock 0 object on CY8CPROTO-062-4343W
-    adc = adcBlock.connect(0, "P10_0")          # connect channel 0 to pin P10_0 on CY8CPROTO-062-4343W
+    adcBlock = ADCBlock(0)                      # create an ADCBlock object
+    adc = adcBlock.connect(0, "P10_0")          # connect channel 0 to physical pin on board
     val = adc.read_uv()                         # read an analog value in microvolts
 
 .. note::
@@ -635,8 +634,8 @@ PDM-PCM objects can be created and initialized using::
 
     from machine import PDM_PCM, Pin, AUDIO_PDM_24_576_000_HZ
 
-    clk_pin = "P10_4"  # PDM-PCM clock pin on CY8CPROTO-062-4343W
-    data_pin = "P10_5"  # PDM-PCM data pin on CY8CPROTO-062-4343W
+    clk_pin = "P10_4"
+    data_pin = "P10_5" 
 
     machine.freq(AUDIO_PDM_24_576_000_HZ)
 
