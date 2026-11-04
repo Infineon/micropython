@@ -90,7 +90,7 @@ An instance of the :mod:`machine.Pin` class can be created by invoking the const
 
     from machine import Pin
 
-    p0 = Pin('P13_7', Pin.OUT, value=0)   # create output pin on pin P13_7 (LED pin for CY8CPROTO-062-4343W),
+    p0 = Pin('P13_7', Pin.OUT, value=0)   # create output pin on P13_7 (LED pin for CY8CPROTO-062-4343W),
                                           # with initial value 0 (low)     
 
 
@@ -268,8 +268,8 @@ The constructor can be called by passing the required arguments. All initialisat
 
 ::  
 
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised for the given pin on CY8CPROTO-062-4343W with respective frequency & duty cycle given as raw value.
-    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised for the given pin on CY8CPROTO-062-4343W with respective frequency & duty cycle given in nanoseconds.
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised with respective frequency & duty cycle given as raw value.
+    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised with respective frequency & duty cycle given in nanoseconds.
 
     All four arguments have to be passed mandatorily to create a PWM object. duty_u16 or duty_ns should be specified at a time.  
 
@@ -277,7 +277,7 @@ The constructor can be called by passing the required arguments. All initialisat
 
     from machine import PWM
 
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised for the given pin on CY8CPROTO-062-4343W with respective frequency & duty cycle given as raw value.
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised with respective frequency & duty cycle given as raw value.
     print(pwm)                                # view PWM settings
 
     pwm.freq()                                # get current frequency
@@ -540,7 +540,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
 
     from machine import ADC
 
-    adc = ADC("P10_0")             # create an ADC object on ADC pin on CY8CPROTO-062-4343W
+    adc = ADC("P10_0")             # create an ADC object on ADC pin
     val = adc.read_u16()           # read a raw analog value in the range 0-65535
     val = adc.read_uv()            # read an analog value in microvolts
 
@@ -656,6 +656,7 @@ PDM-PCM objects can be created and initialized using::
  - blocking
  - non-blocking
 
+ Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 Constructor
 ^^^^^^^^^^^^
