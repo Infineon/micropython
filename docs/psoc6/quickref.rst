@@ -259,7 +259,7 @@ PWM (pulse width modulation)
 ----------------------------
 
 PWM can be enabled on all output-capable pins. The frequency can range from 1Hz to 100MHz. As the frequency
-increases the PWM resolution decreases. Refer to datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+increases the PWM resolution decreases. Refer to datasheets :ref:`here <psoc6_general>`
 for additional details regarding board-specific PWM.
 
 Use the :ref:`machine.PWM <machine.PWM>` class: 
@@ -329,7 +329,7 @@ initialised and configured to work in master mode. The maximum supported frequen
     from machine import I2C
     i2c = I2C(scl='P6_0', sda='P6_1', freq=400000)  # I2C is initialised for the given pins on CY8CPROTO-062-4343W with respective frequency.
 
-The ``scl`` and ``sda`` pins are the only mandatory arguments. Refer board-specific datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+The ``scl`` and ``sda`` pins are the only mandatory arguments. Refer board-specific datasheets :ref:`here <psoc6_general>`
 for details regarding all the I2C-capable pins. The frequency argument is optional, and if not passed will be set to 400KHz by default.
 
 .. note::
@@ -445,7 +445,7 @@ The :ref:`machine.SoftSPI <machine.SoftSPI>` class is **disabled** in this port.
 
 Hardware SPI bus
 ----------------
-Refer to board-specific datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+Refer to board-specific datasheets :ref:`here <psoc6_general>`
 for details regarding all the SPI-capable pins. The pins ``sck``, ``mosi`` and ``miso`` *must* be specified when
 initialising SPI.
 
@@ -463,7 +463,7 @@ SPI object is created with default settings or settings of previous initialisati
 ::
     
     from machine import SPI
-    spi = SPI(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck='P9_2', mosi='P9_0', miso='P9_1')  # SPI is initialised for the given pins on CY8CPROTO-062-4343W with respective settings.
+    spi = SPI(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck='P9_2', mosi='P9_0', miso='P9_1')  # SPI is initialised with respective settings.
 
 Methods
 ^^^^^^^
@@ -534,8 +534,7 @@ Methods
 ADC (analog to digital conversion)
 ----------------------------------
 
-On the PSoC6, a single ADC block with id - '0' is available. The ADC functionality is available on the
-following pins : "P10_0" - "P10_5".
+On the PSoC6, a single ADC block with id - '0' is available. Refer to board-specific datasheets :ref:`here <psoc6_general>` to identify the ADC capable pins for your board.
 
 Use the :ref:`machine.ADC <machine.ADC>` class::
 
@@ -604,11 +603,13 @@ Constructor
     buf=bytearray(10) #Initialise buffer with required values for transmission & as empty buffer for reception
     machine.freq(AUDIO_I2S_90_MHZ) #set the frequency of the I2S clock to 90 MHz.
 
-    audio_out = I2S(0, sck="P13_1", ws="P13_2", sd="P13_3", mode=I2S.TX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) #create I2S object with pins on CY8CPROTO-062-4343W
+    audio_out = I2S(0, sck="P13_1", ws="P13_2", sd="P13_3", mode=I2S.TX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) #create I2S object
     num_written = audio_out.write(buf) # write buffer of audio samples to I2S device 
     
-    audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object with pins on CY8CPROTO-062-4343W
+    audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object
     num_read = audio_in.readinto(buf)# fill buffer with audio samples from I2S device
+
+Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 PDM - PCM bus
 --------------
@@ -732,7 +733,7 @@ Constants
 UART
 ----
 
-See :ref:`machine.UART <machine.UART>`.
+See :ref:`machine.UART <machine.UART>`. Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 The following specialization applies to this port:
 
@@ -1018,7 +1019,7 @@ The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more det
     import neopixel
     from machine import Pin
     data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 on CY8CPROTO-062-4343W to output to control NeoPixels
-    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object on pin P9_1 on CY8CPROTO-062-4343W with 8 pixels and 3 bytes per pixel with default timing=1
+    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object with 8 pixels and 3 bytes per pixel with default timing=1
     np[0] = (255, 255, 255)                # set the first pixel to white
     np.write()                             # write data to all pixels
 
