@@ -90,7 +90,7 @@ An instance of the :mod:`machine.Pin` class can be created by invoking the const
 
     from machine import Pin
 
-    p0 = Pin('P13_7', Pin.OUT, value=0)   # create output pin on pin P13_7,
+    p0 = Pin('P13_7', Pin.OUT, value=0)   # create output pin on P13_7 (LED pin for CY8CPROTO-062-4343W),
                                           # with initial value 0 (low)     
 
 
@@ -103,7 +103,7 @@ Moreover, a pre-configured pin object can be repurposed by calling the :meth:`Pi
 
     from machine import Pin
 
-    p0 = Pin('P13_7')       # create pin object for pin P13_7. 
+    p0 = Pin('P13_7')       # create pin object for pin P13_7 (LED pin for CY8CPROTO-062-4343W). 
     p0.init(Pin.OUT)        # set pin as output.
     p0.low()                # set value low.     
 
@@ -117,11 +117,11 @@ Similar to CPython, the parameters can be passed in any order if keywords are us
 
     from machine import Pin
 
-    p0 = Pin('P13_7', value=0, mode=Pin.OUT)     # create output pin on pin P13_7, 
+    p0 = Pin('P13_7', value=0, mode=Pin.OUT)     # create output pin on pin P13_7 (LED pin for CY8CPROTO-062-4343W), 
                                                  # with initial value 0 (low) 
 
 
-    p1 = Pin('P0_2', Pin.OUT, None, value=1)     # create output pin on pin P0_0, 
+    p1 = Pin('P0_2', Pin.OUT, None, value=1)     # create output pin on pin P0_0 (GPIO pin for CY8CPROTO-062-4343W), 
                                                  # with pull as NONE,
                                                  # with initial value 1 (high)                                                                       
 
@@ -146,8 +146,8 @@ Trigger can be ``Pin.IRQ_FALLING`` or ``Pin.IRQ_RISING`` or ``PIN.IRQ_FALLING | 
     
     from machine import Pin
 
-    p0 = Pin('P0_4', mode=Pin.IN, pull=Pin.PULL_UP)          
-    p1 = Pin('P13_7', mode=Pin.OUT, value=0)      
+    p0 = Pin('P0_4', mode=Pin.IN, pull=Pin.PULL_UP) # GPIO pin for CY8CPROTO-062-4343W          
+    p1 = Pin('P13_7', mode=Pin.OUT, value=0) # LED pin for CY8CPROTO-062-4343W      
 
     p0.irq(handler=lambda t:p1.high(),trigger=Pin.IRQ_RISING) #configure an IRQ callback function P1.high() when there is a rising edge on pin object p0.
     
@@ -259,7 +259,7 @@ PWM (pulse width modulation)
 ----------------------------
 
 PWM can be enabled on all output-capable pins. The frequency can range from 1Hz to 100MHz. As the frequency
-increases the PWM resolution decreases. Refer to datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+increases the PWM resolution decreases. Refer to datasheets :ref:`here <psoc6_general>`
 for additional details regarding board-specific PWM.
 
 Use the :ref:`machine.PWM <machine.PWM>` class: 
@@ -268,8 +268,8 @@ The constructor can be called by passing the required arguments. All initialisat
 
 ::  
 
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised for the given pin with respective frequency & duty cycle given as raw value.
-    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised for the given pin with respective frequency & duty cycle given in nanoseconds.
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised with respective frequency & duty cycle given as raw value.
+    pwm1 = PWM('P9_1', freq=50, duty_ns=1000)  # PWM is initialised with respective frequency & duty cycle given in nanoseconds.
 
     All four arguments have to be passed mandatorily to create a PWM object. duty_u16 or duty_ns should be specified at a time.  
 
@@ -277,7 +277,7 @@ The constructor can be called by passing the required arguments. All initialisat
 
     from machine import PWM
 
-    pwm = PWM('P9_0', freq=50, duty_u16=8192) 
+    pwm = PWM('P9_0', freq=50, duty_u16=8192) # PWM is initialised with respective frequency & duty cycle given as raw value.
     print(pwm)                                # view PWM settings
 
     pwm.freq()                                # get current frequency
@@ -303,7 +303,7 @@ accessed via :ref:`machine.SoftI2C <machine.SoftI2C>`. ::
 
     from machine import Pin, SoftI2C
 
-    i2c = SoftI2C(scl='P5_0', sda='P5_1', freq=100000)
+    i2c = SoftI2C(scl='P5_0', sda='P5_1', freq=100000)  # SoftI2C is initialised for the given pins on CY8CPROTO-062-4343W with respective frequency.
 
     i2c.scan()              # scan for devices
 
@@ -327,9 +327,9 @@ initialised and configured to work in master mode. The maximum supported frequen
 ::
     
     from machine import I2C
-    i2c = I2C(scl='P6_0', sda='P6_1', freq=400000)
+    i2c = I2C(scl='P6_0', sda='P6_1', freq=400000)  # I2C is initialised for the given pins on CY8CPROTO-062-4343W with respective frequency.
 
-The ``scl`` and ``sda`` pins are the only mandatory arguments. Refer board-specific datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+The ``scl`` and ``sda`` pins are the only mandatory arguments. Refer board-specific datasheets :ref:`here <psoc6_general>`
 for details regarding all the I2C-capable pins. The frequency argument is optional, and if not passed will be set to 400KHz by default.
 
 .. note::
@@ -338,12 +338,12 @@ for details regarding all the I2C-capable pins. The frequency argument is option
 ::
 
     from machine import I2C
-    i2c = I2C(scl='P6_0', sda='P6_1')  #I2C is initialised & configured with default frequency
+    i2c = I2C(scl='P6_0', sda='P6_1')  #I2C is initialised & configured with default frequency on CY8CPROTO-062-4343W
 
 ::
 
     from machine import I2C
-    i2c = I2C(scl='P9_0', sda='P9_1', freq=400000)  #I2C is initialised & configured with given scl, sda pins & frequency
+    i2c = I2C(scl='P9_0', sda='P9_1', freq=400000)  #I2C is initialised & configured with given scl, sda pins & frequency on CY8CPROTO-062-4343W
 
 Methods
 ^^^^^^^
@@ -387,7 +387,7 @@ The constructor
             
             from machine import I2CSlave
             
-            i2c_slave = I2CSlave(scl="P6_0", sda="P6_1", addr=0x45)
+            i2c_slave = I2CSlave(scl="P6_0", sda="P6_1", addr=0x45)  # I2C slave is initialised for the given pins on CY8CPROTO-062-4343W with respective address.
 
 Methods
 ^^^^^^^
@@ -445,7 +445,7 @@ The :ref:`machine.SoftSPI <machine.SoftSPI>` class is **disabled** in this port.
 
 Hardware SPI bus
 ----------------
-Refer to board-specific datasheets `here <https://ifx-micropython.readthedocs.io/en/document-review/psoc6/general.html>`_
+Refer to board-specific datasheets :ref:`here <psoc6_general>`
 for details regarding all the SPI-capable pins. The pins ``sck``, ``mosi`` and ``miso`` *must* be specified when
 initialising SPI.
 
@@ -463,7 +463,7 @@ SPI object is created with default settings or settings of previous initialisati
 ::
     
     from machine import SPI
-    spi = SPI(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck='P9_2', mosi='P9_0', miso='P9_1')
+    spi = SPI(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck='P9_2', mosi='P9_0', miso='P9_1')  # SPI is initialised with respective settings.
 
 Methods
 ^^^^^^^
@@ -502,7 +502,7 @@ The constructor
             
             from machine import SPISlave
             
-            spi_slave = SPISlave(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPISlave.MSB, ssel="P6_3", sck='P6_2', mosi='P6_0', miso='P6_1')
+            spi_slave = SPISlave(baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPISlave.MSB, ssel="P6_3", sck='P6_2', mosi='P6_0', miso='P6_1')  # SPI slave is initialised for the given pins on CY8CPROTO-062-4343W with respective settings.
 
 Methods
 ^^^^^^^
@@ -534,8 +534,7 @@ Methods
 ADC (analog to digital conversion)
 ----------------------------------
 
-On the PSoC6, a single ADC block with id - '0' is available. The ADC functionality is available on the
-following pins : "P10_0" - "P10_5".
+On the PSoC6, a single ADC block with id - '0' is available. Refer to board-specific datasheets :ref:`here <psoc6_general>` to identify the ADC capable pins for your board.
 
 Use the :ref:`machine.ADC <machine.ADC>` class::
 
@@ -546,7 +545,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
     val = adc.read_uv()            # read an analog value in microvolts
 
 The PSoC6 port also supports :ref:`machine.ADCBlock <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
-PSoC6 supports only 1 SAR ADC with the channel-to-pin mapping available in respective pinout diagrams.
+PSoC6 supports only 1 SAR ADC with the channel-to-pin mapping available in respective pinout diagrams. Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 .. note::
     Arbitrary connection of ADC channels to GPIO is not supported. Specifying a pin that is not connected to this block, 
@@ -557,8 +556,8 @@ To use the APIs:
     
     from machine import ADCBlock
 
-    adcBlock = ADCBlock(0)                      # create an ADCBlock 0 object
-    adc = adcBlock.connect(0, "P10_0")          # connect channel 0 to pin P10_0
+    adcBlock = ADCBlock(0)                      # create an ADCBlock object
+    adc = adcBlock.connect(0, "P10_0")          # connect channel 0 to physical pin on board
     val = adc.read_uv()                         # read an analog value in microvolts
 
 .. note::
@@ -610,6 +609,8 @@ Constructor
     audio_in = I2S(0, sck="P5_4", ws="P5_5", sd="P5_6", mode=I2S.RX, bits=16, format=I2S.STEREO, rate=22050, ibuf=20000) # create I2S object
     num_read = audio_in.readinto(buf)# fill buffer with audio samples from I2S device
 
+Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
+
 PDM - PCM bus
 --------------
 
@@ -635,7 +636,7 @@ PDM-PCM objects can be created and initialized using::
     from machine import PDM_PCM, Pin, AUDIO_PDM_24_576_000_HZ
 
     clk_pin = "P10_4"
-    data_pin = "P10_5"
+    data_pin = "P10_5" 
 
     machine.freq(AUDIO_PDM_24_576_000_HZ)
 
@@ -655,6 +656,7 @@ PDM-PCM objects can be created and initialized using::
  - blocking
  - non-blocking
 
+ Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 Constructor
 ^^^^^^^^^^^^
@@ -732,7 +734,7 @@ Constants
 UART
 ----
 
-See :ref:`machine.UART <machine.UART>`.
+See :ref:`machine.UART <machine.UART>`. Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
 
 The following specialization applies to this port:
 
@@ -846,7 +848,7 @@ Methods
     import machine
     import os
 
-    bdev = machine.SDCard(slot=0, width=4, cd="P13_5", cmd="P12_4", clk="P12_5", dat0="P13_0", dat1="P13_1", dat2="P13_2", dat3="P13_3")
+    bdev = machine.SDCard(slot=0, width=4, cd="P13_5", cmd="P12_4", clk="P12_5", dat0="P13_0", dat1="P13_1", dat2="P13_2", dat3="P13_3") # SD Card pins on CY8CPROTO-062-4343W
 
     # Define constants
     TEST_STRING = "This is a test string."
@@ -900,7 +902,7 @@ Bitstream
     
     timing = [1000, 7000, 5000, 2500]          # timing (high_time_0, low_time_0, high_time_1, low_time_1)in ns
     buf = bytearray([0xAB])                    # buffer data 
-    bitstream('P13_6', 0, timing, buf)         # bitstrem buffer data with timing through pin P13_6
+    bitstream('P13_6', 0, timing, buf)         # bitstrem buffer data with timing through pin P13_6 on CY8CPROTO-062-4343W
 
 .. note::
     Bitstream is set for the CPU frequency of 100MHz. At other clock frequencies, the timing will not fit.
@@ -1017,8 +1019,8 @@ The NeoPixel driver can be used as follows (see the :mod:`neopixel` for more det
 
     import neopixel
     from machine import Pin
-    data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 to output to control NeoPixels
-    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object on pin P9_1 with 8 pixels and 3 bytes per pixel with default timing=1
+    data = Pin('P9_1', Pin.OUT, value=0)   # set P9_1 on CY8CPROTO-062-4343W to output to control NeoPixels
+    np = neopixel.NeoPixel(data, 8, bpp=3) # create NeoPixel object with 8 pixels and 3 bytes per pixel with default timing=1
     np[0] = (255, 255, 255)                # set the first pixel to white
     np.write()                             # write data to all pixels
 
