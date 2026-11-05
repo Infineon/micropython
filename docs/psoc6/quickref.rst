@@ -546,6 +546,7 @@ Use the :ref:`machine.ADC <machine.ADC>` class::
 
 The PSoC6 port also supports :ref:`machine.ADCBlock <machine.ADCBlock>` API to have control over the ADC configuration. Currently 
 PSoC6 supports only 1 SAR ADC with the channel-to-pin mapping available in respective pinout diagrams. Refer to board-specific datasheets :ref:`here <psoc6_general>` for capable pin details.
+
 .. note::
     Arbitrary connection of ADC channels to GPIO is not supported. Specifying a pin that is not connected to this block, 
     or specifying a mismatched channel and pin will raise an exception.
